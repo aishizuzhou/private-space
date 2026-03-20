@@ -3,9 +3,9 @@
   "short_name": "画脂鏤氷",
   "description": "私有空间",
   "start_url": "./index.html",
-  "display": "standalone",
-  "background_color": "#fce4ec",
-  "theme_color": "#ff9a9e",
+  "display": "fullscreen",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
   "orientation": "portrait",
   "icons": [
     {
