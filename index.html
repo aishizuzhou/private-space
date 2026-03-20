@@ -549,6 +549,20 @@
                 </div>
             </div>
 
+            <div class="settings-title">追评预览</div>
+            <div class="flex-row">
+                <label>显示追评预览:</label>
+                <input type="checkbox" id="setting-comment-preview-enabled" style="width:auto;" onchange="updateSettings()">
+            </div>
+            <div class="flex-row">
+                <label>预览名称:</label>
+                <input type="text" id="setting-comment-preview-name" style="width:60%; margin:0;" placeholder="如 宛宛" oninput="updateSettings()">
+            </div>
+            <div class="flex-row">
+                <label>名称后缀:</label>
+                <input type="text" id="setting-comment-preview-suffix" style="width:60%; margin:0;" placeholder="如 说：或留空" oninput="updateSettings()">
+            </div>
+
             <div class="settings-title">字体设置</div>
             <label style="font-size:0.85rem; color:#777;">长按可删除自定义字体</label>
             <div class="preset-list" id="font-preset-list"></div>
@@ -661,7 +675,20 @@
                 framePresets: []
             },
             tempImages: [], filterTag: null, blockedTags: [], searchQuery: '',
-            editingId: null
+            editingId: null,
+            commentPreviewName: '宛宛',
+            commentPreviewSuffix: '说：',
+            commentPreviewEnabled: true
+        };
+        // 读取追评预览设置
+        try {
+            const cp = JSON.parse(localStorage.getItem('wanwan_comment_preview'));
+            if (cp) {
+                if (cp.enabled !== undefined) state.commentPreviewEnabled = cp.enabled;
+                if (cp.name !== undefined) state.commentPreviewName = cp.name;
+                if (cp.suffix !== undefined) state.commentPreviewSuffix = cp.suffix;
+            }
+        } catch(e) {}
         };
 
         window.onload = () => {
@@ -921,12 +948,15 @@
                 let tagsHtml = item.tags.map(t => `<span class="tag">#${t}</span>`).join('');
                 let timerHtml = item.destructTime ? `<span class="live-timer" data-time="${item.destructTime}"></span>` : '';
                 const comments = item.comments || [];
-                const commentPreviewHtml = comments.length > 0 ? `
+                const cpEnabled = state.commentPreviewEnabled !== false;
+                const cpName = state.commentPreviewName || '';
+                const cpSuffix = state.commentPreviewSuffix !== undefined ? state.commentPreviewSuffix : '说：';
+                const commentPreviewHtml = (cpEnabled && comments.length > 0) ? `
                     <div style="margin-top:8px; display:flex; flex-direction:column; gap:3px;">
                         ${comments.map(c => `
-                            <div style="display:flex; align-items:center; gap:5px;">
-                                <span style="font-size:0.72rem; color:var(--text-color); opacity:0.87; flex-shrink:0;">💬</span>
-                                <span style="font-size:0.78rem; color:var(--text-color); opacity:0.87; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; flex:1;">${state.settings.name}说：${c.text}</span>
+                            <div style="display:flex; align-items:center; gap:4px;">
+                                <span style="font-size:0.78rem; color:var(--text-color); opacity:0.87; flex-shrink:0;">▷  </span>
+                                <span style="font-size:0.78rem; color:var(--text-color); opacity:0.87; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; flex:1;">${cpName}${cpSuffix}${c.text}</span>
                             </div>
                         `).join('')}
                     </div>
@@ -1246,6 +1276,13 @@
                 if (s.charmImage) charmContainer.querySelector('img').src = s.charmImage;
             } else charmContainer.classList.add('hidden');
             document.getElementById('setting-charm-toggle').checked = s.showCharm;
+
+            const cpEnabledEl = document.getElementById('setting-comment-preview-enabled');
+            const cpNameEl = document.getElementById('setting-comment-preview-name');
+            const cpSuffixEl = document.getElementById('setting-comment-preview-suffix');
+            if (cpEnabledEl) cpEnabledEl.checked = state.commentPreviewEnabled !== false;
+            if (cpNameEl) cpNameEl.value = state.commentPreviewName || '';
+            if (cpSuffixEl) cpSuffixEl.value = state.commentPreviewSuffix !== undefined ? state.commentPreviewSuffix : '说：';
         }
 
         // ===================== 全局字体RGB滑条 =====================
@@ -1347,6 +1384,10 @@
             s.avatarOffsetX = document.getElementById('setting-avatar-x').value || 0;
             s.avatarOffsetY = document.getElementById('setting-avatar-y').value || 0;
             s.avatarScale = document.getElementById('setting-avatar-scale').value || 1;
+
+            state.commentPreviewEnabled = document.getElementById('setting-comment-preview-enabled').checked;
+            state.commentPreviewName = document.getElementById('setting-comment-preview-name').value;
+            state.commentPreviewSuffix = document.getElementById('setting-comment-preview-suffix').value;
 
             saveData(); applySettings();
             renderTags();
@@ -1498,7 +1539,15 @@
         function handleSearch(val) { state.searchQuery = val; renderList(); }
         function openModal(id) { document.getElementById(id).classList.add('open'); }
         function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-        function saveData() { localStorage.setItem('wanwan_notes_v3', JSON.stringify(state.notes)); localStorage.setItem('wanwan_settings_v3', JSON.stringify(state.settings)); }
+        function saveData() {
+            localStorage.setItem('wanwan_notes_v3', JSON.stringify(state.notes));
+            localStorage.setItem('wanwan_settings_v3', JSON.stringify(state.settings));
+            localStorage.setItem('wanwan_comment_preview', JSON.stringify({
+                enabled: state.commentPreviewEnabled,
+                name: state.commentPreviewName,
+                suffix: state.commentPreviewSuffix
+            }));
+        }
 
         async function exportDataToZip() {
             try {
