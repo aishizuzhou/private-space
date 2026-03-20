@@ -1,0 +1,1629 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>画脂鏤氷</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ff9a9e">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="画脂鏤氷">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <style>
+        * {
+            box-sizing: border-box !important;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg-image: url('https://images.unsplash.com/photo-1579546929518-9e396f3cc809?ixlib=1.2.1&auto=format&fit=crop&w=1950&q=80');
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.8);
+            --text-color: #333;
+            --name-color: #333;
+            --accent-text: #fff;
+            --accent-color: #ff9a9e;
+            --font-size-base: 14px;
+            --preview-lines: 3;
+            --custom-font: system-ui, -apple-system, sans-serif;
+            --custom-font-weight: 400;
+            --charm-size: 50px;
+            --charm-deg: 5deg;
+            --charm-x: 20px;
+            --charm-y: 0px;
+            --avatar-st-frame: url('https://i.postimg.cc/v8xXtvMP/72ce5c0f0m16d8b4f1b050b6a2ebb6b3.gif');
+            --avatar-offset-x: 0px;
+            --avatar-offset-y: 0px;
+            --avatar-scale: 1;
+            --frame-scale: 1;
+            --content-padding: 16px;
+        }
+
+        body {
+            margin: 0; padding: 0;
+            background-image: var(--bg-image);
+            background-size: cover; background-position: center; background-attachment: fixed;
+            font-family: var(--custom-font); font-weight: var(--custom-font-weight); color: var(--text-color);
+            height: 100vh; height: 100dvh;
+            overflow: hidden;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        #app-container {
+            width: 100%; height: 100%; max-width: 500px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            display: flex; flex-direction: column; position: relative; overflow: hidden;
+            z-index: 1;
+        }
+
+        .qw-particles-bg {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh;
+            z-index: 15;
+            pointer-events: none; overflow: hidden;
+        }
+        .qw-particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.2);
+            top: -10%;
+            animation: qw-float-down linear infinite;
+        }
+        @keyframes qw-float-down {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.15; }
+            90% { opacity: 0.15; }
+            100% { transform: translateY(120vh) rotate(360deg); opacity: 0; }
+        }
+
+        .qw-particle:nth-child(1) { left: 15%; width: 25px; height: 25px; animation-duration: 12s; animation-delay: 0s; }
+        .qw-particle:nth-child(2) { left: 50%; width: 18px; height: 18px; animation-duration: 9s; animation-delay: 3s; }
+        .qw-particle:nth-child(3) { left: 80%; width: 30px; height: 30px; animation-duration: 15s; animation-delay: 1s; }
+
+        .charm-container {
+            position: absolute;
+            top: var(--charm-y); right: var(--charm-x);
+            width: var(--charm-size);
+            z-index: 20;
+            pointer-events: none;
+            transform-origin: top center;
+            animation: swing 3s infinite ease-in-out;
+        }
+        .charm-container.hidden { display: none; }
+        .charm-img {
+            width: 100%; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.3));
+        }
+        @keyframes swing {
+            0% { transform: rotate(var(--charm-deg)); }
+            50% { transform: rotate(calc(var(--charm-deg) * -1)); }
+            100% { transform: rotate(var(--charm-deg)); }
+        }
+
+        .header-section {
+            padding: 20px var(--content-padding);
+            display: flex; align-items: center; z-index: 10;
+        }
+
+        .header-info {
+            display: flex; flex-direction: column; justify-content: center;
+        }
+
+        .status-bar {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 0.72rem; color: var(--text-color);
+            text-shadow: 0 0 3px rgba(0,0,0,0.35);
+            margin-bottom: 3px;
+            font-variant-numeric: tabular-nums;
+        }
+        .status-time { font-weight: 700; letter-spacing: 0.02em; }
+        .status-battery {
+            display: flex; align-items: center; gap: 3px;
+            font-weight: 700;
+        }
+        .battery-infinity {
+            font-size: 1.05rem;
+            font-weight: 900;
+            line-height: 1;
+            display: inline-block;
+            /* clip to show left half when low */
+        }
+        .battery-infinity.half {
+            display: inline-block;
+            overflow: hidden;
+            width: 0.6em;
+        }
+
+        .avatar-container {
+            position: relative;
+            width: 70px; height: 70px;
+            margin-right: 15px;
+            cursor: pointer;
+            border: none !important; background: transparent;
+            display: flex; justify-content: center; align-items: center;
+            overflow: visible;
+        }
+
+        .avatar-inner {
+            width: 100%; height: 100%;
+            overflow: hidden;
+            position: relative;
+            z-index: 3;
+            transition: border-radius 0.3s ease;
+        }
+
+        .avatar-inner.is-framed {
+            border-radius: 50%;
+        }
+
+        .avatar-img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            background: transparent;
+            transform: translate(var(--avatar-offset-x), var(--avatar-offset-y)) scale(var(--avatar-scale));
+            transform-origin: center center;
+        }
+
+        .avatar-container.frame-st::after {
+            content: ''; position: absolute;
+            top: -20%; left: -7.5%; width: 115%; height: 120%;
+            background-image: var(--avatar-st-frame);
+            background-repeat: no-repeat; background-position: center; background-size: contain;
+            pointer-events: none; z-index: 4;
+            transform: scale(var(--frame-scale));
+            transform-origin: center center;
+        }
+
+        .avatar-container.frame-circle::after {
+            content: ''; position: absolute;
+            top: -7.5%; left: -7.5%; width: 115%; height: 115%;
+            border: 3px solid rgba(255,255,255,0.65);
+            border-radius: 50%; box-sizing: border-box;
+            box-shadow: 0 0 10px rgba(0,0,0,0.15);
+            pointer-events: none; z-index: 4;
+        }
+
+        .user-name { font-size: 1.2rem; font-weight: bold; text-shadow: 0 1px 3px rgba(0,0,0,0.2); color: var(--name-color); }
+
+        .content-wrapper {
+            flex: 1;
+            display: flex; flex-direction: column;
+            padding: 0 var(--content-padding);
+            overflow: hidden;
+        }
+
+        .search-bar {
+            width: 100% !important;
+            height: 50px !important;
+            padding: 0 20px !important;
+            margin: 0 0 15px 0 !important;
+            border-radius: 999px !important;
+            border: 1px solid var(--glass-border) !important;
+            background: var(--glass-bg) !important;
+            backdrop-filter: blur(15px) !important;
+            -webkit-backdrop-filter: blur(15px) !important;
+            color: #333 !important;
+            font-size: 15px !important;
+            outline: none !important;
+            box-sizing: border-box !important;
+            display: block !important;
+            line-height: 50px !important;
+            transition: all 0.3s ease !important;
+            position: relative !important;
+            z-index: 10 !important;
+        }
+
+        .tag-filter-bar, .tag-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 5px 0;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .filter-tag {
+            padding: 6px 14px;
+            background: rgba(255,255,255,0.4);
+            border-radius: 999px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            cursor: pointer;
+            color: #333;
+            transition: transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+        }
+        .filter-tag:hover, .filter-tag:active {
+            transform: translateY(-3px);
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.08), inset 1px 1px 2px rgba(255, 255, 255, 0.8);
+        }
+        .filter-tag.active {
+            background: rgba(255, 255, 255, 0.7);
+            font-weight: bold;
+            transform: translateY(-3px);
+            box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.08), inset 1px 1px 2px rgba(255, 255, 255, 0.8);
+        }
+        .filter-tag.blocked { background: #ff4d4d; color: #fff; text-decoration: line-through; }
+
+        .content-area {
+            flex: 1;
+            overflow-y: auto; overflow-x: hidden;
+            padding: 0 0 80px 0;
+            position: relative;
+            z-index: 10;
+        }
+
+        .note-wrapper {
+            position: relative; margin-bottom: 15px; border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .delete-btn-bg {
+            position: absolute;
+            top: 0; right: 0; bottom: 0; width: 80px;
+            background: transparent;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.8rem; cursor: pointer; z-index: 1;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .note-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px; padding: 15px;
+            position: relative; z-index: 2;
+            transition: transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+            will-change: transform;
+            cursor: pointer;
+        }
+
+        .note-card:hover, .note-card:active {
+            transform: translateY(-3px);
+            background: rgba(255, 255, 255, 0.4);
+            box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.08), inset 1px 1px 2px rgba(255, 255, 255, 0.8);
+        }
+
+        .note-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; margin-bottom: 8px; }
+
+        .note-time {
+            color: var(--text-color);
+            font-weight: bold;
+            text-shadow: 0 0 4px rgba(0,0,0,0.4);
+        }
+
+        .note-actions { display: flex; gap: 10px; align-items: center; }
+        .edit-btn { cursor: pointer; font-size: 1.2rem; }
+        .live-timer { color: var(--text-color); font-weight: bold; font-family: monospace; font-size: 1rem; text-shadow: 0 0 6px rgba(0,0,0,0.4); }
+
+        .note-content { font-size: var(--font-size-base); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: var(--preview-lines); -webkit-box-orient: vertical; overflow: hidden; white-space: pre-wrap; }
+        .note-images { display: flex; gap: 5px; margin-top: 10px; overflow-x: auto; }
+        .note-thumb { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; cursor: pointer; }
+        .note-tags { margin-top: 8px; display: flex; gap: 5px; flex-wrap: wrap; }
+        .tag { background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; white-space: nowrap; }
+
+        .fab { position: absolute; bottom: 20px; right: 20px; width: 50px; height: 50px; border-radius: 50%; background: var(--accent-color); color: var(--accent-text); border: none; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 50;}
+
+        .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 100; display: none; justify-content: center; align-items: center; }
+        .modal.open { display: flex; }
+        .modal-content { background: rgba(255,255,255,0.95); width: 85%; max-height: 80vh; overflow-y: auto; border-radius: 15px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-family: var(--custom-font); font-weight: var(--custom-font-weight); }
+        .modal-content h3 { font-weight: calc(var(--custom-font-weight, 400) + 300); }
+
+        .glass-modal-content {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            position: relative;
+            padding: 30px 20px 20px;
+            border: 1px solid var(--glass-border);
+        }
+        .close-btn {
+            position: absolute; top: 10px; right: 15px;
+            background: transparent; border: none; font-size: 1.5rem;
+            color: rgba(85, 85, 85, 0.4);
+            cursor: pointer; padding: 0;
+            font-weight: bold;
+        }
+
+        input[type="text"], input[type="number"], textarea, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; background: transparent;}
+        .btn-group { display: flex; justify-content: flex-end; gap: 10px; }
+        button { padding: 8px 15px; border-radius: 8px; border: none; cursor: pointer; }
+        .btn-primary { background: var(--accent-color); color: var(--accent-text); }
+        #file-input, #font-input, #bg-input, #avatar-input, #charm-input, #frame-input, #import-zip-input, #frame-preset-input { display: none; }
+
+        .settings-title { font-weight: bold; margin: 15px 0 5px; color: #555; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .flex-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .coord-group { display: flex; gap: 10px; margin-bottom: 10px; }
+        .coord-group input { width: 50%; margin-bottom: 0; }
+
+        /* 字体预选 & 头像框预选 公共样式 */
+        .preset-list {
+            display: flex; flex-wrap: wrap; gap: 8px;
+            margin-bottom: 10px;
+        }
+        .preset-item {
+            position: relative;
+            padding: 6px 12px;
+            background: rgba(255,255,255,0.5);
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s, box-shadow 0.2s;
+            white-space: nowrap;
+        }
+        .preset-item.active {
+            background: var(--accent-color);
+            color: var(--accent-text);
+            border-color: var(--accent-color);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        .preset-item.long-pressing {
+            background: #ff4d4d;
+            color: white;
+            border-color: #ff4d4d;
+        }
+
+        /* 头像框预选缩略图 */
+        .frame-preset-list {
+            display: flex; flex-wrap: wrap; gap: 10px;
+            margin-bottom: 10px;
+        }
+        .frame-preset-item {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 4px; cursor: pointer; user-select: none;
+        }
+        .frame-preset-thumb {
+            width: 50px; height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #ddd;
+            transition: border-color 0.2s;
+        }
+        .frame-preset-item.active .frame-preset-thumb {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px var(--accent-color);
+        }
+        .frame-preset-item.long-pressing .frame-preset-thumb {
+            border-color: #ff4d4d;
+            box-shadow: 0 0 0 2px #ff4d4d;
+        }
+        .frame-preset-label {
+            font-size: 0.7rem; color: #666; text-align: center;
+            max-width: 55px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+
+    <div class="qw-particles-bg">
+        <div class="qw-particle"></div>
+        <div class="qw-particle"></div>
+        <div class="qw-particle"></div>
+    </div>
+
+    <div id="app-container">
+        <div class="charm-container" id="charm-display">
+            <img src="https://cdn-icons-png.flaticon.com/512/599/599502.png" class="charm-img" alt="charm">
+        </div>
+
+        <div class="header-section">
+            <div class="avatar-container" id="avatar-box" onclick="openSettings()">
+                <div class="avatar-inner" id="avatar-inner-box">
+                    <img id="current-avatar" class="avatar-img" src="https://via.placeholder.com/150" alt="Avatar">
+                </div>
+            </div>
+            <div class="header-info">
+                <div class="status-bar">
+                    <span class="status-time" id="status-clock">--月--日 --:--:--</span>
+                    <span class="status-battery">
+                        <span class="battery-infinity" id="battery-infinity">∞</span>
+                        <span id="battery-text">--%</span>
+                    </span>
+                </div>
+                <div class="user-name" id="display-name">宛宛</div>
+            </div>
+        </div>
+
+        <div class="content-wrapper">
+            <input type="text" class="search-bar" placeholder="搜索内容、图片备注..." oninput="handleSearch(this.value)">
+            <div class="tag-filters" id="tag-filters"></div>
+            <div class="content-area" id="list-container"></div>
+        </div>
+
+        <button class="fab" onclick="openEditor()">💭</button>
+    </div>
+
+    <div class="modal" id="full-note-modal">
+        <div class="modal-content glass-modal-content">
+            <button class="close-btn" onclick="closeModal('full-note-modal')">＞</button>
+            <div id="full-note-body"></div>
+        </div>
+    </div>
+
+    <div class="modal" id="editor-modal">
+        <div class="modal-content">
+            <h3 id="editor-title">写点什么...</h3>
+            <textarea id="edit-content" rows="5" placeholder="此刻的想法..."></textarea>
+            <input type="text" id="edit-tags" placeholder="标签 (用空格分隔)">
+            <div style="margin-bottom: 10px;">
+                <label>倒计时销毁 (分钟, 0为永久保留):</label>
+                <input type="number" id="edit-timer" value="0" min="0">
+            </div>
+            <div style="margin-bottom: 10px;">
+                <button onclick="document.getElementById('file-input').click()">上传图片</button>
+                <input type="file" id="file-input" multiple accept="image/*" onchange="handleImageUpload(this)">
+            </div>
+            <div id="image-preview-area" style="display:flex; gap:5px; overflow-x:auto; margin-bottom:10px;"></div>
+            <div class="btn-group">
+                <button onclick="closeModal('editor-modal')">取消</button>
+                <button class="btn-primary" onclick="saveItem()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="img-remark-modal">
+        <div class="modal-content">
+            <img id="remark-target-img" src="" style="width:100%; max-height:300px; object-fit:contain; margin-bottom:10px;">
+            <input type="text" id="img-remark-text" placeholder="给这张图片加个备注...">
+            <div class="btn-group">
+                <button onclick="closeModal('img-remark-modal')">关闭</button>
+                <button class="btn-primary" onclick="saveImageRemark()">保存备注</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="settings-modal">
+        <div class="modal-content">
+            <h3>控制台</h3>
+
+            <div class="settings-title">基础设置</div>
+            <div class="flex-row">
+                <label>昵称:</label>
+                <input type="text" id="setting-name" style="width:60%; margin:0;" onchange="updateSettings()">
+            </div>
+            <div style="margin-bottom:10px;">
+                <label style="display:block; margin-bottom:4px;">昵称颜色 <span style="font-size:0.75rem;color:#999;">（支持CSS颜色/渐变，如 #ff9a9e 或 linear-gradient(90deg,#f00,#00f)）</span></label>
+                <div style="display:flex; gap:6px; align-items:center;">
+                    <input type="text" id="setting-name-color" placeholder="#333 或 linear-gradient(...)" style="flex:1; margin:0; font-size:0.85rem;" oninput="updateSettings()">
+                    <div id="name-color-preview" style="width:36px;height:30px;border-radius:6px;border:1px solid #ddd;flex-shrink:0;cursor:pointer;" onclick="toggleNameColorPicker()"></div>
+                </div>
+                <!-- 昵称RGB调色板（点击预览框展开） -->
+                <div id="name-color-picker" style="display:none; margin-top:6px; padding:8px; background:rgba(255,255,255,0.6); border-radius:8px; border:1px solid #eee;">
+                    <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
+                        <span style="font-size:0.75rem;color:#888;width:14px;text-align:center;">R</span>
+                        <input type="range" id="nc-r" min="0" max="255" value="51" style="flex:1;height:6px;accent-color:#f66;" oninput="onNameRgbChange()">
+                        <span id="nc-r-val" style="font-size:0.72rem;color:#888;width:22px;text-align:right;">51</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
+                        <span style="font-size:0.75rem;color:#888;width:14px;text-align:center;">G</span>
+                        <input type="range" id="nc-g" min="0" max="255" value="51" style="flex:1;height:6px;accent-color:#4c4;" oninput="onNameRgbChange()">
+                        <span id="nc-g-val" style="font-size:0.72rem;color:#888;width:22px;text-align:right;">51</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                        <span style="font-size:0.75rem;color:#888;width:14px;text-align:center;">B</span>
+                        <input type="range" id="nc-b" min="0" max="255" value="51" style="flex:1;height:6px;accent-color:#66f;" oninput="onNameRgbChange()">
+                        <span id="nc-b-val" style="font-size:0.72rem;color:#888;width:22px;text-align:right;">51</span>
+                    </div>
+                </div>
+            </div>
+            <div class="flex-row">
+                <label>UI 主题色:</label>
+                <input type="color" id="setting-color" style="width:60%; height:30px; padding:0; margin:0; border:none;" onchange="updateSettings()">
+            </div>
+            <div style="margin-bottom:10px;">
+                <label style="display:block; margin-bottom:5px;">全局字体颜色</label>
+                <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
+                    <span style="font-size:0.75rem;color:#888;width:14px;text-align:center;">R</span>
+                    <input type="range" id="tc-r" min="0" max="255" value="51" style="flex:1;height:6px;accent-color:#f66;" oninput="onRgbSliderChange()">
+                    <span id="tc-r-val" style="font-size:0.72rem;color:#888;width:22px;text-align:right;">51</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
+                    <span style="font-size:0.75rem;color:#888;width:14px;text-align:center;">G</span>
+                    <input type="range" id="tc-g" min="0" max="255" value="51" style="flex:1;height:6px;accent-color:#4c4;" oninput="onRgbSliderChange()">
+                    <span id="tc-g-val" style="font-size:0.72rem;color:#888;width:22px;text-align:right;">51</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px;">
+                    <span style="font-size:0.75rem;color:#888;width:14px;text-align:center;">B</span>
+                    <input type="range" id="tc-b" min="0" max="255" value="51" style="flex:1;height:6px;accent-color:#66f;" oninput="onRgbSliderChange()">
+                    <span id="tc-b-val" style="font-size:0.72rem;color:#888;width:22px;text-align:right;">51</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <div id="text-color-preview" style="width:30px;height:22px;border-radius:5px;border:1px solid #ddd;flex-shrink:0;"></div>
+                    <span id="text-color-hex" style="font-size:0.78rem; color:#666;">#333333</span>
+                </div>
+            </div>
+
+            <div class="settings-title">字体设置</div>
+            <label style="font-size:0.85rem; color:#777;">长按可删除自定义字体</label>
+            <div class="preset-list" id="font-preset-list"></div>
+            <button onclick="document.getElementById('font-input').click()" style="width:100%; margin-bottom:6px;">上传字体文件 (.ttf / .woff2 等)</button>
+            <input type="file" id="font-input" accept=".ttf,.otf,.woff,.woff2" onchange="addFontPreset(this)">
+
+            <div class="settings-title">头像与头像框美化</div>
+            <label style="font-size:0.85rem; color:#777;">长按可删除自定义头像框</label>
+            <div class="frame-preset-list" id="frame-preset-list"></div>
+            <div style="display:flex; gap:5px; margin-bottom:10px;">
+                <button onclick="document.getElementById('frame-preset-input').click()" style="flex:1;">上传新头像框</button>
+                <input type="text" id="frame-preset-url-input" placeholder="或输入框URL..." style="flex:1; margin:0;" onkeydown="if(event.key==='Enter')addFramePresetFromUrl(this.value)">
+                <input type="file" id="frame-preset-input" accept="image/*" onchange="addFramePresetFromFile(this)">
+            </div>
+
+            <div id="frame-scale-setting" style="display: none; margin-bottom: 10px;">
+                <label>头像框大小调整:</label>
+                <input type="range" id="setting-frame-scale" min="0.5" max="2" step="0.05" value="1" onchange="updateSettings()">
+            </div>
+
+            <div style="display:flex; gap:5px; margin-bottom:5px;">
+                <button onclick="document.getElementById('avatar-input').click()" style="flex:1;">更换头像</button>
+                <input type="text" id="avatar-url-input" placeholder="或输入头像URL..." style="flex:1; margin:0;" onchange="changeAvatarUrl(this.value)">
+                <input type="file" id="avatar-input" accept="image/*" onchange="changeAvatar(this)">
+            </div>
+
+            <label>历史头像 (最近3个)</label>
+            <div id="history-avatars" style="display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap;"></div>
+
+            <label>框内头像缩放比例:</label>
+            <input type="range" id="setting-avatar-scale" min="0.5" max="3" step="0.1" value="1" onchange="updateSettings()">
+
+            <label>框内头像坐标偏移:</label>
+            <div class="coord-group">
+                <input type="number" id="setting-avatar-x" placeholder="X轴偏移" onchange="updateSettings()">
+                <input type="number" id="setting-avatar-y" placeholder="Y轴偏移" onchange="updateSettings()">
+            </div>
+
+            <div class="settings-title">挂件深度控制</div>
+            <div class="flex-row">
+                <label>启用挂件:</label>
+                <input type="checkbox" id="setting-charm-toggle" style="width:auto;" onchange="updateSettings()">
+            </div>
+
+            <div style="display:flex; gap:5px; margin-bottom:10px;">
+                <button onclick="document.getElementById('charm-input').click()" style="flex:1;">更换挂件图片</button>
+                <input type="text" id="charm-url-input" placeholder="或输入挂件URL..." style="flex:1; margin:0;" onchange="changeCharmUrl(this.value)">
+                <input type="file" id="charm-input" accept="image/*" onchange="changeCharm(this)">
+            </div>
+
+            <label>挂件绝对坐标调整:</label>
+            <div class="coord-group">
+                <input type="number" id="setting-charm-x" placeholder="X轴 (距右侧)" onchange="updateSettings()">
+                <input type="number" id="setting-charm-y" placeholder="Y轴 (距顶部)" onchange="updateSettings()">
+            </div>
+            <label>挂件大小:</label>
+            <input type="range" id="setting-charm-size" min="20" max="150" onchange="updateSettings()">
+            <label>摇晃幅度:</label>
+            <input type="range" id="setting-charm-swing" min="0" max="45" onchange="updateSettings()">
+
+            <div class="settings-title">排版与背景</div>
+            <button onclick="document.getElementById('bg-input').click()" style="width:100%;">更换背景图</button>
+            <input type="file" id="bg-input" accept="image/*" onchange="changeBg(this)">
+
+            <label>历史背景 (最近3个)</label>
+            <div id="history-bgs" style="display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap;"></div>
+
+            <div class="settings-title">数据备份</div>
+            <div style="display:flex;gap:8px;margin-bottom:10px;">
+                <button onclick="exportDataToZip()" style="flex:1;background:rgba(80,140,80,0.25);color:#2d5a2d;border:1px solid rgba(80,140,80,0.4);font-weight:bold;">导出 ZIP ⬆️</button>
+                <button onclick="document.getElementById('import-zip-input').click()" style="flex:1;background:rgba(60,100,180,0.2);color:#1e3a6e;border:1px solid rgba(60,100,180,0.35);font-weight:bold;">导入 ZIP ⬇️</button>
+                <input type="file" id="import-zip-input" accept=".zip" onchange="importDataFromZip(this)">
+            </div>
+
+            <div class="btn-group" style="margin-top: 20px;">
+                <button onclick="closeModal('settings-modal')">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let state = {
+            notes: JSON.parse(localStorage.getItem('wanwan_notes_v3')) || [],
+            settings: JSON.parse(localStorage.getItem('wanwan_settings_v3')) || {
+                name: '宛宛',
+                nameColor: '#333333',
+                textColorR: 51, textColorG: 51, textColorB: 51,
+                themeColor: '#ff9a9e',
+                fontSize: 14,
+                previewLines: 3,
+                showCharm: true,
+                charmSize: 60,
+                charmSwing: 8,
+                charmX: 20,
+                charmY: 10,
+                frameStyle: 'st',
+                customFrameImg: '',
+                frameScale: 1,
+                avatarOffsetX: 0,
+                avatarOffsetY: 0,
+                avatarScale: 1,
+                bgImage: '',
+                currentAvatar: 'https://via.placeholder.com/150',
+                charmImage: '',
+                historyAvatars: [],
+                historyBgs: [],
+                currentFont: 'system',
+                fontPresets: [],
+                currentFrame: 'st',
+                framePresets: []
+            },
+            tempImages: [], filterTag: null, blockedTags: [], searchQuery: '',
+            editingId: null
+        };
+
+        window.onload = () => {
+            // 内置字体主列表（始终保持最新）
+            const BUILTIN_FONTS = [
+                { id: 'system',   name: '手机字体',  value: 'system-ui, -apple-system, sans-serif', isBuiltin: true },
+                { id: 'msyh',     name: '现代黑体',  value: 'sans-serif', isBuiltin: true,
+                  gfont: 'Noto+Sans+SC:wght@400', gname: 'Noto Sans SC' },
+                { id: 'heiti',    name: '圆润黑体',  value: 'sans-serif', isBuiltin: true,
+                  gfont: 'ZCOOL+KuaiLe', gname: 'ZCOOL KuaiLe' },
+                { id: 'pingfang', name: '纤细体',    value: 'sans-serif', isBuiltin: true,
+                  gfont: 'Noto+Sans+SC:wght@100', gname: 'Noto Sans SC' },
+                { id: 'kaiti',    name: '小篆风',    value: 'serif', isBuiltin: true,
+                  gfont: 'ZCOOL+XiaoWei', gname: 'ZCOOL XiaoWei' },
+                { id: 'songti',   name: '宋体',      value: 'serif', isBuiltin: true,
+                  gfont: 'Noto+Serif+SC:wght@400', gname: 'Noto Serif SC' },
+                { id: 'fangsong', name: '细衬线',    value: 'serif', isBuiltin: true,
+                  gfont: 'Noto+Serif+SC:wght@200', gname: 'Noto Serif SC' },
+                { id: 'mono',     name: '等宽字体',  value: 'monospace', isBuiltin: true,
+                  gfont: 'Noto+Sans+Mono', gname: 'Noto Sans Mono' }
+            ];
+            // 内置头像框主列表（始终保持最新）
+            const BUILTIN_FRAMES = [
+                { id: 'none',   name: '无框',     type: 'builtin', value: 'none',   isBuiltin: true },
+                { id: 'st',     name: '星落',     type: 'builtin', value: 'st',     isBuiltin: true },
+                { id: 'circle', name: '极简圆圈', type: 'builtin', value: 'circle', isBuiltin: true }
+            ];
+
+            // 迁移：清除旧版遗留的内置字体残留（老id如 serif、mono 等旧条目），保留用户自定义
+            const BUILTIN_IDS = BUILTIN_FONTS.map(f => f.id);
+            // 旧版内置id列表（需要清除）
+            const OLD_BUILTIN_IDS = ['serif', 'system', 'msyh', 'heiti', 'pingfang', 'kaiti', 'songti', 'fangsong', 'mono'];
+            if (!state.settings.fontPresets) state.settings.fontPresets = [];
+            // 清除所有旧内置项（isBuiltin:true 或 id 在老列表里），保留用户自定义
+            state.settings.fontPresets = state.settings.fontPresets.filter(f => !f.isBuiltin && !OLD_BUILTIN_IDS.includes(f.id));
+            // 把最新内置字体插入最前
+            state.settings.fontPresets = [...BUILTIN_FONTS, ...state.settings.fontPresets];
+            if (!state.settings.currentFont || OLD_BUILTIN_IDS.includes(state.settings.currentFont) && !BUILTIN_IDS.includes(state.settings.currentFont)) {
+                state.settings.currentFont = 'system';
+            }
+
+            // 动态加载 Google Fonts（按 family 合并，避免重复请求）
+            const gfontMap = {}; // gname -> [weight, ...]
+            BUILTIN_FONTS.forEach(f => {
+                if (!f.gfont) return;
+                const family = f.gname;
+                // 提取 weight（如 'Noto+Sans+SC:wght@100' → 100）
+                const wMatch = f.gfont.match(/wght@(\d+)/);
+                const w = wMatch ? wMatch[1] : null;
+                if (!gfontMap[family]) gfontMap[family] = { baseName: f.gfont.split(':')[0], weights: new Set() };
+                if (w) gfontMap[family].weights.add(w);
+            });
+            Object.entries(gfontMap).forEach(([family, info]) => {
+                const linkId = 'gfont_' + info.baseName;
+                if (document.getElementById(linkId)) return;
+                const link = document.createElement('link');
+                link.id = linkId;
+                link.rel = 'stylesheet';
+                const wStr = info.weights.size > 0 ? `:wght@${[...info.weights].join(';')}` : '';
+                link.href = `https://fonts.googleapis.com/css2?family=${info.baseName}${wStr}&display=swap`;
+                document.head.appendChild(link);
+            });
+            // 把 gname 注入每个字体的 value 最前
+            BUILTIN_FONTS.forEach(f => {
+                if (f.gname) f.value = `"${f.gname}", ${f.value}`;
+            });
+
+            // 迁移：合并内置头像框
+            if (!state.settings.framePresets) state.settings.framePresets = [];
+            BUILTIN_FRAMES.forEach(bf => {
+                const idx = state.settings.framePresets.findIndex(f => f.id === bf.id);
+                if (idx === -1) {
+                    state.settings.framePresets.unshift(bf);
+                } else {
+                    state.settings.framePresets[idx] = bf;
+                }
+            });
+            if (!state.settings.currentFrame) state.settings.currentFrame = state.settings.frameStyle || 'st';
+            applySettings();
+            renderList();
+            renderTags();
+            renderHistoryAvatars();
+            renderHistoryBgs();
+            renderFontPresets();
+            renderFramePresets();
+            setInterval(updateLiveTimers, 1000);
+            updateClock();
+            setInterval(updateClock, 1000);
+            initBattery();
+        };
+
+        function openSettings() {
+            applySettings();
+            renderHistoryAvatars();
+            renderHistoryBgs();
+            renderFontPresets();
+            renderFramePresets();
+            openModal('settings-modal');
+        }
+
+        function openEditor(id = null) {
+            state.editingId = id;
+            const title = document.getElementById('editor-title');
+            const contentInput = document.getElementById('edit-content');
+            const tagsInput = document.getElementById('edit-tags');
+            const timerInput = document.getElementById('edit-timer');
+
+            if (id) {
+                const note = state.notes.find(n => n.id === id);
+                title.innerText = "编辑内容";
+                contentInput.value = note.content;
+                tagsInput.value = note.tags.join(' ');
+
+                if (note.destructTime) {
+                    const remainingMs = note.destructTime - Date.now();
+                    timerInput.value = remainingMs > 0 ? Math.ceil(remainingMs / 60000) : 0;
+                } else {
+                    timerInput.value = 0;
+                }
+                state.tempImages = [...note.images];
+            } else {
+                title.innerText = "写点什么...";
+                contentInput.value = '';
+                // 若当前选中了某个非"全部"的tag，自动带入
+                tagsInput.value = (state.filterTag && !state.blockedTags.includes(state.filterTag)) ? state.filterTag : '';
+                timerInput.value = '0';
+                state.tempImages = [];
+            }
+
+            renderTempImages();
+            openModal('editor-modal');
+        }
+
+        function renderTempImages() {
+            const area = document.getElementById('image-preview-area');
+            area.innerHTML = '';
+            state.tempImages.forEach((img, idx) => {
+                const el = document.createElement('img');
+                el.src = img.src;
+                el.style.width = '50px'; el.style.height = '50px'; el.style.objectFit = 'cover';
+                area.appendChild(el);
+            });
+        }
+
+        function saveItem() {
+            const content = document.getElementById('edit-content').value;
+            const tagsInput = document.getElementById('edit-tags').value;
+            const timerVal = parseInt(document.getElementById('edit-timer').value);
+
+            if (!content && state.tempImages.length === 0) return;
+
+            const destructTime = timerVal > 0 ? Date.now() + timerVal * 60 * 1000 : null;
+
+            if (state.editingId) {
+                const note = state.notes.find(n => n.id === state.editingId);
+                note.content = content;
+                note.tags = tagsInput.split(' ').filter(t => t.trim() !== '');
+                note.images = state.tempImages;
+                note.destructTime = destructTime;
+            } else {
+                state.notes.unshift({
+                    id: Date.now(),
+                    content: content,
+                    tags: tagsInput.split(' ').filter(t => t.trim() !== ''),
+                    images: state.tempImages,
+                    timestamp: new Date().toLocaleString(),
+                    createdTime: Date.now(),
+                    destructTime: destructTime,
+                    isTrash: false
+                });
+            }
+
+            saveData(); closeModal('editor-modal'); renderList(); renderTags();
+        }
+
+        function deleteNote(id) {
+            state.notes = state.notes.filter(n => n.id !== id);
+            saveData(); renderList(); renderTags();
+        }
+
+        function renderList() {
+            const container = document.getElementById('list-container');
+            container.innerHTML = '';
+            const now = Date.now();
+
+            let filtered = state.notes.filter(item => {
+                if (item.isTrash) return false;
+                if (item.destructTime && now >= item.destructTime) return false;
+
+                if (item.tags.some(t => state.blockedTags.includes(t))) return false;
+                if (state.filterTag && !item.tags.includes(state.filterTag)) return false;
+                if (state.searchQuery) {
+                    const inContent = item.content.includes(state.searchQuery);
+                    const inRemark = item.images.some(img => img.remark && img.remark.includes(state.searchQuery));
+                    if (!inContent && !inRemark) return false;
+                }
+                return true;
+            });
+
+            filtered.forEach(item => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'note-wrapper';
+
+                const deleteBg = document.createElement('div');
+                deleteBg.className = 'delete-btn-bg';
+                deleteBg.innerHTML = '🗑️';
+                deleteBg.onclick = () => deleteNote(item.id);
+
+                const card = document.createElement('div');
+                card.className = 'note-card';
+
+                let startX = 0, currentX = 0;
+                let isSwiping = false;
+
+                card.addEventListener('touchstart', e => {
+                    startX = e.touches[0].clientX;
+                    isSwiping = false;
+                    card.style.transition = 'none';
+                });
+                card.addEventListener('touchmove', e => {
+                    currentX = e.touches[0].clientX;
+                    let diff = currentX - startX;
+                    if (Math.abs(diff) > 10) isSwiping = true;
+                    if (diff < 0) {
+                        e.preventDefault();
+                        card.style.transform = `translateX(${Math.max(diff, -80)}px)`;
+                        card.style.background = 'rgba(255, 255, 255, 0.35)';
+                        deleteBg.style.opacity = '0.5';
+                    }
+                }, {passive: false});
+                card.addEventListener('touchend', e => {
+                    card.style.transition = 'transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease';
+                    let diff = currentX ? currentX - startX : 0;
+                    if (diff < -40) {
+                        card.style.transform = `translateX(-80px)`;
+                        deleteBg.style.opacity = '0.5';
+                    } else {
+                        card.style.transform = `translateX(0px)`;
+                        card.style.background = '';
+                        deleteBg.style.opacity = '0';
+                    }
+                    startX = 0; currentX = 0;
+                });
+
+                card.onclick = (e) => {
+                    if (isSwiping) return;
+                    if (e.target.closest('.edit-btn') || e.target.closest('.note-thumb')) return;
+                    setTimeout(() => openFullNote(item.id), 150);
+                };
+
+                let imagesHtml = '';
+                if (item.images && item.images.length > 0) {
+                    imagesHtml = `<div class="note-images">
+                        ${item.images.map((img, idx) => `<img src="${img.src}" class="note-thumb" onclick="openImageRemark(${item.id}, ${idx})">`).join('')}
+                    </div>`;
+                }
+                let tagsHtml = item.tags.map(t => `<span class="tag">#${t}</span>`).join('');
+                let timerHtml = item.destructTime ? `<span class="live-timer" data-time="${item.destructTime}"></span>` : '';
+
+                card.innerHTML = `
+                    <div class="note-header">
+                        <span class="note-time">${item.timestamp}</span>
+                        <div class="note-actions">
+                            ${timerHtml}
+                            <span class="edit-btn" onclick="openEditor(${item.id})">📝</span>
+                        </div>
+                    </div>
+                    <div class="note-content">${item.content}</div>
+                    ${imagesHtml}
+                    <div class="note-tags">${tagsHtml}</div>
+                `;
+
+                wrapper.appendChild(deleteBg);
+                wrapper.appendChild(card);
+                container.appendChild(wrapper);
+            });
+            updateLiveTimers();
+        }
+
+        function openFullNote(id) {
+            const note = state.notes.find(n => n.id === id);
+            if(!note) return;
+
+            let imagesHtml = '';
+            if (note.images && note.images.length > 0) {
+                imagesHtml = `<div style="display:flex; flex-direction:column; gap:10px; margin-top:15px;">
+                    ${note.images.map(img => `
+                        <div>
+                            <img src="${img.src}" style="width:100%; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+                            ${img.remark ? `<div style="font-size:0.85rem; color:#555; margin-top:5px; font-style:italic;">${img.remark}</div>` : ''}
+                        </div>
+                    `).join('')}
+                </div>`;
+            }
+            let tagsHtml = note.tags.map(t => `<span class="tag" style="background:rgba(255,255,255,0.6); border:1px solid #eee;">#${t}</span>`).join('');
+
+            document.getElementById('full-note-body').innerHTML = `
+                <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                    <img src="${state.settings.currentAvatar}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; margin-right: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                    <span style="font-weight: bold; font-size: 1.1rem; ${(()=>{ const nc = state.settings.nameColor||'#333'; return nc.includes('gradient') ? `background:${nc};-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;` : `color:${nc};`; })()}">${state.settings.name}</span>
+                </div>
+                <div style="font-size: 1.05rem; line-height: 1.6; white-space: pre-wrap; color:var(--text-color);">${note.content}</div>
+                ${imagesHtml}
+                <div style="margin-top: 20px; display: flex; gap: 8px; flex-wrap: wrap;">${tagsHtml}</div>
+                <div style="font-size: 0.8rem; color: #999; text-align: right; margin-top: 20px; font-style: italic;">${note.timestamp}</div>
+            `;
+            openModal('full-note-modal');
+        }
+
+        function updateLiveTimers() {
+            const now = Date.now();
+            let needsRender = false;
+            document.querySelectorAll('.live-timer').forEach(el => {
+                const destructTime = parseInt(el.getAttribute('data-time'));
+                const diff = destructTime - now;
+                if (diff <= 0) {
+                    needsRender = true;
+                } else {
+                    const mins = Math.floor(diff / 60000);
+                    const secs = Math.floor((diff % 60000) / 1000);
+                    el.innerText = `${mins}:${secs.toString().padStart(2, '0')}`;
+                }
+            });
+            if(needsRender) renderList();
+        }
+
+        function handleImageUpload(input) {
+            Array.from(input.files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    state.tempImages.push({ src: e.target.result, remark: '' });
+                    renderTempImages();
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        let currentEditingImg = null;
+        function openImageRemark(noteId, imgIndex) {
+            const note = state.notes.find(n => n.id === noteId);
+            currentEditingImg = { noteId, imgIndex };
+            document.getElementById('remark-target-img').src = note.images[imgIndex].src;
+            document.getElementById('img-remark-text').value = note.images[imgIndex].remark || '';
+            openModal('img-remark-modal');
+        }
+        function saveImageRemark() {
+            const note = state.notes.find(n => n.id === currentEditingImg.noteId);
+            note.images[currentEditingImg.imgIndex].remark = document.getElementById('img-remark-text').value;
+            saveData(); closeModal('img-remark-modal');
+        }
+
+        function applySettings() {
+            const s = state.settings;
+            document.documentElement.style.setProperty('--accent-color', s.themeColor);
+
+            // accent-color 文字可读性：用感知亮度公式判断白字还是黑字
+            // 感知亮度 = 0.299R + 0.587G + 0.114B（人眼对绿色最敏感）
+            const hex = s.themeColor.replace('#', '');
+            const r = parseInt(hex.substring(0,2), 16);
+            const g = parseInt(hex.substring(2,4), 16);
+            const b = parseInt(hex.substring(4,6), 16);
+            const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+            // 亮度 > 186（约73%）时背景太亮，换黑字；否则白字
+            document.documentElement.style.setProperty('--accent-text', luminance > 186 ? '#222' : '#fff');
+
+            // 名字颜色（支持CSS任意值：纯色/渐变）
+            const nameColor = s.nameColor || '#333333';
+            // 渐变需要用 background-clip 实现，纯色直接 color
+            const nameEl = document.getElementById('display-name');
+            if (nameEl) {
+                const isGradient = nameColor.includes('gradient');
+                if (isGradient) {
+                    nameEl.style.backgroundImage = nameColor;
+                    nameEl.style.webkitBackgroundClip = 'text';
+                    nameEl.style.webkitTextFillColor = 'transparent';
+                    nameEl.style.backgroundClip = 'text';
+                    document.documentElement.style.setProperty('--name-color', 'transparent');
+                } else {
+                    nameEl.style.backgroundImage = '';
+                    nameEl.style.webkitBackgroundClip = '';
+                    nameEl.style.webkitTextFillColor = '';
+                    nameEl.style.backgroundClip = '';
+                    document.documentElement.style.setProperty('--name-color', nameColor);
+                }
+            }
+            // 预览框
+            const namePreview = document.getElementById('name-color-preview');
+            if (namePreview) namePreview.style.background = nameColor;
+
+            // 全局字体颜色
+            const tr = s.textColorR ?? 51, tg = s.textColorG ?? 51, tb = s.textColorB ?? 51;
+            document.documentElement.style.setProperty('--text-color', `rgb(${tr},${tg},${tb})`);
+            const tcPreview = document.getElementById('text-color-preview');
+            const tcHexEl = document.getElementById('text-color-hex');
+            const hexVal = rgbToHex(tr, tg, tb);
+            if (tcPreview) tcPreview.style.background = hexVal;
+            if (tcHexEl) tcHexEl.innerText = hexVal;
+            syncRgbSliders(tr, tg, tb);
+
+            if (s.bgImage) document.documentElement.style.setProperty('--bg-image', `url(${s.bgImage})`);
+
+            // 应用字体
+            const activeFont = (s.fontPresets || []).find(f => f.id === s.currentFont);
+            if (activeFont) {
+                if (activeFont.dataUrl) {
+                    // 自定义上传字体：动态注册 @font-face
+                    const faceId = 'custom_font_' + activeFont.id;
+                    if (!document.getElementById(faceId)) {
+                        const style = document.createElement('style');
+                        style.id = faceId;
+                        style.textContent = `@font-face { font-family: "${faceId}"; src: url("${activeFont.dataUrl}"); }`;
+                        document.head.appendChild(style);
+                    }
+                    document.documentElement.style.setProperty('--custom-font', `"${faceId}", sans-serif`);
+                } else {
+                    document.documentElement.style.setProperty('--custom-font', activeFont.value);
+                    // 细黑体用 weight 100，其他正常
+                    const weightMap = { pingfang: '100', fangsong: '200' };
+                    document.documentElement.style.setProperty('--custom-font-weight', weightMap[activeFont.id] || '400');
+                }
+            }
+
+            document.documentElement.style.setProperty('--charm-size', s.charmSize + 'px');
+            document.documentElement.style.setProperty('--charm-deg', s.charmSwing + 'deg');
+            document.documentElement.style.setProperty('--charm-x', s.charmX + 'px');
+            document.documentElement.style.setProperty('--charm-y', s.charmY + 'px');
+
+            document.documentElement.style.setProperty('--avatar-offset-x', s.avatarOffsetX + 'px');
+            document.documentElement.style.setProperty('--avatar-offset-y', s.avatarOffsetY + 'px');
+            document.documentElement.style.setProperty('--avatar-scale', s.avatarScale);
+            document.documentElement.style.setProperty('--frame-scale', s.frameScale || 1);
+
+            document.getElementById('display-name').innerText = s.name;
+            document.getElementById('setting-name').value = s.name;
+            const ncInput = document.getElementById('setting-name-color');
+            if (ncInput) ncInput.value = s.nameColor || '#333333';
+            document.getElementById('setting-color').value = s.themeColor;
+
+            document.getElementById('setting-charm-size').value = s.charmSize;
+            document.getElementById('setting-charm-swing').value = s.charmSwing;
+            document.getElementById('setting-charm-x').value = s.charmX;
+            document.getElementById('setting-charm-y').value = s.charmY;
+
+            document.getElementById('setting-avatar-x').value = s.avatarOffsetX;
+            document.getElementById('setting-avatar-y').value = s.avatarOffsetY;
+            document.getElementById('setting-avatar-scale').value = s.avatarScale;
+            document.getElementById('setting-frame-scale').value = s.frameScale || 1;
+
+            if (s.currentAvatar) document.getElementById('current-avatar').src = s.currentAvatar;
+
+            const avatarBox = document.getElementById('avatar-box');
+            const avatarInner = document.getElementById('avatar-inner-box');
+            const frameScaleSetting = document.getElementById('frame-scale-setting');
+
+            avatarBox.className = 'avatar-container';
+
+            // 应用头像框：从 framePresets 中取当前项
+            const activeFrame = (s.framePresets || []).find(f => f.id === s.currentFrame) || { value: 'none' };
+            const frameVal = activeFrame.value;
+
+            if (frameVal !== 'none') {
+                avatarInner.classList.add('is-framed');
+                if (frameVal === 'circle') {
+                    avatarBox.classList.add('frame-circle');
+                    frameScaleSetting.style.display = 'none';
+                } else if (frameVal === 'st') {
+                    document.documentElement.style.setProperty('--avatar-st-frame', `url('https://i.postimg.cc/v8xXtvMP/72ce5c0f0m16d8b4f1b050b6a2ebb6b3.gif')`);
+                    avatarBox.classList.add('frame-st');
+                    frameScaleSetting.style.display = 'block';
+                } else if (activeFrame.dataUrl || activeFrame.url) {
+                    // 自定义上传或URL框
+                    const src = activeFrame.dataUrl || activeFrame.url;
+                    document.documentElement.style.setProperty('--avatar-st-frame', `url(${src})`);
+                    avatarBox.classList.add('frame-st');
+                    frameScaleSetting.style.display = 'block';
+                }
+            } else {
+                avatarInner.classList.remove('is-framed');
+                frameScaleSetting.style.display = 'none';
+            }
+
+            // 同步旧 frameStyle（兼容旧逻辑，防止 updateSettings 读取时出错）
+            s.frameStyle = frameVal === 'none' ? 'none' : (frameVal === 'circle' ? 'circle' : 'st');
+
+            const charmContainer = document.getElementById('charm-display');
+            if (s.showCharm) {
+                charmContainer.classList.remove('hidden');
+                if (s.charmImage) charmContainer.querySelector('img').src = s.charmImage;
+            } else charmContainer.classList.add('hidden');
+            document.getElementById('setting-charm-toggle').checked = s.showCharm;
+        }
+
+        // ===================== 全局字体RGB滑条 =====================
+        function rgbToHex(r, g, b) {
+            return '#' + [r,g,b].map(v => v.toString(16).padStart(2,'0')).join('');
+        }
+        function syncRgbSliders(r, g, b) {
+            const tr = document.getElementById('tc-r');
+            const tg = document.getElementById('tc-g');
+            const tb = document.getElementById('tc-b');
+            if (tr) { tr.value = r; document.getElementById('tc-r-val').innerText = r; }
+            if (tg) { tg.value = g; document.getElementById('tc-g-val').innerText = g; }
+            if (tb) { tb.value = b; document.getElementById('tc-b-val').innerText = b; }
+            const hex = rgbToHex(r, g, b);
+            const preview = document.getElementById('text-color-preview');
+            const hexEl = document.getElementById('text-color-hex');
+            if (preview) preview.style.background = hex;
+            if (hexEl) hexEl.innerText = hex;
+        }
+
+        function onRgbSliderChange() {
+            const r = parseInt(document.getElementById('tc-r').value);
+            const g = parseInt(document.getElementById('tc-g').value);
+            const b = parseInt(document.getElementById('tc-b').value);
+            document.getElementById('tc-r-val').innerText = r;
+            document.getElementById('tc-g-val').innerText = g;
+            document.getElementById('tc-b-val').innerText = b;
+            const hex = rgbToHex(r, g, b);
+            const preview = document.getElementById('text-color-preview');
+            const hexEl = document.getElementById('text-color-hex');
+            if (preview) preview.style.background = hex;
+            if (hexEl) hexEl.innerText = hex;
+            state.settings.textColorR = r;
+            state.settings.textColorG = g;
+            state.settings.textColorB = b;
+            document.documentElement.style.setProperty('--text-color', `rgb(${r},${g},${b})`);
+            saveData();
+        }
+
+        // ===================== 昵称颜色RGB调色板 =====================
+        let _namePickerOpen = false;
+        function toggleNameColorPicker() {
+            _namePickerOpen = !_namePickerOpen;
+            const picker = document.getElementById('name-color-picker');
+            if (picker) picker.style.display = _namePickerOpen ? 'block' : 'none';
+            if (_namePickerOpen) {
+                // 尝试从当前输入框解析纯色并同步滑条
+                const cur = (document.getElementById('setting-name-color').value || '').trim();
+                const rgb = parseCssColorToRgb(cur);
+                if (rgb) {
+                    document.getElementById('nc-r').value = rgb[0]; document.getElementById('nc-r-val').innerText = rgb[0];
+                    document.getElementById('nc-g').value = rgb[1]; document.getElementById('nc-g-val').innerText = rgb[1];
+                    document.getElementById('nc-b').value = rgb[2]; document.getElementById('nc-b-val').innerText = rgb[2];
+                }
+            }
+        }
+        function parseCssColorToRgb(str) {
+            // 支持 #rgb #rrggbb rgb(r,g,b)
+            if (!str) return null;
+            let m = str.match(/^#([0-9a-f]{6})$/i);
+            if (m) { const h=m[1]; return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)]; }
+            m = str.match(/^#([0-9a-f]{3})$/i);
+            if (m) { const h=m[1]; return [parseInt(h[0]+h[0],16),parseInt(h[1]+h[1],16),parseInt(h[2]+h[2],16)]; }
+            m = str.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/i);
+            if (m) return [parseInt(m[1]),parseInt(m[2]),parseInt(m[3])];
+            return null;
+        }
+        function onNameRgbChange() {
+            const r = parseInt(document.getElementById('nc-r').value);
+            const g = parseInt(document.getElementById('nc-g').value);
+            const b = parseInt(document.getElementById('nc-b').value);
+            document.getElementById('nc-r-val').innerText = r;
+            document.getElementById('nc-g-val').innerText = g;
+            document.getElementById('nc-b-val').innerText = b;
+            const hex = rgbToHex(r, g, b);
+            // 更新输入框和预览
+            const input = document.getElementById('setting-name-color');
+            if (input) input.value = hex;
+            const preview = document.getElementById('name-color-preview');
+            if (preview) preview.style.background = hex;
+            // 实时应用
+            state.settings.nameColor = hex;
+            saveData(); applySettings();
+        }
+
+        function updateSettings() {
+            const s = state.settings;
+            s.name = document.getElementById('setting-name').value;
+            s.nameColor = document.getElementById('setting-name-color').value || '#333333';
+            s.themeColor = document.getElementById('setting-color').value;
+
+            s.showCharm = document.getElementById('setting-charm-toggle').checked;
+            s.charmSize = document.getElementById('setting-charm-size').value;
+            s.charmSwing = document.getElementById('setting-charm-swing').value;
+            s.charmX = document.getElementById('setting-charm-x').value || 0;
+            s.charmY = document.getElementById('setting-charm-y').value || 0;
+
+            s.frameScale = document.getElementById('setting-frame-scale').value || 1;
+            s.avatarOffsetX = document.getElementById('setting-avatar-x').value || 0;
+            s.avatarOffsetY = document.getElementById('setting-avatar-y').value || 0;
+            s.avatarScale = document.getElementById('setting-avatar-scale').value || 1;
+
+            saveData(); applySettings();
+            renderTags();
+        }
+
+        function addToHistoryAvatars(url) {
+            if (!url || url === 'https://via.placeholder.com/150') return;
+            let list = state.settings.historyAvatars || [];
+            list = list.filter(item => item !== url);
+            list.unshift(url);
+            if (list.length > 3) list = list.slice(0, 3);
+            state.settings.historyAvatars = list;
+        }
+
+        function renderHistoryAvatars() {
+            const container = document.getElementById('history-avatars');
+            container.innerHTML = '';
+            const list = state.settings.historyAvatars || [];
+            list.forEach(url => {
+                const img = document.createElement('img');
+                img.src = url;
+                img.style.width = '40px';
+                img.style.height = '40px';
+                img.style.borderRadius = '50%';
+                img.style.objectFit = 'cover';
+                img.style.cursor = 'pointer';
+                img.onclick = () => {
+                    state.settings.currentAvatar = url;
+                    saveData();
+                    applySettings();
+                    renderHistoryAvatars();
+                };
+                container.appendChild(img);
+            });
+        }
+
+        function addToHistoryBgs(url) {
+            if (!url) return;
+            let list = state.settings.historyBgs || [];
+            list = list.filter(item => item !== url);
+            list.unshift(url);
+            if (list.length > 3) list = list.slice(0, 3);
+            state.settings.historyBgs = list;
+        }
+
+        function renderHistoryBgs() {
+            const container = document.getElementById('history-bgs');
+            container.innerHTML = '';
+            const list = state.settings.historyBgs || [];
+            list.forEach(url => {
+                const img = document.createElement('img');
+                img.src = url;
+                img.style.width = '40px';
+                img.style.height = '40px';
+                img.style.borderRadius = '6px';
+                img.style.objectFit = 'cover';
+                img.style.cursor = 'pointer';
+                img.onclick = () => {
+                    state.settings.bgImage = url;
+                    saveData();
+                    applySettings();
+                    renderHistoryBgs();
+                };
+                container.appendChild(img);
+            });
+        }
+
+        function changeAvatar(input) {
+            if(input.files[0]) {
+                const r = new FileReader();
+                r.onload = e => {
+                    const url = e.target.result;
+                    addToHistoryAvatars(state.settings.currentAvatar);
+                    state.settings.currentAvatar = url;
+                    saveData(); applySettings(); renderHistoryAvatars();
+                };
+                r.readAsDataURL(input.files[0]);
+            }
+        }
+        function changeAvatarUrl(url) {
+            if(url) {
+                addToHistoryAvatars(state.settings.currentAvatar);
+                state.settings.currentAvatar = url;
+                saveData(); applySettings(); renderHistoryAvatars();
+            }
+        }
+
+        function changeCustomFrame(input) {
+            if(input.files[0]) {
+                const r = new FileReader();
+                r.onload = e => {
+                    state.settings.customFrameImg = e.target.result;
+                    state.settings.frameStyle = 'custom';
+                    saveData(); applySettings();
+                };
+                r.readAsDataURL(input.files[0]);
+            }
+        }
+        function changeFrameUrl(url) {
+            if(url) {
+                state.settings.customFrameImg = url;
+                state.settings.frameStyle = 'custom';
+                document.getElementById('setting-frame-style').value = 'custom';
+                saveData(); applySettings();
+            }
+        }
+
+        function changeBg(input) {
+            if(input.files[0]) {
+                const r = new FileReader();
+                r.onload = e => {
+                    const url = e.target.result;
+                    addToHistoryBgs(state.settings.bgImage);
+                    state.settings.bgImage = url;
+                    saveData(); applySettings(); renderHistoryBgs();
+                };
+                r.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function changeCharm(input) {
+            if(input.files[0]) {
+                const r = new FileReader();
+                r.onload = e => {
+                    state.settings.charmImage = e.target.result;
+                    saveData(); applySettings();
+                };
+                r.readAsDataURL(input.files[0]);
+            }
+        }
+        function changeCharmUrl(url) { if(url) { state.settings.charmImage = url; saveData(); applySettings(); } }
+
+        function renderTags() {
+            const allTags = new Set(); state.notes.forEach(n => n.tags.forEach(t => allTags.add(t)));
+            const container = document.getElementById('tag-filters');
+            container.innerHTML = `<div class="filter-tag ${!state.filterTag ? 'active' : ''}" onclick="filterByTag(null)">全部</div>`;
+            allTags.forEach(tag => {
+                const isBlocked = state.blockedTags.includes(tag);
+                const div = document.createElement('div');
+                div.className = `filter-tag ${state.filterTag === tag ? 'active' : ''} ${isBlocked ? 'blocked' : ''}`;
+                div.innerText = tag;
+                div.onclick = () => filterByTag(tag);
+                div.oncontextmenu = (e) => { e.preventDefault(); toggleBlockTag(tag); };
+                container.appendChild(div);
+            });
+        }
+        function filterByTag(tag) { if(state.blockedTags.includes(tag)) return; state.filterTag = tag; renderList(); renderTags(); }
+        function toggleBlockTag(tag) { if(state.blockedTags.includes(tag)) state.blockedTags = state.blockedTags.filter(t => t !== tag); else { state.blockedTags.push(tag); if(state.filterTag===tag) state.filterTag=null; } renderList(); renderTags(); }
+        function handleSearch(val) { state.searchQuery = val; renderList(); }
+        function openModal(id) { document.getElementById(id).classList.add('open'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+        function saveData() { localStorage.setItem('wanwan_notes_v3', JSON.stringify(state.notes)); localStorage.setItem('wanwan_settings_v3', JSON.stringify(state.settings)); }
+
+        async function exportDataToZip() {
+            try {
+                const zip = new JSZip();
+                zip.file("notes.json", JSON.stringify(state.notes, null, 2));
+                zip.file("settings.json", JSON.stringify(state.settings, null, 2));
+                const content = await zip.generateAsync({ type: "blob" });
+                saveAs(content, `宛宛空间备份_${new Date().toLocaleDateString()}.zip`);
+                alert("✅ 导出成功！");
+            } catch (e) {
+                alert("❌ 导出失败：" + e.message);
+            }
+        }
+
+        async function importDataFromZip(input) {
+            if (!input.files || !input.files[0]) return;
+            const file = input.files[0];
+            try {
+                const zip = new JSZip();
+                const contents = await zip.loadAsync(file);
+                
+                if (contents.files["notes.json"]) {
+                    const notesStr = await contents.files["notes.json"].async("string");
+                    state.notes = JSON.parse(notesStr);
+                }
+                if (contents.files["settings.json"]) {
+                    const settingsStr = await contents.files["settings.json"].async("string");
+                    state.settings = JSON.parse(settingsStr);
+                }
+
+                saveData();
+                applySettings();
+                renderList();
+                renderTags();
+                renderHistoryAvatars();
+                renderHistoryBgs();
+                renderFontPresets();
+                renderFramePresets();
+                alert("✅ 导入成功！页面已刷新数据");
+            } catch (e) {
+                alert("❌ 导入失败：" + e.message);
+            }
+            input.value = '';
+        }
+        // ===================== 时钟 & 电量 =====================
+        function updateClock() {
+            const now = new Date();
+            const M = now.getMonth() + 1;
+            const D = now.getDate();
+            const h = String(now.getHours()).padStart(2, '0');
+            const m = String(now.getMinutes()).padStart(2, '0');
+            const s = String(now.getSeconds()).padStart(2, '0');
+            const el = document.getElementById('status-clock');
+            if (el) el.innerText = `${M}月${D}日 ${h}:${m}:${s}`;
+        }
+
+        function initBattery() {
+            if (!navigator.getBattery) return;
+            navigator.getBattery().then(bat => {
+                function update() {
+                    const pct = Math.round(bat.level * 100);
+                    const sym = document.getElementById('battery-infinity');
+                    const txt = document.getElementById('battery-text');
+                    if (!sym || !txt) return;
+                    // 电量<=50%只显示∞左半边（overflow:hidden + 固定宽度）
+                    if (pct <= 50) {
+                        sym.classList.add('half');
+                    } else {
+                        sym.classList.remove('half');
+                    }
+                    txt.innerText = pct + '%';
+                }
+                update();
+                bat.addEventListener('levelchange', update);
+                bat.addEventListener('chargingchange', update);
+            });
+        }
+
+        // ===================== 字体预选 =====================
+        function renderFontPresets() {
+            const container = document.getElementById('font-preset-list');
+            container.innerHTML = '';
+            const presets = state.settings.fontPresets || [];
+            presets.forEach(font => {
+                const el = document.createElement('div');
+                el.className = 'preset-item' + (state.settings.currentFont === font.id ? ' active' : '');
+                el.innerText = font.name;
+                el.style.fontFamily = font.dataUrl ? `"custom_font_${font.id}", sans-serif` : font.value;
+
+                // 点击选中
+                el.onclick = () => {
+                    state.settings.currentFont = font.id;
+                    saveData(); applySettings(); renderFontPresets();
+                };
+
+                // 长按删除（仅自定义）
+                if (!font.isBuiltin) {
+                    setupLongPress(el, () => {
+                        if (confirm(`删除字体「${font.name}」？`)) {
+                            state.settings.fontPresets = state.settings.fontPresets.filter(f => f.id !== font.id);
+                            if (state.settings.currentFont === font.id) state.settings.currentFont = 'system';
+                            saveData(); applySettings(); renderFontPresets();
+                        }
+                    });
+                }
+                container.appendChild(el);
+            });
+        }
+
+        function addFontPreset(input) {
+            if (!input.files[0]) return;
+            const file = input.files[0];
+            const nameRaw = file.name.replace(/\.[^/.]+$/, '');
+            const label = prompt('给这个字体起个名字：', nameRaw) || nameRaw;
+            const reader = new FileReader();
+            reader.onload = e => {
+                const id = 'custom_font_' + Date.now();
+                state.settings.fontPresets.push({ id, name: label, value: id, dataUrl: e.target.result, isBuiltin: false });
+                state.settings.currentFont = id;
+                saveData(); applySettings(); renderFontPresets();
+            };
+            reader.readAsDataURL(file);
+            input.value = '';
+        }
+
+        // ===================== 头像框预选 =====================
+        function renderFramePresets() {
+            const container = document.getElementById('frame-preset-list');
+            container.innerHTML = '';
+            const presets = state.settings.framePresets || [];
+            presets.forEach(frame => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'frame-preset-item' + (state.settings.currentFrame === frame.id ? ' active' : '');
+
+                const thumb = document.createElement('img');
+                thumb.className = 'frame-preset-thumb';
+                // 缩略图：无框用纯色占位，st用框gif，circle用白框，自定义用上传图
+                if (frame.value === 'none') {
+                    thumb.src = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
+                    thumb.style.background = '#eee';
+                } else if (frame.value === 'st') {
+                    thumb.src = 'https://i.postimg.cc/v8xXtvMP/72ce5c0f0m16d8b4f1b050b6a2ebb6b3.gif';
+                } else if (frame.value === 'circle') {
+                    thumb.src = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
+                    thumb.style.background = '#ccc';
+                    thumb.style.border = '3px solid rgba(255,255,255,0.9)';
+                } else if (frame.dataUrl) {
+                    thumb.src = frame.dataUrl;
+                } else if (frame.url) {
+                    thumb.src = frame.url;
+                }
+
+                const label = document.createElement('div');
+                label.className = 'frame-preset-label';
+                label.innerText = frame.name;
+
+                wrapper.onclick = () => {
+                    state.settings.currentFrame = frame.id;
+                    saveData(); applySettings(); renderFramePresets();
+                };
+
+                // 长按删除（仅自定义）
+                if (!frame.isBuiltin) {
+                    setupLongPress(wrapper, () => {
+                        if (confirm(`删除头像框「${frame.name}」？`)) {
+                            state.settings.framePresets = state.settings.framePresets.filter(f => f.id !== frame.id);
+                            if (state.settings.currentFrame === frame.id) state.settings.currentFrame = 'none';
+                            saveData(); applySettings(); renderFramePresets();
+                        }
+                    });
+                }
+
+                wrapper.appendChild(thumb);
+                wrapper.appendChild(label);
+                container.appendChild(wrapper);
+            });
+        }
+
+        function addFramePresetFromFile(input) {
+            if (!input.files[0]) return;
+            const file = input.files[0];
+            const label = prompt('给这个头像框起个名字：', file.name.replace(/\.[^/.]+$/, '')) || '自定义框';
+            const reader = new FileReader();
+            reader.onload = e => {
+                const id = 'frame_' + Date.now();
+                state.settings.framePresets.push({ id, name: label, value: 'custom', dataUrl: e.target.result, isBuiltin: false });
+                state.settings.currentFrame = id;
+                saveData(); applySettings(); renderFramePresets();
+            };
+            reader.readAsDataURL(file);
+            input.value = '';
+        }
+
+        function addFramePresetFromUrl(url) {
+            if (!url) return;
+            const label = prompt('给这个头像框起个名字：', '自定义框') || '自定义框';
+            const id = 'frame_' + Date.now();
+            state.settings.framePresets.push({ id, name: label, value: 'custom', url: url, isBuiltin: false });
+            state.settings.currentFrame = id;
+            document.getElementById('frame-preset-url-input').value = '';
+            saveData(); applySettings(); renderFramePresets();
+        }
+
+        // ===================== 长按工具函数 =====================
+        function setupLongPress(el, callback) {
+            let timer = null;
+            const start = () => {
+                timer = setTimeout(() => { el.classList.add('long-pressing'); callback(); el.classList.remove('long-pressing'); }, 700);
+            };
+            const cancel = () => { clearTimeout(timer); el.classList.remove('long-pressing'); };
+            el.addEventListener('touchstart', start, { passive: true });
+            el.addEventListener('touchend', cancel);
+            el.addEventListener('touchmove', cancel);
+            el.addEventListener('mousedown', start);
+            el.addEventListener('mouseup', cancel);
+            el.addEventListener('mouseleave', cancel);
+        }
+
+    </script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('SW registered:', reg.scope))
+                    .catch(err => console.log('SW failed:', err));
+            });
+        }
+    </script>
+</body>
+</html>
