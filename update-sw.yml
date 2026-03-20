@@ -1,0 +1,24 @@
+name: Auto Update SW Version
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  update-sw:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update cache version with timestamp
+        run: |
+          TIMESTAMP=$(date +%s)
+          sed -i "s/const CACHE_NAME = 'huazhi-v[^']*'/const CACHE_NAME = 'huazhi-v${TIMESTAMP}'/" sw.js
+
+      - name: Commit updated sw.js
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add sw.js
+          git diff --staged --quiet || git commit -m "chore: auto update SW cache version"
+          git push
