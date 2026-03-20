@@ -442,9 +442,18 @@
     </div>
 
     <div class="modal" id="full-note-modal">
-        <div class="modal-content glass-modal-content">
-            <button class="close-btn" onclick="closeModal('full-note-modal')">＞</button>
-            <div id="full-note-body"></div>
+        <div class="modal-content glass-modal-content" style="display:flex; flex-direction:column; padding:0; overflow:hidden; max-height:88vh;">
+            <button class="close-btn" onclick="closeModal('full-note-modal')" style="position:absolute; top:10px; right:15px; z-index:10;">＞</button>
+            <!-- 正文+评论列表，可滚动 -->
+            <div id="full-note-body" style="flex:1; overflow-y:auto; padding:30px 20px 12px;"></div>
+            <!-- 评论列表 -->
+            <div id="full-note-comments" style="padding:0 20px 8px; overflow-y:auto; max-height:35vh;"></div>
+            <!-- 底部固定输入栏 -->
+            <div style="display:flex; align-items:center; gap:8px; padding:10px 16px 14px; border-top:1px solid rgba(255,255,255,0.4); background:rgba(255,255,255,0.3); backdrop-filter:blur(10px); flex-shrink:0;">
+                <input id="comment-input" type="text" placeholder="追评一下..." style="flex:1; padding:9px 16px; border-radius:999px; border:1px solid rgba(255,255,255,0.6); background:rgba(245,245,245,0.7); font-size:0.9rem; outline:none; margin:0;"
+                    onkeydown="if(event.key==='Enter') submitComment()">
+                <button onclick="submitComment()" style="width:36px; height:36px; border-radius:50%; border:none; background:var(--accent-color); color:var(--accent-text); font-size:1rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; cursor:pointer;">⋀</button>
+            </div>
         </div>
     </div>
 
@@ -933,9 +942,12 @@
             updateLiveTimers();
         }
 
+        let _currentNoteId = null;
+
         function openFullNote(id) {
             const note = state.notes.find(n => n.id === id);
             if(!note) return;
+            _currentNoteId = id;
 
             let imagesHtml = '';
             if (note.images && note.images.length > 0) {
@@ -958,9 +970,60 @@
                 <div style="font-size: 1.05rem; line-height: 1.6; white-space: pre-wrap; color:var(--text-color);">${note.content}</div>
                 ${imagesHtml}
                 <div style="margin-top: 20px; display: flex; gap: 8px; flex-wrap: wrap;">${tagsHtml}</div>
-                <div style="font-size: 0.8rem; color: #999; text-align: right; margin-top: 20px; font-style: italic;">${note.timestamp}</div>
+                <div style="font-size: 0.8rem; color: #999; text-align: right; margin-top: 12px; font-style: italic;">${note.timestamp}</div>
+                ${(note.comments && note.comments.length > 0) ? '<div style="border-top:1px solid rgba(0,0,0,0.07); margin-top:14px;"></div>' : ''}
             `;
+            renderComments(note);
+            document.getElementById('comment-input').value = '';
             openModal('full-note-modal');
+        }
+
+        function renderComments(note) {
+            const container = document.getElementById('full-note-comments');
+            const comments = note.comments || [];
+            if (comments.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+            container.innerHTML = comments.map((c, i) => `
+                <div style="display:flex; align-items:flex-start; gap:8px; padding:8px 0; border-bottom:1px solid rgba(0,0,0,0.05);">
+                    <img src="${state.settings.currentAvatar}" style="width:26px; height:26px; border-radius:50%; object-fit:cover; flex-shrink:0; margin-top:2px;">
+                    <div style="flex:1;">
+                        <div style="font-size:0.78rem; color:#aaa; margin-bottom:2px;">${c.time}</div>
+                        <div style="font-size:0.9rem; line-height:1.5; color:var(--text-color); white-space:pre-wrap;">${c.text}</div>
+                    </div>
+                    <span onclick="deleteComment(${note.id}, ${i})" style="font-size:0.85rem; color:#ccc; cursor:pointer; padding:2px 4px; flex-shrink:0;">×</span>
+                </div>
+            `).join('');
+        }
+
+        function submitComment() {
+            const input = document.getElementById('comment-input');
+            const text = input.value.trim();
+            if (!text || _currentNoteId === null) return;
+            const note = state.notes.find(n => n.id === _currentNoteId);
+            if (!note) return;
+            if (!note.comments) note.comments = [];
+            note.comments.push({
+                text,
+                time: new Date().toLocaleString()
+            });
+            input.value = '';
+            saveData();
+            renderComments(note);
+            // 滚到评论底部
+            setTimeout(() => {
+                const c = document.getElementById('full-note-comments');
+                c.scrollTop = c.scrollHeight;
+            }, 50);
+        }
+
+        function deleteComment(noteId, idx) {
+            const note = state.notes.find(n => n.id === noteId);
+            if (!note || !note.comments) return;
+            note.comments.splice(idx, 1);
+            saveData();
+            renderComments(note);
         }
 
         function updateLiveTimers() {
