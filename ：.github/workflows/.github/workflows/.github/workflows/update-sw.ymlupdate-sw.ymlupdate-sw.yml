@@ -3,6 +3,7 @@ name: Auto Update SW Version
 on:
   push:
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   update-sw:
