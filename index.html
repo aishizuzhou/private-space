@@ -1228,6 +1228,7 @@
             });
             input.value = '';
             saveData();
+            renderList();
             renderComments(note);
             // 滚到评论底部
             setTimeout(() => {
@@ -1241,6 +1242,7 @@
             if (!note || !note.comments) return;
             note.comments.splice(idx, 1);
             saveData();
+            renderList();
             renderComments(note);
         }
 
