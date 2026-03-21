@@ -105,11 +105,188 @@
         .header-section {
             padding: 20px var(--content-padding);
             display: flex; align-items: center; z-index: 10;
+            position: relative;
         }
 
         .header-info {
             display: flex; flex-direction: column; justify-content: center;
+            flex: 1;
         }
+
+        /* 日历按钮 */
+        .cal-btn {
+            width: 34px; height: 34px; border-radius: 50%;
+            background: var(--accent-color);
+            border: none; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; margin-left: auto;
+            font-size: 1.1rem; line-height: 1;
+            color: var(--accent-text);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            position: relative;
+        }
+        .cal-btn span {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -52%);
+            line-height: 1;
+        }
+        .cal-btn.active { box-shadow: 0 0 0 2px var(--accent-color), 0 2px 8px rgba(0,0,0,0.2); }
+
+        /* 日历面板 - 用modal遮罩方式 */
+        .cal-overlay {
+            position: fixed; top:0; left:0; right:0; bottom:0;
+            z-index: 8999;
+            display: none;
+        }
+        .cal-overlay.open { display: block; }
+        .cal-panel {
+            position: fixed;
+            left: 12px; right: 12px;
+            background: rgba(255,255,255,0.99);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+            z-index: 9000;
+            padding: 14px;
+            display: none;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .cal-panel.open { display: block; }
+
+        /* 日历头部 */
+        .cal-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .cal-nav { background:none; border:none; font-size:1.1rem; cursor:pointer; padding:4px 8px; color:#666; }
+        .cal-month-label { font-size:0.9rem; font-weight:bold; color:#333; cursor:pointer; }
+
+        /* 日历格子 */
+        .cal-grid {
+            display: grid; grid-template-columns: repeat(7,1fr);
+            gap: 0;
+            margin-bottom: 10px;
+        }
+        .cal-cell {
+            aspect-ratio: 1; display:flex; align-items:center; justify-content:center;
+            font-size:0.75rem; cursor:pointer;
+            color:#333; user-select:none; position:relative;
+        }
+        .cal-cell:hover { background: rgba(0,0,0,0.04); }
+        .cal-cell.today { font-weight:bold; color: var(--accent-color); }
+
+        :root {
+            --cal-range-bg: rgba(180,140,145,0.22);
+            --cal-dot-bg: rgba(160,120,125,0.65);
+            --cal-text-on-range: #3a2a2c;
+        }
+
+        /* 单选圆形 */
+        .cal-cell.selected::after {
+            content:''; position:absolute;
+            top:50%; left:50%;
+            transform:translate(-50%,-50%);
+            width:78%; padding-top:78%;
+            background: var(--cal-dot-bg);
+            border-radius:50%;
+            z-index:1;
+        }
+
+        /* 范围：中间条，透明度低，在圆形下面（z-index:0） */
+        .cal-cell.in-range::before {
+            content:''; position:absolute;
+            top:11%; bottom:11%;
+            left:0; right:0;
+            background: var(--cal-range-bg);
+            z-index:0;
+        }
+
+        /* 首端：右半条，等高，z-index:0 在圆下面 */
+        .cal-cell.range-start::before {
+            content:''; position:absolute;
+            top:11%; bottom:11%;
+            left:50%; right:0;
+            background: var(--cal-range-bg);
+            z-index:0;
+        }
+        /* 末端：左半条，等高，z-index:0 在圆下面 */
+        .cal-cell.range-end::before {
+            content:''; position:absolute;
+            top:11%; bottom:11%;
+            left:0; right:50%;
+            background: var(--cal-range-bg);
+            z-index:0;
+        }
+        /* 首末的实心圆帽，z-index:2 在条子上面 */
+        .cal-cell.range-start::after, .cal-cell.range-end::after {
+            content:''; position:absolute;
+            top:50%; left:50%;
+            transform:translate(-50%,-50%);
+            width:78%; padding-top:78%;
+            background: var(--cal-dot-bg);
+            border-radius:50%;
+            z-index:2;
+        }
+        /* 首末数字颜色 */
+        .cal-cell.range-start span, .cal-cell.range-end span,
+        .cal-cell.in-range span { color: var(--cal-text-on-range); position:relative; z-index:3; }
+
+        /* 只选了起始没有结束时不显示右延伸条 */
+        .cal-cell.range-start.no-end::before { display:none; }
+        .cal-cell.has-note::after {
+            content:''; display:block; width:3px; height:3px;
+            background: var(--accent-color); border-radius:50%;
+            position:absolute; bottom:2px; left:50%; transform:translateX(-50%);
+            z-index:4;
+        }
+        .cal-cell { position:relative; }
+        .cal-cell.other-month { color:#bbb; }
+        .cal-cell.range-start.has-note::after,
+        .cal-cell.range-end.has-note::after,
+        .cal-cell.in-range.has-note::after { background:#fff; }
+        .cal-weekday { font-size:0.7rem; color:#aaa; text-align:center; padding-bottom:4px; user-select:none; }
+
+        .cal-input-row {
+            display:flex; gap:6px; align-items:center; margin-bottom:12px; flex-wrap:wrap;
+        }
+        .cal-input-row input {
+            flex:1; min-width:0; padding:6px 8px; border:1px solid #eee; border-radius:8px;
+            font-size:0.78rem; background:#fafafa; margin:0;
+        }
+        .cal-input-row button {
+            padding:6px 10px; border-radius:8px; font-size:0.82rem; flex-shrink:0;
+            background: var(--accent-color); color: var(--accent-text); border:none; cursor:pointer;
+        }
+        .cal-clear-btn {
+            width:100%; padding:6px; border-radius:8px; font-size:0.8rem;
+            background:rgba(0,0,0,0.05); border:none; cursor:pointer; color:#666;
+            margin-bottom:12px;
+        }
+
+        /* 统计面板 */
+        .stats-panel { border-top:1px solid #eee; padding-top:10px; }
+        .stats-total {
+            text-align:center; font-size:0.8rem; color:#888;
+            margin-bottom:8px; padding:4px; background:rgba(0,0,0,0.03);
+            border-radius:8px;
+        }
+        .stats-grid {
+            display:grid; grid-template-columns:1fr 1fr;
+            grid-template-rows:1fr 1fr; gap:6px;
+        }
+        .stats-cell {
+            background:rgba(0,0,0,0.03); border-radius:10px;
+            padding:8px; text-align:center; cursor:pointer;
+            transition: background 0.2s;
+            min-height:56px; display:flex; flex-direction:column;
+            align-items:center; justify-content:center; gap:2px;
+        }
+        .stats-cell:hover { background:rgba(0,0,0,0.07); }
+        .stats-cell .stats-label { font-size:0.7rem; color:#aaa; }
+        .stats-cell .stats-val { font-size:1.2rem; font-weight:bold; color:#333; }
+        .stats-cell .stats-sub { font-size:0.65rem; color:#bbb; }
 
         .status-bar {
             display: flex; align-items: center; gap: 8px;
@@ -186,7 +363,7 @@
         }
 
         .user-name { font-size: 1.2rem; font-weight: bold; text-shadow: 0 1px 3px rgba(0,0,0,0.2); color: var(--name-color); }
-        .user-signature { font-size: 0.78rem; margin-top: 2px; color: var(--text-color); opacity: 0.8; max-width: 180px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+        .user-signature { font-size: 0.78rem; margin-top: 2px; color: var(--text-color); opacity: 0.8; max-width: 180px; white-space: pre-wrap; word-break: break-word; }
 
         .content-wrapper {
             flex: 1;
@@ -310,7 +487,8 @@
         .note-tags { margin-top: 8px; display: flex; gap: 5px; flex-wrap: wrap; }
         .tag { background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; white-space: nowrap; }
 
-        .fab { position: absolute; bottom: 20px; right: 20px; width: 50px; height: 50px; border-radius: 50%; background: var(--accent-color); color: var(--accent-text); border: none; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 50;}
+        .fab { position: absolute; bottom: 20px; right: 20px; width: 50px; height: 50px; border-radius: 50%; background: var(--accent-color); color: var(--accent-text); border: none; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 50; }
+        .fab span { display:block; transform: translateY(-2px); }
 
         .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 100; display: none; justify-content: center; align-items: center; }
         .modal.open { display: flex; }
@@ -518,6 +696,24 @@
             0%, 100% { opacity: 0.2; }
             50%       { opacity: 1; }
         }
+        .lock-btn {
+            background: none; border: 1px solid #ddd; border-radius: 6px;
+            padding: 2px 6px; cursor: pointer; font-size: 0.85rem;
+            color: #aaa; flex-shrink: 0; line-height: 1;
+            transition: color 0.2s, border-color 0.2s;
+        }
+        .lock-btn.locked { color: #e08; border-color: #e08; }
+        /* 防止非交互元素被选中 */
+        .status-bar, .status-time, .status-battery, .battery-infinity,
+        .user-name, .user-signature, .note-time, .live-timer,
+        .note-content, .note-tags, .tag, .filter-tag,
+        .settings-title, .charm-container, .avatar-container,
+        #display-name, #display-signature, #status-clock, #battery-text,
+        .cal-weekday, .cal-cell, .cal-month-label, .cal-nav,
+        .stats-label, .stats-sub, .stats-total, .stats-val {
+            user-select: none;
+            -webkit-user-select: none;
+        }
     </style>
 </head>
 <body>
@@ -566,6 +762,7 @@
                 <div class="user-name" id="display-name">宛宛</div>
                 <div class="user-signature" id="display-signature"></div>
             </div>
+            <button class="cal-btn" id="cal-btn" onclick="toggleCalPanel()"><span>⚘</span></button>
         </div>
 
         <div class="content-wrapper">
@@ -574,7 +771,34 @@
             <div class="content-area" id="list-container"></div>
         </div>
 
-        <button class="fab" onclick="openEditor()">⍚</button>
+        <button class="fab" onclick="openEditor()"><span>⍚</span></button>
+    </div>
+
+    <!-- 日历面板遮罩 -->
+    <div class="cal-overlay" id="cal-overlay" onclick="toggleCalPanel()"></div>
+    <!-- 日历面板 -->
+    <div class="cal-panel" id="cal-panel">
+        <div class="cal-header">
+            <button class="cal-nav" onclick="calChangeMonth(-1)">‹</button>
+            <span class="cal-month-label" id="cal-month-label"></span>
+            <button class="cal-nav" onclick="calChangeMonth(1)">›</button>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+        <div class="cal-input-row">
+            <input type="text" id="cal-date-from" placeholder="按空格分割" maxlength="12">
+            <input type="text" id="cal-date-to" placeholder="按空格分割" maxlength="12">
+            <button onclick="calGoToInput()">筛选</button>
+        </div>
+        <button class="cal-clear-btn" onclick="calClearFilter()">清除日期筛选</button>
+        <div class="stats-panel">
+            <div class="stats-total" id="stats-total">统计中...</div>
+            <div class="stats-grid">
+                <div class="stats-cell" onclick="statsFlip('year')" id="stats-year"><div class="stats-label">年</div><div class="stats-val" id="sv-year">-</div><div class="stats-sub" id="ss-year"></div></div>
+                <div class="stats-cell" onclick="statsFlip('month')" id="stats-month"><div class="stats-label">月</div><div class="stats-val" id="sv-month">-</div><div class="stats-sub" id="ss-month"></div></div>
+                <div class="stats-cell" onclick="statsFlip('week')" id="stats-week"><div class="stats-label">周</div><div class="stats-val" id="sv-week">-</div><div class="stats-sub" id="ss-week"></div></div>
+                <div class="stats-cell" onclick="statsFlip('day')" id="stats-day"><div class="stats-label">日</div><div class="stats-val" id="sv-day">-</div><div class="stats-sub" id="ss-day"></div></div>
+            </div>
+        </div>
     </div>
 
     <div class="modal" id="full-note-modal">
@@ -646,9 +870,9 @@
                 <label>昵称:</label>
                 <input type="text" id="setting-name" style="width:60%; margin:0;" onchange="updateSettings()">
             </div>
-            <div class="flex-row">
-                <label>签名:</label>
-                <input type="text" id="setting-signature" style="width:60%; margin:0;" placeholder="留空则不显示" oninput="updateSettings()">
+            <div class="flex-row" style="align-items:flex-start;">
+                <label style="padding-top:8px;">签名:</label>
+                <textarea id="setting-signature" rows="1" placeholder="留空则不显示" style="width:60%; margin:0; resize:none; overflow:hidden; line-height:1.5; font-family:var(--custom-font);" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';updateSettings()"></textarea>
             </div>
             <div style="margin-bottom:10px;">
                 <label style="display:block; margin-bottom:4px;">昵称颜色 <span style="font-size:0.75rem;color:#999;">（支持CSS颜色/渐变，如 #ff9a9e 或 linear-gradient(90deg,#f00,#00f)）</span></label>
@@ -680,7 +904,11 @@
                 <input type="color" id="setting-color" style="width:60%; height:30px; padding:0; margin:0; border:none;" onchange="updateSettings()">
             </div>
             <div style="margin-bottom:10px;">
-                <label style="display:block; margin-bottom:5px;">全局字体颜色</label>
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:5px;">
+                    <label style="display:block;">全局字体颜色</label>
+                    <button class="lock-btn" id="lock-textcolor" onclick="toggleLock('textcolor')" title="锁定防误触">🔓</button>
+                </div>
+                <div id="lockable-textcolor">
                 <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
                     <span style="font-size:0.75rem;color:#888;width:14px;text-align:center;">R</span>
                     <input type="range" id="tc-r" min="0" max="255" value="51" style="flex:1;height:6px;accent-color:#f66;" oninput="onRgbSliderChange()">
@@ -700,6 +928,7 @@
                     <div id="text-color-preview" style="width:30px;height:22px;border-radius:5px;border:1px solid #ddd;flex-shrink:0;"></div>
                     <span id="text-color-hex" style="font-size:0.78rem; color:#666;">#333333</span>
                 </div>
+                </div>
             </div>
 
             <div class="settings-title">追评预览</div>
@@ -709,7 +938,12 @@
             </div>
             <div class="flex-row">
                 <label>预览名称:</label>
-                <input type="text" id="setting-comment-preview-name" style="width:60%; margin:0;" placeholder="如 宛宛" oninput="updateSettings()">
+                <div style="width:60%; display:flex; gap:6px; align-items:center;">
+                    <input type="text" id="setting-comment-preview-name" style="flex:1; margin:0;" placeholder="如 宛宛" oninput="updateSettings()">
+                    <label style="display:flex; align-items:center; gap:3px; font-size:0.75rem; color:#888; white-space:nowrap; cursor:pointer;">
+                        <input type="checkbox" id="setting-preview-sync-name" style="width:auto; margin:0;" onchange="updateSettings()">同步昵称
+                    </label>
+                </div>
             </div>
             <div class="flex-row">
                 <label>名称后缀:</label>
@@ -745,11 +979,19 @@
             <label>历史头像 (最近3个)</label>
             <div id="history-avatars" style="display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap;"></div>
 
-            <label>框内头像缩放比例:</label>
-            <input type="range" id="setting-avatar-scale" min="0.5" max="3" step="0.1" value="1" onchange="updateSettings()">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-top:8px;">
+                <label>框内头像缩放比例:</label>
+                <button class="lock-btn" id="lock-avatarscale" onclick="toggleLock('avatarscale')" title="锁定防误触">🔓</button>
+            </div>
+            <div id="lockable-avatarscale">
+                <input type="range" id="setting-avatar-scale" min="0.5" max="3" step="0.1" value="1" onchange="updateSettings()">
+            </div>
 
-            <label>框内头像坐标偏移:</label>
-            <div class="coord-group">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-top:8px;">
+                <label>框内头像坐标偏移:</label>
+                <button class="lock-btn" id="lock-avataroffset" onclick="toggleLock('avataroffset')" title="锁定防误触">🔓</button>
+            </div>
+            <div id="lockable-avataroffset" class="coord-group">
                 <input type="number" id="setting-avatar-x" placeholder="X轴偏移" onchange="updateSettings()">
                 <input type="number" id="setting-avatar-y" placeholder="Y轴偏移" onchange="updateSettings()">
             </div>
@@ -771,10 +1013,20 @@
                 <input type="number" id="setting-charm-x" placeholder="X轴 (距右侧)" onchange="updateSettings()">
                 <input type="number" id="setting-charm-y" placeholder="Y轴 (距顶部)" onchange="updateSettings()">
             </div>
-            <label>挂件大小:</label>
-            <input type="range" id="setting-charm-size" min="20" max="150" onchange="updateSettings()">
-            <label>摇晃幅度:</label>
-            <input type="range" id="setting-charm-swing" min="0" max="45" onchange="updateSettings()">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+                <label>挂件大小:</label>
+                <button class="lock-btn" id="lock-charmsize" onclick="toggleLock('charmsize')" title="锁定防误触">🔓</button>
+            </div>
+            <div id="lockable-charmsize">
+                <input type="range" id="setting-charm-size" min="20" max="150" onchange="updateSettings()">
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-top:6px;">
+                <label>摇晃幅度:</label>
+                <button class="lock-btn" id="lock-charmswing" onclick="toggleLock('charmswing')" title="锁定防误触">🔓</button>
+            </div>
+            <div id="lockable-charmswing">
+                <input type="range" id="setting-charm-swing" min="0" max="45" onchange="updateSettings()">
+            </div>
 
             <div class="settings-title">排版与背景</div>
             <button onclick="document.getElementById('bg-input').click()" style="width:100%;">更换背景图</button>
@@ -829,10 +1081,11 @@
                 framePresets: []
             },
             tempImages: [], filterTag: null, blockedTags: [], searchQuery: '',
-            editingId: null,
+            editingId: null, filterDateFrom: null, filterDateTo: null,
             commentPreviewName: '宛宛',
             commentPreviewSuffix: '说：',
-            commentPreviewEnabled: true
+            commentPreviewEnabled: true,
+            commentPreviewSyncName: false
         };
         // 读取追评预览设置
         try {
@@ -841,6 +1094,7 @@
                 if (cp.enabled !== undefined) state.commentPreviewEnabled = cp.enabled;
                 if (cp.name !== undefined) state.commentPreviewName = cp.name;
                 if (cp.suffix !== undefined) state.commentPreviewSuffix = cp.suffix;
+                if (cp.syncName !== undefined) state.commentPreviewSyncName = cp.syncName;
             }
         } catch(e) {}
 
@@ -935,10 +1189,8 @@
             // 启动遮罩淡出
             const splash = document.getElementById('splash-screen');
             if (splash) {
-                setTimeout(() => {
-                    splash.classList.add('fade-out');
-                    setTimeout(() => splash.remove(), 800);
-                }, 600);
+                splash.classList.add('fade-out');
+                setTimeout(() => splash.remove(), 600);
             }
 
             // 加载完成后淡出遮罩
@@ -1069,6 +1321,18 @@
 
                 if (item.tags.some(t => state.blockedTags.includes(t))) return false;
                 if (state.filterTag && !item.tags.includes(state.filterTag)) return false;
+                if (state.filterDateFrom || state.filterDateTo) {
+                    const itemDate = new Date(item.timestamp);
+                    itemDate.setHours(0,0,0,0);
+                    if (state.filterDateFrom) {
+                        const from = new Date(state.filterDateFrom); from.setHours(0,0,0,0);
+                        if (itemDate < from) return false;
+                    }
+                    if (state.filterDateTo) {
+                        const to = new Date(state.filterDateTo); to.setHours(23,59,59,999);
+                        if (itemDate > to) return false;
+                    }
+                }
                 if (state.searchQuery) {
                     const inContent = item.content.includes(state.searchQuery);
                     const inRemark = item.images.some(img => img.remark && img.remark.includes(state.searchQuery));
@@ -1363,6 +1627,13 @@
             // 亮度 > 186（约73%）时背景太亮，换黑字；否则白字
             document.documentElement.style.setProperty('--accent-text', luminance > 186 ? '#222' : '#fff');
 
+            // 日历范围色跟着 accent-color 走，低饱和处理
+            // 把 accent-color 混入灰色降饱和，透明度控制
+            document.documentElement.style.setProperty('--cal-range-bg', `rgba(${r},${g},${b},0.18)`);
+            document.documentElement.style.setProperty('--cal-dot-bg', `rgba(${r},${g},${b},0.6)`);
+            // 感知亮度高则用深色文字，低则用浅色文字
+            document.documentElement.style.setProperty('--cal-text-on-range', luminance > 160 ? '#222' : '#fff');
+
             // 名字颜色（支持CSS任意值：纯色/渐变）
             const nameColor = s.nameColor || '#333333';
             // 渐变需要用 background-clip 实现，纯色直接 color
@@ -1435,7 +1706,11 @@
             if (sigEl) sigEl.innerText = s.signature || '';
             document.getElementById('setting-name').value = s.name;
             const sigInput = document.getElementById('setting-signature');
-            if (sigInput) sigInput.value = s.signature || '';
+            if (sigInput) {
+                sigInput.value = s.signature || '';
+                sigInput.style.height = 'auto';
+                sigInput.style.height = sigInput.scrollHeight + 'px';
+            }
             const ncInput = document.getElementById('setting-name-color');
             if (ncInput) ncInput.value = s.nameColor || '#333333';
             document.getElementById('setting-color').value = s.themeColor;
@@ -1497,11 +1772,30 @@
             const cpNameEl = document.getElementById('setting-comment-preview-name');
             const cpSuffixEl = document.getElementById('setting-comment-preview-suffix');
             if (cpEnabledEl) cpEnabledEl.checked = state.commentPreviewEnabled !== false;
-            if (cpNameEl) cpNameEl.value = state.commentPreviewName || '';
+            if (cpNameEl) {
+                cpNameEl.value = state.commentPreviewSyncName ? state.settings.name : (state.commentPreviewName || '');
+                cpNameEl.disabled = !!state.commentPreviewSyncName;
+            }
             if (cpSuffixEl) cpSuffixEl.value = state.commentPreviewSuffix !== undefined ? state.commentPreviewSuffix : '说：';
+            const syncEl = document.getElementById('setting-preview-sync-name');
+            if (syncEl) syncEl.checked = !!state.commentPreviewSyncName;
         }
 
-        // ===================== 全局字体RGB滑条 =====================
+        // ===================== 锁定控件 =====================
+        const _lockedControls = new Set();
+        function toggleLock(key) {
+            const btn = document.getElementById('lock-' + key);
+            const area = document.getElementById('lockable-' + key);
+            if (_lockedControls.has(key)) {
+                _lockedControls.delete(key);
+                if (btn) { btn.textContent = '🔓'; btn.classList.remove('locked'); }
+                if (area) { area.style.pointerEvents = ''; area.style.opacity = ''; }
+            } else {
+                _lockedControls.add(key);
+                if (btn) { btn.textContent = '🔒'; btn.classList.add('locked'); }
+                if (area) { area.style.pointerEvents = 'none'; area.style.opacity = '0.4'; }
+            }
+        }
         function rgbToHex(r, g, b) {
             return '#' + [r,g,b].map(v => v.toString(16).padStart(2,'0')).join('');
         }
@@ -1603,7 +1897,16 @@
             s.avatarScale = document.getElementById('setting-avatar-scale').value || 1;
 
             state.commentPreviewEnabled = document.getElementById('setting-comment-preview-enabled').checked;
-            state.commentPreviewName = document.getElementById('setting-comment-preview-name').value;
+            state.commentPreviewSyncName = document.getElementById('setting-preview-sync-name').checked;
+            // 同步昵称开启时，预览名称跟着昵称走
+            if (state.commentPreviewSyncName) {
+                state.commentPreviewName = s.name;
+                document.getElementById('setting-comment-preview-name').value = s.name;
+                document.getElementById('setting-comment-preview-name').disabled = true;
+            } else {
+                document.getElementById('setting-comment-preview-name').disabled = false;
+                state.commentPreviewName = document.getElementById('setting-comment-preview-name').value;
+            }
             state.commentPreviewSuffix = document.getElementById('setting-comment-preview-suffix').value;
 
             saveData(); applySettings();
@@ -1802,6 +2105,245 @@
             closeModal('tag-manage-modal');
         }
         function handleSearch(val) { state.searchQuery = val; renderList(); }
+
+        // ===================== 日历 =====================
+        let _calYear = new Date().getFullYear();
+        let _calMonth = new Date().getMonth();
+        let _statsMode = {};
+        let _calPickStep = 0; // 0=没选 1=选了起始 2=选完
+
+        function toggleCalPanel() {
+            const panel = document.getElementById('cal-panel');
+            const overlay = document.getElementById('cal-overlay');
+            const btn = document.getElementById('cal-btn');
+            const isOpen = panel.classList.contains('open');
+            if (isOpen) {
+                panel.classList.remove('open');
+                overlay.classList.remove('open');
+                btn.classList.remove('active');
+            } else {
+                const btnRect = btn.getBoundingClientRect();
+                panel.style.top = (btnRect.bottom + 6) + 'px';
+                panel.classList.add('open');
+                overlay.classList.add('open');
+                btn.classList.add('active');
+                renderCalendar();
+                renderStats();
+            }
+        }
+
+        // 日历月份切换
+        function calChangeMonth(dir) {
+            _calMonth += dir;
+            if (_calMonth > 11) { _calMonth = 0; _calYear++; }
+            if (_calMonth < 0) { _calMonth = 11; _calYear--; }
+            renderCalendar();
+        }
+
+        function dateToKey(y, m, d) {
+            return `${y} ${m} ${d}`;
+        }
+        function parseSpaceDate(str) {
+            if (!str) return null;
+            const parts = str.trim().split(/\s+/);
+            if (parts.length < 3) return null;
+            const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+            return isNaN(d) ? null : d;
+        }
+        function keyToDate(key) {
+            if (!key) return null;
+            return parseSpaceDate(key);
+        }
+
+        function renderCalendar() {
+            const label = document.getElementById('cal-month-label');
+            const grid = document.getElementById('cal-grid');
+            label.innerText = `${_calYear}年 ${_calMonth + 1}月`;
+
+            const noteDates = new Set();
+            state.notes.forEach(n => {
+                const d = new Date(n.timestamp);
+                if (!isNaN(d)) noteDates.add(`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`);
+            });
+
+            const today = new Date(); today.setHours(0,0,0,0);
+            const firstDay = new Date(_calYear, _calMonth, 1);
+            const lastDay = new Date(_calYear, _calMonth + 1, 0);
+            const startDow = firstDay.getDay();
+
+            const fromDate = keyToDate(state.filterDateFrom);
+            if (fromDate) fromDate.setHours(0,0,0,0);
+            const toDate = keyToDate(state.filterDateTo);
+            if (toDate) toDate.setHours(0,0,0,0);
+
+            grid.innerHTML = '';
+            ['日','一','二','三','四','五','六'].forEach(d => {
+                const el = document.createElement('div');
+                el.className = 'cal-weekday'; el.innerText = d;
+                grid.appendChild(el);
+            });
+
+            for (let i = 0; i < startDow; i++) {
+                const el = document.createElement('div'); el.className = 'cal-cell other-month';
+                const prevDate = new Date(_calYear, _calMonth, -startDow + i + 1);
+                el.innerText = prevDate.getDate();
+                grid.appendChild(el);
+            }
+
+            for (let d = 1; d <= lastDay.getDate(); d++) {
+                const el = document.createElement('div');
+                el.className = 'cal-cell';
+                // 数字用span包裹确保在伪元素上层
+                const span = document.createElement('span');
+                span.style.cssText = 'position:relative;z-index:3;';
+                span.innerText = d;
+                el.appendChild(span);
+
+                const noteKey = `${_calYear}-${_calMonth}-${d}`;
+                if (noteDates.has(noteKey)) el.classList.add('has-note');
+
+                const thisDate = new Date(_calYear, _calMonth, d);
+                thisDate.setHours(0,0,0,0);
+
+                if (thisDate.getTime() === today.getTime()) el.classList.add('today');
+
+                if (fromDate && toDate) {
+                    if (thisDate.getTime() === fromDate.getTime()) el.classList.add('range-start');
+                    else if (thisDate.getTime() === toDate.getTime()) el.classList.add('range-end');
+                    else if (thisDate > fromDate && thisDate < toDate) el.classList.add('in-range');
+                } else if (fromDate) {
+                    if (thisDate.getTime() === fromDate.getTime()) el.classList.add('range-start', 'no-end');
+                }
+
+                el.onclick = () => calSelectDate(_calYear, _calMonth + 1, d);
+                grid.appendChild(el);
+            }
+
+            const totalCells = startDow + lastDay.getDate();
+            const remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+            for (let i = 1; i <= remaining; i++) {
+                const el = document.createElement('div'); el.className = 'cal-cell other-month';
+                el.innerText = i; grid.appendChild(el);
+            }
+        }
+
+        function calSelectDate(y, m, d) {
+            const key = dateToKey(y, m, d);
+            const picked = new Date(y, m-1, d); picked.setHours(0,0,0,0);
+
+            if (_calPickStep !== 1) {
+                // 没有等待结束日：重新开始，设起始
+                state.filterDateFrom = key;
+                state.filterDateTo = null;
+                _calPickStep = 1;
+            } else {
+                // 已有起始，设结束
+                const from = keyToDate(state.filterDateFrom);
+                from.setHours(0,0,0,0);
+                if (picked.getTime() === from.getTime()) {
+                    // 点同一天：单日完成
+                    state.filterDateTo = null;
+                    _calPickStep = 2;
+                } else if (picked < from) {
+                    // 比起始早：交换
+                    state.filterDateTo = state.filterDateFrom;
+                    state.filterDateFrom = key;
+                    _calPickStep = 2;
+                } else {
+                    state.filterDateTo = key;
+                    _calPickStep = 2;
+                }
+            }
+
+            const fromInput = document.getElementById('cal-date-from');
+            const toInput = document.getElementById('cal-date-to');
+            if (fromInput) fromInput.value = state.filterDateFrom || '';
+            if (toInput) toInput.value = state.filterDateTo || '';
+
+            renderCalendar();
+            renderList();
+            renderStats();
+        }
+
+        function calGoToInput() {
+            const fromVal = document.getElementById('cal-date-from').value.trim();
+            const toVal = document.getElementById('cal-date-to').value.trim();
+            if (!fromVal && !toVal) return;
+            if (fromVal) {
+                const d = parseSpaceDate(fromVal);
+                if (!d) { alert('起始日期格式错误，请输入如：2021 5 21'); return; }
+                state.filterDateFrom = dateToKey(d.getFullYear(), d.getMonth()+1, d.getDate());
+                _calYear = d.getFullYear(); _calMonth = d.getMonth();
+            }
+            if (toVal) {
+                const d = parseSpaceDate(toVal);
+                if (!d) { alert('结束日期格式错误，请输入如：2021 5 21'); return; }
+                state.filterDateTo = dateToKey(d.getFullYear(), d.getMonth()+1, d.getDate());
+            }
+            // 手动输入完成后，重置为「完成」态，下次点日历会重新开始选
+            _calPickStep = 2;
+            renderCalendar(); renderList(); renderStats();
+        }
+
+        function calClearFilter() {
+            state.filterDateFrom = null; state.filterDateTo = null;
+            _calPickStep = 0;
+            const fromInput = document.getElementById('cal-date-from');
+            const toInput = document.getElementById('cal-date-to');
+            if (fromInput) fromInput.value = '';
+            if (toInput) toInput.value = '';
+            renderCalendar(); renderList(); renderStats();
+        }
+
+        // ===================== 统计 =====================
+        function getStatsForRange(type, refFrom, refTo) {
+            const ref = refFrom ? new Date(refFrom) : new Date();
+            let notes = 0, chars = 0;
+            state.notes.forEach(n => {
+                const d = new Date(n.timestamp);
+                if (isNaN(d)) return;
+                let match = false;
+                if (type === 'year') match = d.getFullYear() === ref.getFullYear();
+                else if (type === 'month') match = d.getFullYear() === ref.getFullYear() && d.getMonth() === ref.getMonth();
+                else if (type === 'week') {
+                    const startOfWeek = new Date(ref);
+                    startOfWeek.setDate(ref.getDate() - ref.getDay());
+                    startOfWeek.setHours(0,0,0,0);
+                    const endOfWeek = new Date(startOfWeek);
+                    endOfWeek.setDate(startOfWeek.getDate() + 7);
+                    match = d >= startOfWeek && d < endOfWeek;
+                } else if (type === 'day') {
+                    match = d.getFullYear() === ref.getFullYear() && d.getMonth() === ref.getMonth() && d.getDate() === ref.getDate();
+                }
+                if (match) {
+                    notes++;
+                    chars += (n.content || '').length;
+                    (n.comments || []).forEach(c => { chars += (c.text || '').length; });
+                }
+            });
+            return { notes, chars };
+        }
+
+        function statsFlip(key) {
+            _statsMode[key] = (_statsMode[key] === 'chars') ? 'notes' : 'chars';
+            renderStats();
+        }
+
+        function renderStats() {
+            const refFrom = state.filterDateFrom;
+            const total = state.notes.length;
+            const totalChars = state.notes.reduce((s, n) => s + (n.content||'').length + (n.comments||[]).reduce((a,c)=>a+(c.text||'').length,0), 0);
+            document.getElementById('stats-total').innerText = `共 ${total} 条笔记 · ${totalChars} 字`;
+
+            ['year','month','week','day'].forEach(type => {
+                const { notes, chars } = getStatsForRange(type, refFrom);
+                const mode = _statsMode[type] || 'notes';
+                const val = mode === 'notes' ? notes : chars;
+                const sub = mode === 'notes' ? '条数' : '字数';
+                document.getElementById(`sv-${type}`).innerText = val;
+                document.getElementById(`ss-${type}`).innerText = sub;
+            });
+        }
         function openModal(id) { document.getElementById(id).classList.add('open'); }
         function closeModal(id) { document.getElementById(id).classList.remove('open'); }
         function saveData() {
@@ -1810,7 +2352,8 @@
             localStorage.setItem('wanwan_comment_preview', JSON.stringify({
                 enabled: state.commentPreviewEnabled,
                 name: state.commentPreviewName,
-                suffix: state.commentPreviewSuffix
+                suffix: state.commentPreviewSuffix,
+                syncName: state.commentPreviewSyncName
             }));
         }
 
