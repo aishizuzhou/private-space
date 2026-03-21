@@ -1,43 +1,49 @@
 // 画脂鏤氷 - Service Worker
-// 每次修改图标或内容后，把版本号改一下（如 v2、v3），强制用户更新缓存
-const CACHE_NAME = 'huazhi-v1774106445';
+const CACHE_NAME = 'huazhi-v1';
 
 const ASSETS = [
-  './',
   './index.html',
   './manifest.json',
   './icon-192.png',
   './icon-512.png'
 ];
 
-// 安装：预缓存所有静态资源
+// 安装：skipWaiting 优先，缓存失败不阻塞
 self.addEventListener('install', event => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(ASSETS);
+      return Promise.allSettled(
+        ASSETS.map(url => cache.add(url).catch(() => {}))
+      );
     })
   );
-  self.skipWaiting();
 });
 
-// 激活：清除旧版本缓存
+// 激活：清旧缓存，立即接管
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
         keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
       )
-    )
+    ).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
-// 拦截请求：优先缓存，网络失败时降级
+// 拦截请求：缓存优先
 self.addEventListener('fetch', event => {
+  if (event.request.method !== 'GET') return;
   event.respondWith(
     caches.match(event.request).then(cached => {
-      return cached || fetch(event.request).catch(() => {
-        // 离线时，导航请求回退到 index.html
+      if (cached) return cached;
+      return fetch(event.request).then(response => {
+        if (response && response.status === 200) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+        }
+        return response;
+      }).catch(() => {
         if (event.request.mode === 'navigate') {
           return caches.match('./index.html');
         }
