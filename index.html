@@ -397,11 +397,143 @@
             font-size: 0.7rem; color: #666; text-align: center;
             max-width: 55px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
         }
+        /* ═开场加载遮罩═ */
+        #launch-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: #f5f5f5;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.6s ease;
+        }
+        #launch-overlay.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+        #load-spinner {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            background: transparent;
+            border: none;
+            animation: none;
+        }
+        #load-spinner::before {
+            content: "";
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 56px; height: 56px;
+            transform: translate(-50%, -50%);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpolygon points='12,0 15,9 24,12 15,15 12,24 9,15 0,12 9,9' fill='%23000'/%3E%3C/svg%3E");
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            z-index: 2;
+            animation: spinnerBreathe 3s ease-in-out infinite;
+        }
+        #load-spinner::after {
+            content: "";
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 180px; height: 180px;
+            transform: translate(-50%, -50%);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cpolygon points='100,20 105,30 115,35 105,40 100,50 95,40 85,35 95,30' fill='none' stroke='%23000' stroke-width='1.5'/%3E%3Cpolygon points='146,44 149,51 156,54 149,57 146,64 143,57 136,54 143,51' fill='none' stroke='%23000' stroke-width='1.5'/%3E%3Cpolygon points='165,87 169,96 178,100 169,104 165,113 161,104 152,100 161,96' fill='none' stroke='%23000' stroke-width='1.5'/%3E%3Cpolygon points='146,139 148,144 153,146 148,148 146,153 144,148 139,146 144,144' fill='none' stroke='%23000' stroke-width='1.5'/%3E%3Cpolygon points='100,155 103,162 110,165 103,168 100,175 97,168 90,165 97,162' fill='none' stroke='%23000' stroke-width='1.5'/%3E%3Cpolygon points='54,131 59,141 69,146 59,151 54,161 49,151 39,146 49,141' fill='none' stroke='%23000' stroke-width='1.5'/%3E%3Cpolygon points='35,88 39,96 47,100 39,104 35,112 31,104 23,100 31,96' fill='none' stroke='%23000' stroke-width='1.5'/%3E%3Cpolygon points='54,47 56,52 61,54 56,56 54,61 52,56 47,54 52,52' fill='none' stroke='%23000' stroke-width='1.5'/%3E%3C/svg%3E");
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            animation: spinnerRotate 15s linear infinite, spinnerBreathe 3s ease-in-out infinite;
+            z-index: 1;
+        }
+        @keyframes spinnerRotate {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        @keyframes spinnerBreathe {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+        /* ═ 启动遮罩 ═ */
+        #splash-screen {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: #fff;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.8s ease;
+        }
+        #splash-screen.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .splash-spinner {
+            position: relative;
+            width: 160px;
+            height: 160px;
+        }
+        /* 中间八角星 */
+        .splash-center {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 36px; height: 36px;
+            background: #000;
+            clip-path: polygon(50% 0%, 65% 35%, 100% 50%, 65% 65%, 50% 100%, 35% 65%, 0% 50%, 35% 35%);
+        }
+        /* 外圈旋转容器 */
+        .splash-ring {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            animation: splashRotate 12s linear infinite;
+        }
+        /* 外圈八个小星星 */
+        .splash-ring span {
+            position: absolute;
+            top: 50%; left: 50%;
+            background: #000;
+            clip-path: polygon(50% 0%, 65% 35%, 100% 50%, 65% 65%, 50% 100%, 35% 65%, 0% 50%, 35% 35%);
+            animation: splashBreathe 3s ease-in-out infinite;
+        }
+        .splash-ring span:nth-child(1) { width:14px;height:14px; transform: translate(-50%,-50%) rotate(0deg)   translateY(-68px); animation-delay:0s; }
+        .splash-ring span:nth-child(2) { width:9px; height:9px;  transform: translate(-50%,-50%) rotate(45deg)  translateY(-68px); animation-delay:0.375s; }
+        .splash-ring span:nth-child(3) { width:14px;height:14px; transform: translate(-50%,-50%) rotate(90deg)  translateY(-68px); animation-delay:0.75s; }
+        .splash-ring span:nth-child(4) { width:9px; height:9px;  transform: translate(-50%,-50%) rotate(135deg) translateY(-68px); animation-delay:1.125s; }
+        .splash-ring span:nth-child(5) { width:14px;height:14px; transform: translate(-50%,-50%) rotate(180deg) translateY(-68px); animation-delay:1.5s; }
+        .splash-ring span:nth-child(6) { width:9px; height:9px;  transform: translate(-50%,-50%) rotate(225deg) translateY(-68px); animation-delay:1.875s; }
+        .splash-ring span:nth-child(7) { width:14px;height:14px; transform: translate(-50%,-50%) rotate(270deg) translateY(-68px); animation-delay:2.25s; }
+        .splash-ring span:nth-child(8) { width:9px; height:9px;  transform: translate(-50%,-50%) rotate(315deg) translateY(-68px); animation-delay:2.625s; }
+
+        @keyframes splashRotate {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(360deg); }
+        }
+        @keyframes splashBreathe {
+            0%, 100% { opacity: 0.2; }
+            50%       { opacity: 1; }
+        }
     </style>
 </head>
 <body>
+    <div id="launch-overlay">
+        <div id="load-spinner"></div>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+
+    <!-- 启动遮罩 -->
+    <div id="splash-screen">
+        <div class="splash-spinner">
+            <div class="splash-ring">
+                <span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span>
+            </div>
+            <div class="splash-center"></div>
+        </div>
+    </div>
 
     <div class="qw-particles-bg">
         <div class="qw-particle"></div>
@@ -777,6 +909,24 @@
             updateClock();
             setInterval(updateClock, 1000);
             initBattery();
+
+            // 启动遮罩淡出
+            const splash = document.getElementById('splash-screen');
+            if (splash) {
+                setTimeout(() => {
+                    splash.classList.add('fade-out');
+                    setTimeout(() => splash.remove(), 800);
+                }, 600);
+            }
+
+            // 加载完成后淡出遮罩
+            setTimeout(() => {
+                const overlay = document.getElementById('launch-overlay');
+                if (overlay) {
+                    overlay.classList.add('fade-out');
+                    setTimeout(() => overlay.remove(), 650);
+                }
+            }, 600);
         };
 
         function openSettings() {
