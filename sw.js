@@ -1,6 +1,6 @@
 // 画脂鏤氷 - Service Worker
 // 每次修改图标或内容后，把版本号改一下（如 v2、v3），强制用户更新缓存
-const CACHE_NAME = 'huazhi-v1774053694';
+const CACHE_NAME = 'huazhi-v1774098597';
 
 const ASSETS = [
   './',
