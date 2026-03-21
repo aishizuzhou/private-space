@@ -18,7 +18,7 @@
         }
 
         :root {
-            --bg-image: url('https://images.unsplash.com/photo-1579546929518-9e396f3cc809?ixlib=1.2.1&auto=format&fit=crop&w=1950&q=80');
+            --bg-image: none;
             --glass-bg: rgba(255, 255, 255, 0.25);
             --glass-border: rgba(255, 255, 255, 0.8);
             --text-color: #333;
@@ -742,7 +742,7 @@
 
     <div id="app-container">
         <div class="charm-container" id="charm-display">
-            <img src="https://cdn-icons-png.flaticon.com/512/599/599502.png" class="charm-img" alt="charm">
+            <img src="" class="charm-img" alt="charm">
         </div>
 
         <div class="header-section">
@@ -1137,28 +1137,9 @@
                 state.settings.currentFont = 'system';
             }
 
-            // 动态加载 Google Fonts（按 family 合并，避免重复请求）
-            const gfontMap = {}; // gname -> [weight, ...]
-            BUILTIN_FONTS.forEach(f => {
-                if (!f.gfont) return;
-                const family = f.gname;
-                // 提取 weight（如 'Noto+Sans+SC:wght@100' → 100）
-                const wMatch = f.gfont.match(/wght@(\d+)/);
-                const w = wMatch ? wMatch[1] : null;
-                if (!gfontMap[family]) gfontMap[family] = { baseName: f.gfont.split(':')[0], weights: new Set() };
-                if (w) gfontMap[family].weights.add(w);
-            });
-            Object.entries(gfontMap).forEach(([family, info]) => {
-                const linkId = 'gfont_' + info.baseName;
-                if (document.getElementById(linkId)) return;
-                const link = document.createElement('link');
-                link.id = linkId;
-                link.rel = 'stylesheet';
-                const wStr = info.weights.size > 0 ? `:wght@${[...info.weights].join(';')}` : '';
-                link.href = `https://fonts.googleapis.com/css2?family=${info.baseName}${wStr}&display=swap`;
-                document.head.appendChild(link);
-            });
-            // 把 gname 注入每个字体的 value 最前
+            // Google Fonts 改为懒加载：只在切换到对应字体时才请求
+            // 启动时不加载任何 Google Fonts，避免国内网络超时拖慢启动
+            // 把 gname 注入每个字体的 value（字体值先存着，实际请求延迟）
             BUILTIN_FONTS.forEach(f => {
                 if (f.gname) f.value = `"${f.gname}", ${f.value}`;
             });
@@ -1684,8 +1665,18 @@
                     }
                     document.documentElement.style.setProperty('--custom-font', `"${faceId}", sans-serif`);
                 } else {
+                    // 内置 Google Font：懒加载，只在切换时才请求一次
+                    if (activeFont.gfont && activeFont.gname) {
+                        const linkId = 'gfont_lazy_' + activeFont.id;
+                        if (!document.getElementById(linkId)) {
+                            const link = document.createElement('link');
+                            link.id = linkId;
+                            link.rel = 'stylesheet';
+                            link.href = `https://fonts.googleapis.com/css2?family=${activeFont.gfont}&display=swap`;
+                            document.head.appendChild(link);
+                        }
+                    }
                     document.documentElement.style.setProperty('--custom-font', activeFont.value);
-                    // 细黑体用 weight 100，其他正常
                     const weightMap = { pingfang: '100', fangsong: '200' };
                     document.documentElement.style.setProperty('--custom-font-weight', weightMap[activeFont.id] || '400');
                 }
