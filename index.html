@@ -120,6 +120,7 @@
             border: none; cursor: pointer;
             display: flex; align-items: center; justify-content: center;
             flex-shrink: 0; margin-left: auto;
+            margin-right: 4px; margin-bottom: -4px;
             font-size: 1.1rem; line-height: 1;
             color: var(--accent-text);
             box-shadow: 0 2px 8px rgba(0,0,0,0.15);
@@ -128,7 +129,7 @@
         .cal-btn span {
             position: absolute;
             top: 50%; left: 50%;
-            transform: translate(-50%, -52%);
+            transform: translate(-52%, -46%);
             line-height: 1;
         }
         .cal-btn.active { box-shadow: 0 0 0 2px var(--accent-color), 0 2px 8px rgba(0,0,0,0.2); }
@@ -194,7 +195,7 @@
             z-index:1;
         }
 
-        /* 范围：中间条，透明度低，在圆形下面（z-index:0） */
+        /* 范围：中间条在圆形下面，不与圆形颜色叠加 */
         .cal-cell.in-range::before {
             content:''; position:absolute;
             top:11%; bottom:11%;
@@ -202,8 +203,7 @@
             background: var(--cal-range-bg);
             z-index:0;
         }
-
-        /* 首端：右半条，等高，z-index:0 在圆下面 */
+        /* 首端：右半条 */
         .cal-cell.range-start::before {
             content:''; position:absolute;
             top:11%; bottom:11%;
@@ -211,7 +211,7 @@
             background: var(--cal-range-bg);
             z-index:0;
         }
-        /* 末端：左半条，等高，z-index:0 在圆下面 */
+        /* 末端：左半条 */
         .cal-cell.range-end::before {
             content:''; position:absolute;
             top:11%; bottom:11%;
@@ -219,7 +219,7 @@
             background: var(--cal-range-bg);
             z-index:0;
         }
-        /* 首末的实心圆帽，z-index:2 在条子上面 */
+        /* 首末圆帽：z-index:2，盖在条子上面，用 mix-blend-mode:normal 避免颜色叠加 */
         .cal-cell.range-start::after, .cal-cell.range-end::after {
             content:''; position:absolute;
             top:50%; left:50%;
@@ -228,6 +228,8 @@
             background: var(--cal-dot-bg);
             border-radius:50%;
             z-index:2;
+            isolation: isolate;
+            box-shadow: 0 0 0 2px #fff;
         }
         /* 首末数字颜色 */
         .cal-cell.range-start span, .cal-cell.range-end span,
@@ -456,7 +458,7 @@
             background: var(--glass-bg);
             backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
             border: 1px solid var(--glass-border);
-            border-radius: 12px; padding: 15px;
+            border-radius: 12px; padding: 10px 12px;
             position: relative; z-index: 2;
             transition: transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
             will-change: transform;
@@ -710,7 +712,10 @@
         .settings-title, .charm-container, .avatar-container,
         #display-name, #display-signature, #status-clock, #battery-text,
         .cal-weekday, .cal-cell, .cal-month-label, .cal-nav,
-        .stats-label, .stats-sub, .stats-total, .stats-val {
+        .stats-label, .stats-sub, .stats-total, .stats-val,
+        .edit-btn, .fab, .fab span, .note-actions,
+        #full-note-body, .comment-inner .stats-cell .stats-label,
+        .note-wrapper, .note-header {
             user-select: none;
             -webkit-user-select: none;
         }
@@ -1486,13 +1491,13 @@
                 inner.addEventListener('touchmove', e => {
                     curX = e.touches[0].clientX;
                     const diff = curX - startX;
-                    if (Math.abs(diff) > 8) swiping = true;
-                    if (diff < 0) { inner.style.transform = `translateX(${Math.max(diff,-60)}px)`; delBg.style.opacity='0.7'; }
+                    if (Math.abs(diff) > 15) swiping = true;
+                    if (diff < -15) { inner.style.transform = `translateX(${Math.max(diff,-60)}px)`; delBg.style.opacity='0.7'; }
                 }, {passive:true});
                 inner.addEventListener('touchend', () => {
                     inner.style.transition = 'transform 0.3s ease';
                     const diff = curX - startX;
-                    if (diff < -30) { inner.style.transform = 'translateX(-60px)'; delBg.style.opacity='0.7'; }
+                    if (diff < -45) { inner.style.transform = 'translateX(-60px)'; delBg.style.opacity='0.7'; }
                     else { inner.style.transform = 'translateX(0)'; delBg.style.opacity='0'; }
                     startX = 0; curX = 0;
                 });
@@ -2111,13 +2116,35 @@
                 panel.classList.remove('open');
                 overlay.classList.remove('open');
                 btn.classList.remove('active');
+                // 关闭时清除日期筛选，恢复全部显示
+                state.filterDateFrom = null;
+                state.filterDateTo = null;
+                _calPickStep = 0;
+                renderList();
             } else {
+                // 每次打开都重置到今天
+                const now = new Date();
+                _calYear = now.getFullYear();
+                _calMonth = now.getMonth();
+                _calPickStep = 0;
+                // 默认筛选当天
+                const todayKey = dateToKey(now.getFullYear(), now.getMonth()+1, now.getDate());
+                state.filterDateFrom = todayKey;
+                state.filterDateTo = null;
+                _calPickStep = 1;
+                // 同步输入框
+                const fromInput = document.getElementById('cal-date-from');
+                const toInput = document.getElementById('cal-date-to');
+                if (fromInput) fromInput.value = todayKey;
+                if (toInput) toInput.value = '';
+
                 const btnRect = btn.getBoundingClientRect();
                 panel.style.top = (btnRect.bottom + 6) + 'px';
                 panel.classList.add('open');
                 overlay.classList.add('open');
                 btn.classList.add('active');
                 renderCalendar();
+                renderList();
                 renderStats();
             }
         }
