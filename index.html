@@ -2212,13 +2212,24 @@
         function renderTags() {
             const allTags = new Set(); state.notes.forEach(n => n.tags.forEach(t => allTags.add(t)));
             const container = document.getElementById('tag-filters');
+            container.innerHTML = '';
+
+            // 常驻「全部」
             const allDiv = document.createElement('div');
             allDiv.className = `filter-tag ${!state.filterTag ? 'active' : ''}`;
             allDiv.innerText = '全部';
             allDiv.onclick = () => filterByTag(null);
             setupLongPress(allDiv, () => openTagManager());
-            container.innerHTML = '';
             container.appendChild(allDiv);
+
+            // 常驻「⏳」——始终显示
+            const timerDiv = document.createElement('div');
+            timerDiv.className = `filter-tag ${state.filterTag === '⏳' ? 'active' : ''}`;
+            timerDiv.innerText = '⏳';
+            timerDiv.onclick = () => filterByTag('⏳');
+            container.appendChild(timerDiv);
+            allTags.delete('⏳'); // 避免后面重复渲染
+
             allTags.forEach(tag => {
                 const isBlocked = state.blockedTags.includes(tag);
                 const div = document.createElement('div');
