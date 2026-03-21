@@ -1631,20 +1631,49 @@
             container.querySelectorAll('.comment-item').forEach(item => {
                 const inner = item.querySelector('.comment-inner');
                 const delBg = item.querySelector('.comment-delete-bg');
-                let startX = 0, curX = 0, swiping = false;
-                inner.addEventListener('touchstart', e => { startX = e.touches[0].clientX; swiping = false; inner.style.transition = 'none'; }, {passive:true});
+                let startX = 0, curX = 0, swiping = false, locked = false;
+
+                inner.addEventListener('touchstart', e => {
+                    startX = e.touches[0].clientX;
+                    swiping = false;
+                    inner.style.transition = 'none';
+                }, {passive:true});
+
                 inner.addEventListener('touchmove', e => {
                     curX = e.touches[0].clientX;
                     const diff = curX - startX;
                     if (Math.abs(diff) > 15) swiping = true;
-                    if (diff < -15) { inner.style.transform = `translateX(${Math.max(diff,-60)}px)`; delBg.style.opacity='0.7'; }
+                    if (diff < -15) {
+                        inner.style.transform = `translateX(${Math.max(diff, -60)}px)`;
+                        delBg.style.opacity = '0.7';
+                    }
                 }, {passive:true});
+
                 inner.addEventListener('touchend', () => {
                     inner.style.transition = 'transform 0.3s ease';
                     const diff = curX - startX;
-                    if (diff < -45) { inner.style.transform = 'translateX(-60px)'; delBg.style.opacity='0.7'; }
-                    else { inner.style.transform = 'translateX(0)'; delBg.style.opacity='0'; }
+                    if (diff < -45) {
+                        // 滑到底：锁定在-60px，等待点垃圾桶
+                        inner.style.transform = 'translateX(-60px)';
+                        delBg.style.opacity = '0.7';
+                        locked = true;
+                    } else {
+                        // 没滑够：弹回
+                        inner.style.transform = 'translateX(0)';
+                        delBg.style.opacity = '0';
+                        locked = false;
+                    }
                     startX = 0; curX = 0;
+                });
+
+                // 点内容区域时如果已锁定则收回，不触发打开评论
+                inner.addEventListener('click', () => {
+                    if (locked) {
+                        inner.style.transition = 'transform 0.3s ease';
+                        inner.style.transform = 'translateX(0)';
+                        delBg.style.opacity = '0';
+                        locked = false;
+                    }
                 });
             });
         }
