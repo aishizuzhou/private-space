@@ -125,12 +125,15 @@
             color: var(--accent-text);
             box-shadow: 0 2px 8px rgba(0,0,0,0.15);
             position: relative;
+            transform: translate(-45%, -45%);
+            user-select: none; -webkit-user-select: none;
         }
         .cal-btn span {
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-52%, -46%);
             line-height: 1;
+            user-select: none; -webkit-user-select: none;
         }
         .cal-btn.active { box-shadow: 0 0 0 2px var(--accent-color), 0 2px 8px rgba(0,0,0,0.2); }
 
@@ -723,6 +726,82 @@
             user-select: none;
             -webkit-user-select: none;
         }
+        /* Special Days 置顶条 */
+        .special-pin {
+            display: none;
+            align-items: center; gap:8px;
+            padding: 6px 12px;
+            margin-bottom: 8px;
+            background: rgba(255,255,255,0.35);
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.6);
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+            font-size: 0.82rem;
+        }
+        .special-pin.visible { display: flex; }
+        .special-pin-emoji { font-size: 1rem; flex-shrink:0; }
+        .special-pin-name { color: var(--text-color); opacity:0.9; font-weight:500; flex:1; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+        .special-pin-days { color: var(--accent-color); font-weight:bold; font-size:0.85rem; flex-shrink:0; }
+
+        /* 日历面板 tab */
+        .cal-tabs {
+            display: flex; margin-bottom: 12px;
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+        }
+        .cal-tab {
+            flex:1; text-align:center; padding:6px 0;
+            font-size:0.85rem; cursor:pointer; color:#aaa;
+            border-bottom: 2px solid transparent;
+            transition: color 0.2s, border-color 0.2s;
+            user-select:none; -webkit-user-select:none;
+        }
+        .cal-tab.active { color: var(--accent-color); border-bottom-color: var(--accent-color); }
+
+        /* Special Days 面板 */
+        .special-panel { display:none; }
+        .special-panel.active { display:block; }
+        .daily-panel { display:none; }
+        .daily-panel.active { display:block; }
+
+        /* Special Days 列表 */
+        .special-list { margin-bottom:10px; }
+        .special-item {
+            display:flex; align-items:center; gap:8px;
+            padding:10px 8px; border-radius:10px;
+            margin-bottom:6px;
+            background:rgba(0,0,0,0.03);
+            cursor:pointer;
+            position:relative;
+        }
+        .special-item.pinned { background: rgba(255,154,158,0.1); }
+        .special-item-emoji { font-size:1.2rem; flex-shrink:0; }
+        .special-item-info { flex:1; min-width:0; }
+        .special-item-name { font-size:0.88rem; font-weight:500; color:#333; }
+        .special-item-date { font-size:0.72rem; color:#aaa; margin-top:1px; }
+        .special-item-days { font-size:1rem; font-weight:bold; color:var(--accent-color); flex-shrink:0; text-align:right; }
+        .special-item-days span { display:block; font-size:0.65rem; font-weight:normal; color:#aaa; }
+        .special-add-btn {
+            width:100%; padding:8px; border-radius:10px;
+            border: 1px dashed rgba(0,0,0,0.15); background:transparent;
+            color:#aaa; font-size:0.85rem; cursor:pointer;
+            margin-bottom:8px;
+        }
+
+        /* Special Days 新增表单 */
+        .special-form {
+            display:none; padding:10px; background:rgba(0,0,0,0.03);
+            border-radius:10px; margin-bottom:10px;
+        }
+        .special-form.open { display:block; }
+        .special-form input[type=text], .special-form input[type=date] {
+            width:100%; padding:7px 10px; border:1px solid #eee;
+            border-radius:8px; font-size:0.85rem; background:#fafafa;
+            margin-bottom:6px; box-sizing:border-box;
+        }
+        .special-form-row { display:flex; gap:6px; }
+        .special-form-row button { flex:1; padding:7px; border-radius:8px; font-size:0.82rem; border:none; cursor:pointer; }
     </style>
 </head>
 <body>
@@ -774,6 +853,11 @@
         </div>
 
         <div class="content-wrapper">
+            <div class="special-pin" id="special-pin" onclick="openSpecialPanel()">
+                <span class="special-pin-emoji" id="pin-emoji">✦</span>
+                <span class="special-pin-name" id="pin-name"></span>
+                <span class="special-pin-days" id="pin-days"></span>
+            </div>
             <input type="text" class="search-bar" placeholder="搜索内容、图片备注..." oninput="handleSearch(this.value)">
             <div class="tag-filters" id="tag-filters"></div>
             <div class="content-area" id="list-container"></div>
@@ -786,25 +870,54 @@
     <div class="cal-overlay" id="cal-overlay" onclick="toggleCalPanel()"></div>
     <!-- 日历面板 -->
     <div class="cal-panel" id="cal-panel">
-        <div class="cal-header">
-            <button class="cal-nav" onclick="calChangeMonth(-1)">‹</button>
-            <span class="cal-month-label" id="cal-month-label"></span>
-            <button class="cal-nav" onclick="calChangeMonth(1)">›</button>
+        <!-- tab切换 -->
+        <div class="cal-tabs">
+            <div class="cal-tab active" id="tab-daily" onclick="switchCalTab('daily')">✧𝓓𝓪𝓲𝓵𝔂</div>
+            <div class="cal-tab" id="tab-special" onclick="switchCalTab('special')">𝓼𝓹𝓮𝓬𝓲𝓪𝓵 ✦</div>
         </div>
-        <div class="cal-grid" id="cal-grid"></div>
-        <div class="cal-input-row">
-            <input type="text" id="cal-date-from" placeholder="按空格分割" maxlength="12">
-            <input type="text" id="cal-date-to" placeholder="按空格分割" maxlength="12">
-            <button onclick="calGoToInput()">筛选</button>
+
+        <!-- 日历页 -->
+        <div class="daily-panel active" id="daily-panel">
+            <div class="cal-header">
+                <button class="cal-nav" onclick="calChangeMonth(-1)">‹</button>
+                <span class="cal-month-label" id="cal-month-label"></span>
+                <button class="cal-nav" onclick="calChangeMonth(1)">›</button>
+            </div>
+            <div class="cal-grid" id="cal-grid"></div>
+            <div class="cal-input-row">
+                <input type="text" id="cal-date-from" placeholder="按空格分割" maxlength="12">
+                <input type="text" id="cal-date-to" placeholder="按空格分割" maxlength="12">
+                <button onclick="calGoToInput()">筛选</button>
+            </div>
+            <button class="cal-clear-btn" onclick="calClearFilter()">清除日期筛选</button>
+            <div class="stats-panel">
+                <div id="stats-special-hint" style="display:none; margin-bottom:8px; padding:6px 8px; background:rgba(255,154,158,0.08); border-radius:8px; font-size:0.8rem; color:#888;"></div>
+                <div class="stats-total" id="stats-total">统计中...</div>
+                <div class="stats-grid">
+                    <div class="stats-cell" onclick="statsFlip('year')" id="stats-year"><div class="stats-label">年</div><div class="stats-val" id="sv-year">-</div><div class="stats-sub" id="ss-year"></div></div>
+                    <div class="stats-cell" onclick="statsFlip('month')" id="stats-month"><div class="stats-label">月</div><div class="stats-val" id="sv-month">-</div><div class="stats-sub" id="ss-month"></div></div>
+                    <div class="stats-cell" onclick="statsFlip('week')" id="stats-week"><div class="stats-label">周</div><div class="stats-val" id="sv-week">-</div><div class="stats-sub" id="ss-week"></div></div>
+                    <div class="stats-cell" onclick="statsFlip('day')" id="stats-day"><div class="stats-label">日</div><div class="stats-val" id="sv-day">-</div><div class="stats-sub" id="ss-day"></div></div>
+                </div>
+            </div>
         </div>
-        <button class="cal-clear-btn" onclick="calClearFilter()">清除日期筛选</button>
-        <div class="stats-panel">
-            <div class="stats-total" id="stats-total">统计中...</div>
-            <div class="stats-grid">
-                <div class="stats-cell" onclick="statsFlip('year')" id="stats-year"><div class="stats-label">年</div><div class="stats-val" id="sv-year">-</div><div class="stats-sub" id="ss-year"></div></div>
-                <div class="stats-cell" onclick="statsFlip('month')" id="stats-month"><div class="stats-label">月</div><div class="stats-val" id="sv-month">-</div><div class="stats-sub" id="ss-month"></div></div>
-                <div class="stats-cell" onclick="statsFlip('week')" id="stats-week"><div class="stats-label">周</div><div class="stats-val" id="sv-week">-</div><div class="stats-sub" id="ss-week"></div></div>
-                <div class="stats-cell" onclick="statsFlip('day')" id="stats-day"><div class="stats-label">日</div><div class="stats-val" id="sv-day">-</div><div class="stats-sub" id="ss-day"></div></div>
+
+        <!-- Special Days 页 -->
+        <div class="special-panel" id="special-panel">
+            <div class="special-list" id="special-list"></div>
+            <button class="special-add-btn" onclick="toggleSpecialForm()">＋ 新增特别的日子</button>
+            <div class="special-form" id="special-form">
+                <input type="text" id="sf-emoji" placeholder="emoji（留空则无）" maxlength="4">
+                <input type="text" id="sf-name" placeholder="名称（如 💕 在一起纪念日）">
+                <input type="date" id="sf-date">
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+                    <input type="checkbox" id="sf-annual" style="width:auto;margin:0;">
+                    <label for="sf-annual" style="font-size:0.82rem;color:#666;">每年重复</label>
+                </div>
+                <div class="special-form-row">
+                    <button onclick="toggleSpecialForm()" style="background:rgba(0,0,0,0.06);color:#666;">取消</button>
+                    <button onclick="saveSpecialDay()" style="background:var(--accent-color);color:var(--accent-text);">保存</button>
+                </div>
             </div>
         </div>
     </div>
@@ -1095,6 +1208,7 @@
             },
             tempImages: [], filterTag: null, blockedTags: [], searchQuery: '',
             editingId: null, filterDateFrom: null, filterDateTo: null,
+            specialDays: [], specialPinnedId: null,
             commentPreviewName: '宛宛',
             commentPreviewSuffix: '说：',
             commentPreviewEnabled: true,
@@ -1108,6 +1222,14 @@
                 if (cp.name !== undefined) state.commentPreviewName = cp.name;
                 if (cp.suffix !== undefined) state.commentPreviewSuffix = cp.suffix;
                 if (cp.syncName !== undefined) state.commentPreviewSyncName = cp.syncName;
+            }
+        } catch(e) {}
+        // 读取 Special Days
+        try {
+            const sd = JSON.parse(localStorage.getItem('wanwan_special_days'));
+            if (sd) {
+                if (sd.days) state.specialDays = sd.days;
+                if (sd.pinnedId !== undefined) state.specialPinnedId = sd.pinnedId;
             }
         } catch(e) {}
 
@@ -1179,6 +1301,7 @@
             updateClock();
             setInterval(updateClock, 1000);
             initBattery();
+            renderSpecialPin();
 
             // 启动遮罩淡出
             const splash = document.getElementById('splash-screen');
@@ -1409,6 +1532,18 @@
                     </div>
                 ` : '';
 
+                // 笔记当天的纪念日
+                const itemDate = new Date(item.timestamp); itemDate.setHours(0,0,0,0);
+                const itemSpecials = (state.specialDays || []).filter(sd => {
+                    let target = new Date(sd.date); target.setHours(0,0,0,0);
+                    if (sd.annual) target.setFullYear(itemDate.getFullYear());
+                    return target.getTime() === itemDate.getTime();
+                });
+                const specialNoteHtml = itemSpecials.length > 0 ? `
+                    <div style="display:flex; flex-wrap:wrap; gap:4px; margin-top:4px; justify-content:flex-end;">
+                        ${itemSpecials.map(sd => `<span style="font-size:0.72rem; color:var(--accent-color); opacity:0.85;">${sd.emoji ? sd.emoji + ' ' : '✦ '}${sd.name}</span>`).join('')}
+                    </div>` : '';
+
                 card.innerHTML = `
                     <div class="note-header">
                         <span class="note-time">${item.timestamp}</span>
@@ -1423,6 +1558,7 @@
                         <div class="note-tags">${tagsHtml}</div>
                     </div>
                     ${commentPreviewHtml}
+                    ${specialNoteHtml}
                 `;
 
                 wrapper.appendChild(deleteBg);
@@ -2110,6 +2246,151 @@
         }
         function handleSearch(val) { state.searchQuery = val; renderList(); }
 
+        // ===================== Special Days =====================
+        let _calTab = 'daily';
+
+        function switchCalTab(tab) {
+            _calTab = tab;
+            document.getElementById('tab-daily').classList.toggle('active', tab === 'daily');
+            document.getElementById('tab-special').classList.toggle('active', tab === 'special');
+            document.getElementById('daily-panel').classList.toggle('active', tab === 'daily');
+            document.getElementById('special-panel').classList.toggle('active', tab === 'special');
+            if (tab === 'special') renderSpecialDays();
+        }
+
+        function openSpecialPanel() {
+            const panel = document.getElementById('cal-panel');
+            const overlay = document.getElementById('cal-overlay');
+            const btn = document.getElementById('cal-btn');
+            const btnRect = btn.getBoundingClientRect();
+            panel.style.top = (btnRect.bottom + 6) + 'px';
+            panel.classList.add('open');
+            overlay.classList.add('open');
+            btn.classList.add('active');
+            switchCalTab('special');
+        }
+
+        function calcDays(dateStr, annual) {
+            const today = new Date(); today.setHours(0,0,0,0);
+            let target = new Date(dateStr); target.setHours(0,0,0,0);
+            if (annual) {
+                // 今年的日期
+                target.setFullYear(today.getFullYear());
+                if (target < today) target.setFullYear(today.getFullYear() + 1);
+            }
+            const diff = Math.round((target - today) / 86400000);
+            return diff;
+        }
+
+        function formatDays(diff, dateStr, annual) {
+            const past = new Date(dateStr) < new Date() && !annual;
+            if (diff === 0) return { num: '今天', sub: '' };
+            if (diff > 0) return { num: `还有 ${diff}`, sub: '天' };
+            // 过去的日期（非每年重复）
+            const total = Math.abs(Math.round((new Date() - new Date(dateStr)) / 86400000));
+            return { num: `已 ${total}`, sub: '天' };
+        }
+
+        function renderSpecialDays() {
+            const list = document.getElementById('special-list');
+            if (!list) return;
+            const days = state.specialDays || [];
+            if (days.length === 0) {
+                list.innerHTML = '<div style="text-align:center;color:#ccc;font-size:0.82rem;padding:20px 0;">还没有特别的日子</div>';
+                return;
+            }
+            list.innerHTML = days.map((d, i) => {
+                const diff = calcDays(d.date, d.annual);
+                const fmt = formatDays(diff, d.date, d.annual);
+                const isPinned = state.specialPinnedId === d.id;
+                return `
+                <div class="special-item ${isPinned ? 'pinned' : ''}" onclick="toggleSpecialPin(${i})">
+                    <div class="special-item-info">
+                        <div class="special-item-name">${d.emoji ? d.emoji + ' ' : ''}${d.name}</div>
+                        <div class="special-item-date">${d.date}${d.annual ? ' · 每年' : ''}</div>
+                    </div>
+                    <div class="special-item-days">
+                        ${fmt.num}<span>${fmt.sub}</span>
+                    </div>
+                    <button onclick="event.stopPropagation();deleteSpecialDay(${i})" style="background:none;border:none;color:#ddd;font-size:1rem;cursor:pointer;padding:0 0 0 6px;">×</button>
+                </div>`;
+            }).join('');
+        }
+
+        function toggleSpecialPin(idx) {
+            const d = state.specialDays[idx];
+            if (state.specialPinnedId === d.id) {
+                state.specialPinnedId = null; // 取消置顶
+            } else {
+                state.specialPinnedId = d.id; // 设为置顶
+            }
+            saveData();
+            renderSpecialDays();
+            renderSpecialPin();
+        }
+
+        function renderSpecialPin() {
+            const pin = document.getElementById('special-pin');
+            if (!pin) return;
+            const days = state.specialDays || [];
+            if (days.length === 0) { pin.classList.remove('visible'); return; }
+
+            let target = null;
+            if (state.specialPinnedId) {
+                target = days.find(d => d.id === state.specialPinnedId);
+            }
+            if (!target) {
+                // 默认显示最近的
+                target = days.slice().sort((a, b) => {
+                    const da = Math.abs(calcDays(a.date, a.annual));
+                    const db = Math.abs(calcDays(b.date, b.annual));
+                    return da - db;
+                })[0];
+            }
+            if (!target) { pin.classList.remove('visible'); return; }
+
+            const diff = calcDays(target.date, target.annual);
+            const fmt = formatDays(diff, target.date, target.annual);
+            document.getElementById('pin-emoji').innerText = '';
+            document.getElementById('pin-name').innerText = (target.emoji ? target.emoji + ' ' : '') + target.name;
+            document.getElementById('pin-days').innerText = fmt.num + (fmt.sub ? ' ' + fmt.sub : '');
+            pin.classList.add('visible');
+        }
+
+        function toggleSpecialForm() {
+            const form = document.getElementById('special-form');
+            form.classList.toggle('open');
+            if (form.classList.contains('open')) {
+                document.getElementById('sf-emoji').value = '';
+                document.getElementById('sf-name').value = '';
+                document.getElementById('sf-date').value = new Date().toISOString().slice(0,10);
+                document.getElementById('sf-annual').checked = false;
+            }
+        }
+
+        function saveSpecialDay() {
+            const emoji = document.getElementById('sf-emoji').value.trim() || '✦';
+            const name = document.getElementById('sf-name').value.trim();
+            const date = document.getElementById('sf-date').value;
+            const annual = document.getElementById('sf-annual').checked;
+            if (!name || !date) { alert('请填写名称和日期'); return; }
+            if (!state.specialDays) state.specialDays = [];
+            state.specialDays.push({ id: Date.now(), emoji, name, date, annual });
+            saveData();
+            toggleSpecialForm();
+            renderSpecialDays();
+            renderSpecialPin();
+        }
+
+        function deleteSpecialDay(idx) {
+            const d = state.specialDays[idx];
+            if (state.specialPinnedId === d.id) state.specialPinnedId = null;
+            state.specialDays.splice(idx, 1);
+            saveData();
+            renderSpecialDays();
+            renderSpecialPin();
+        }
+
         // ===================== 日历 =====================
         let _calYear = new Date().getFullYear();
         let _calMonth = new Date().getMonth();
@@ -2130,13 +2411,12 @@
                 const now = new Date();
                 _calYear = now.getFullYear();
                 _calMonth = now.getMonth();
-                _calPickStep = 0;
-                _calLastClick = null;
-                // 默认筛选当天
+                // 默认筛选当天，同步 lastClick 让逻辑一致
                 const todayKey = dateToKey(now.getFullYear(), now.getMonth()+1, now.getDate());
                 state.filterDateFrom = todayKey;
                 state.filterDateTo = null;
                 _calPickStep = 1;
+                _calLastClick = todayKey; // 关键：同步，这样点今天=双击确认单日，点别的=范围
                 // 同步输入框
                 const fromInput = document.getElementById('cal-date-from');
                 const toInput = document.getElementById('cal-date-to');
@@ -2148,6 +2428,7 @@
                 panel.classList.add('open');
                 overlay.classList.add('open');
                 btn.classList.add('active');
+                switchCalTab('daily');
                 renderCalendar();
                 renderList();
                 renderStats();
@@ -2188,6 +2469,14 @@
                 if (!isNaN(d)) noteDates.add(`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`);
             });
 
+            // 纪念日日期集合
+            const specialDateKeys = new Set();
+            (state.specialDays || []).forEach(sd => {
+                let target = new Date(sd.date); target.setHours(0,0,0,0);
+                if (sd.annual) target.setFullYear(_calYear);
+                specialDateKeys.add(`${target.getFullYear()}-${target.getMonth()}-${target.getDate()}`);
+            });
+
             const today = new Date(); today.setHours(0,0,0,0);
             const firstDay = new Date(_calYear, _calMonth, 1);
             const lastDay = new Date(_calYear, _calMonth + 1, 0);
@@ -2223,6 +2512,13 @@
 
                 const noteKey = `${_calYear}-${_calMonth}-${d}`;
                 if (noteDates.has(noteKey)) el.classList.add('has-note');
+                if (specialDateKeys.has(noteKey)) {
+                    el.classList.add('has-special');
+                    const star = document.createElement('span');
+                    star.style.cssText = 'position:absolute;top:1px;right:1px;font-size:0.45rem;color:var(--accent-color);z-index:4;line-height:1;';
+                    star.innerText = '✦';
+                    el.appendChild(star);
+                }
 
                 const thisDate = new Date(_calYear, _calMonth, d);
                 thisDate.setHours(0,0,0,0);
@@ -2372,6 +2668,25 @@
                 document.getElementById(`sv-${type}`).innerText = val;
                 document.getElementById(`ss-${type}`).innerText = sub;
             });
+
+            // 纪念日联动：显示所选日期当天的纪念日
+            const hint = document.getElementById('stats-special-hint');
+            if (!hint) return;
+            const ref = refFrom ? new Date(refFrom.replace(/\s+/g, '/')) : new Date();
+            ref.setHours(0,0,0,0);
+            const matched = (state.specialDays || []).filter(d => {
+                let target = new Date(d.date); target.setHours(0,0,0,0);
+                if (d.annual) {
+                    target.setFullYear(ref.getFullYear());
+                }
+                return target.getTime() === ref.getTime();
+            });
+            if (matched.length > 0) {
+                hint.style.display = 'block';
+                hint.innerHTML = matched.map(d => `<span style="margin-right:8px;">${d.emoji ? d.emoji + ' ' : '✦ '}${d.name}</span>`).join('');
+            } else {
+                hint.style.display = 'none';
+            }
         }
         function openModal(id) { document.getElementById(id).classList.add('open'); }
         function closeModal(id) { document.getElementById(id).classList.remove('open'); }
@@ -2383,6 +2698,10 @@
                 name: state.commentPreviewName,
                 suffix: state.commentPreviewSuffix,
                 syncName: state.commentPreviewSyncName
+            }));
+            localStorage.setItem('wanwan_special_days', JSON.stringify({
+                days: state.specialDays,
+                pinnedId: state.specialPinnedId
             }));
         }
 
