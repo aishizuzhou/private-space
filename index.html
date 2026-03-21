@@ -195,13 +195,14 @@
             z-index:1;
         }
 
-        /* 范围：中间条在圆形下面，不与圆形颜色叠加 */
+        /* 范围：中间条在圆形下面 */
         .cal-cell.in-range::before {
             content:''; position:absolute;
             top:11%; bottom:11%;
             left:0; right:0;
             background: var(--cal-range-bg);
             z-index:0;
+            border-radius:0;
         }
         /* 首端：右半条 */
         .cal-cell.range-start::before {
@@ -219,7 +220,10 @@
             background: var(--cal-range-bg);
             z-index:0;
         }
-        /* 首末圆帽：z-index:2，盖在条子上面，用 mix-blend-mode:normal 避免颜色叠加 */
+        /* 首末圆帽：白色底层先铺，再盖实色圆 */
+        .cal-cell.range-start, .cal-cell.range-end {
+            isolation: isolate;
+        }
         .cal-cell.range-start::after, .cal-cell.range-end::after {
             content:''; position:absolute;
             top:50%; left:50%;
@@ -228,8 +232,8 @@
             background: var(--cal-dot-bg);
             border-radius:50%;
             z-index:2;
-            isolation: isolate;
-            box-shadow: 0 0 0 2px #fff;
+            /* 白色描边遮住透明条，防止颜色叠加 */
+            box-shadow: 0 0 0 3px white;
         }
         /* 首末数字颜色 */
         .cal-cell.range-start span, .cal-cell.range-end span,
@@ -970,8 +974,13 @@
             </div>
 
             <div id="frame-scale-setting" style="display: none; margin-bottom: 10px;">
-                <label>头像框大小调整:</label>
-                <input type="range" id="setting-frame-scale" min="0.5" max="2" step="0.05" value="1" onchange="updateSettings()">
+                <div style="display:flex; align-items:center; justify-content:space-between;">
+                    <label>头像框大小调整:</label>
+                    <button class="lock-btn" id="lock-framescale" onclick="toggleLock('framescale')" title="锁定防误触">🔓</button>
+                </div>
+                <div id="lockable-framescale">
+                    <input type="range" id="setting-frame-scale" min="0.5" max="2" step="0.05" value="1" onchange="updateSettings()">
+                </div>
             </div>
 
             <div style="display:flex; gap:5px; margin-bottom:5px;">
@@ -2116,17 +2125,13 @@
                 panel.classList.remove('open');
                 overlay.classList.remove('open');
                 btn.classList.remove('active');
-                // 关闭时清除日期筛选，恢复全部显示
-                state.filterDateFrom = null;
-                state.filterDateTo = null;
-                _calPickStep = 0;
-                renderList();
             } else {
                 // 每次打开都重置到今天
                 const now = new Date();
                 _calYear = now.getFullYear();
                 _calMonth = now.getMonth();
                 _calPickStep = 0;
+                _calLastClick = null;
                 // 默认筛选当天
                 const todayKey = dateToKey(now.getFullYear(), now.getMonth()+1, now.getDate());
                 state.filterDateFrom = todayKey;
@@ -2244,30 +2249,36 @@
             }
         }
 
+        let _calLastClick = null; // 记录上一次点击的key，用于判断双击
+
         function calSelectDate(y, m, d) {
             const key = dateToKey(y, m, d);
             const picked = new Date(y, m-1, d); picked.setHours(0,0,0,0);
 
-            if (_calPickStep !== 1) {
-                // 没有等待结束日：重新开始，设起始
+            if (_calPickStep === 0 || _calPickStep === 2) {
+                // 全新开始：设起始，等待第二次点击
                 state.filterDateFrom = key;
                 state.filterDateTo = null;
+                _calLastClick = key;
                 _calPickStep = 1;
-            } else {
-                // 已有起始，设结束
-                const from = keyToDate(state.filterDateFrom);
-                from.setHours(0,0,0,0);
-                if (picked.getTime() === from.getTime()) {
-                    // 点同一天：单日完成
+            } else if (_calPickStep === 1) {
+                // 已有起始，判断是否双击同一天
+                if (key === _calLastClick) {
+                    // 双击同一天 = 单日筛选，完成
                     state.filterDateTo = null;
                     _calPickStep = 2;
-                } else if (picked < from) {
-                    // 比起始早：交换
-                    state.filterDateTo = state.filterDateFrom;
-                    state.filterDateFrom = key;
-                    _calPickStep = 2;
                 } else {
-                    state.filterDateTo = key;
+                    // 点了不同的天 = 设结束，完成范围
+                    const from = keyToDate(state.filterDateFrom);
+                    from.setHours(0,0,0,0);
+                    if (picked < from) {
+                        // 比起始早：交换
+                        state.filterDateTo = state.filterDateFrom;
+                        state.filterDateFrom = key;
+                    } else {
+                        state.filterDateTo = key;
+                    }
+                    _calLastClick = null;
                     _calPickStep = 2;
                 }
             }
@@ -2305,6 +2316,7 @@
         function calClearFilter() {
             state.filterDateFrom = null; state.filterDateTo = null;
             _calPickStep = 0;
+            _calLastClick = null;
             const fromInput = document.getElementById('cal-date-from');
             const toInput = document.getElementById('cal-date-to');
             if (fromInput) fromInput.value = '';
