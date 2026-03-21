@@ -113,7 +113,7 @@
 
         .status-bar {
             display: flex; align-items: center; gap: 8px;
-            font-size: 0.72rem; color: var(--text-color);
+            font-size: 0.72rem; color: #000;
             text-shadow: 0 0 3px rgba(0,0,0,0.35);
             margin-bottom: 3px;
             font-variant-numeric: tabular-nums;
@@ -186,6 +186,7 @@
         }
 
         .user-name { font-size: 1.2rem; font-weight: bold; text-shadow: 0 1px 3px rgba(0,0,0,0.2); color: var(--name-color); }
+        .user-signature { font-size: 0.78rem; margin-top: 2px; color: var(--text-color); opacity: 0.8; max-width: 180px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 
         .content-wrapper {
             flex: 1;
@@ -233,6 +234,8 @@
             white-space: nowrap;
             cursor: pointer;
             color: #333;
+            user-select: none;
+            -webkit-user-select: none;
             transition: transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
         }
         .filter-tag:hover, .filter-tag:active {
@@ -561,6 +564,7 @@
                     </span>
                 </div>
                 <div class="user-name" id="display-name">宛宛</div>
+                <div class="user-signature" id="display-signature"></div>
             </div>
         </div>
 
@@ -588,13 +592,26 @@
         </div>
     </div>
 
+    <div class="modal" id="tag-manage-modal">
+        <div class="modal-content" style="max-height:70vh; display:flex; flex-direction:column;">
+            <h3 style="margin-bottom:12px;">标签管理</h3>
+            <p style="font-size:0.8rem; color:#999; margin-bottom:10px;">点击标签选中，再点删除按钮移除（仅删除标签，笔记保留）</p>
+            <div id="tag-manage-list" style="flex:1; overflow-y:auto; display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px;"></div>
+            <div class="btn-group">
+                <button onclick="closeModal('tag-manage-modal')">关闭</button>
+                <button class="btn-primary" id="tag-delete-btn" onclick="deleteSelectedTags()" style="background:#ff6b6b;">删除所选</button>
+            </div>
+        </div>
+    </div>
+
     <div class="modal" id="editor-modal">
         <div class="modal-content">
             <h3 id="editor-title">言って。</h3>
             <textarea id="edit-content" rows="5" placeholder="おかえりなさい♡"></textarea>
             <input type="text" id="edit-tags" placeholder="标签 (用空格分隔)">
             <div style="margin-bottom: 10px;">
-                <label>一忘皆空 (单位为分钟, 0为永久保留):</label>
+                <label style="display:block; text-align:center; font-weight:bold; margin-bottom:4px;">一忘皆空</label>
+                <label style="display:block; text-align:center; font-size:0.85rem; color:#888; margin-bottom:6px;">⋄单位为分钟, 0为永久保留⋄</label>
                 <input type="number" id="edit-timer" value="0" min="0">
             </div>
             <div style="margin-bottom: 10px;">
@@ -628,6 +645,10 @@
             <div class="flex-row">
                 <label>昵称:</label>
                 <input type="text" id="setting-name" style="width:60%; margin:0;" onchange="updateSettings()">
+            </div>
+            <div class="flex-row">
+                <label>签名:</label>
+                <input type="text" id="setting-signature" style="width:60%; margin:0;" placeholder="留空则不显示" oninput="updateSettings()">
             </div>
             <div style="margin-bottom:10px;">
                 <label style="display:block; margin-bottom:4px;">昵称颜色 <span style="font-size:0.75rem;color:#999;">（支持CSS颜色/渐变，如 #ff9a9e 或 linear-gradient(90deg,#f00,#00f)）</span></label>
@@ -780,6 +801,7 @@
             notes: JSON.parse(localStorage.getItem('wanwan_notes_v3')) || [],
             settings: JSON.parse(localStorage.getItem('wanwan_settings_v3')) || {
                 name: '宛宛',
+                signature: '',
                 nameColor: '#333333',
                 textColorR: 51, textColorG: 51, textColorB: 51,
                 themeColor: '#ff9a9e',
@@ -963,7 +985,8 @@
                 contentInput.value = '';
                 // 若当前选中了某个非"全部"的tag，自动带入
                 tagsInput.value = (state.filterTag && !state.blockedTags.includes(state.filterTag)) ? state.filterTag : '';
-                timerInput.value = '0';
+                // ⏳tag下默认3分钟倒计时
+                timerInput.value = (state.filterTag === '⏳') ? '3' : '0';
                 state.tempImages = [];
             }
 
@@ -989,19 +1012,25 @@
 
             if (!content && state.tempImages.length === 0) return;
 
+            let tags = tagsInput.split(' ').filter(t => t.trim() !== '');
             const destructTime = timerVal > 0 ? Date.now() + timerVal * 60 * 1000 : null;
+
+            // 有倒计时自动加⏳tag
+            if (destructTime && !tags.includes('⏳')) tags.push('⏳');
+            // 没有倒计时则移除⏳tag
+            if (!destructTime) tags = tags.filter(t => t !== '⏳');
 
             if (state.editingId) {
                 const note = state.notes.find(n => n.id === state.editingId);
                 note.content = content;
-                note.tags = tagsInput.split(' ').filter(t => t.trim() !== '');
+                note.tags = tags;
                 note.images = state.tempImages;
                 note.destructTime = destructTime;
             } else {
                 state.notes.unshift({
                     id: Date.now(),
                     content: content,
-                    tags: tagsInput.split(' ').filter(t => t.trim() !== ''),
+                    tags: tags,
                     images: state.tempImages,
                     timestamp: new Date().toLocaleString(),
                     createdTime: Date.now(),
@@ -1014,7 +1043,18 @@
         }
 
         function deleteNote(id) {
+            // 找到要删的笔记，记录它的tag
+            const note = state.notes.find(n => n.id === id);
+            const tagsToCheck = note ? [...note.tags] : [];
             state.notes = state.notes.filter(n => n.id !== id);
+            // 检查这些tag在其他笔记里是否还存在，不存在则清理
+            tagsToCheck.forEach(tag => {
+                const stillExists = state.notes.some(n => n.tags.includes(tag));
+                if (!stillExists) {
+                    state.blockedTags = state.blockedTags.filter(t => t !== tag);
+                    if (state.filterTag === tag) state.filterTag = null;
+                }
+            });
             saveData(); renderList(); renderTags();
         }
 
@@ -1260,7 +1300,28 @@
                     el.innerText = `${mins}:${secs.toString().padStart(2, '0')}`;
                 }
             });
-            if(needsRender) renderList();
+            if (needsRender) {
+                // 找出即将被删除的笔记，收集tag
+                const expiredTags = [];
+                state.notes.forEach(n => {
+                    if (n.destructTime && now >= n.destructTime) {
+                        expiredTags.push(...n.tags);
+                    }
+                });
+                // 先删笔记
+                state.notes = state.notes.filter(n => !(n.destructTime && now >= n.destructTime));
+                // 检查孤立tag
+                expiredTags.forEach(tag => {
+                    const stillExists = state.notes.some(n => n.tags.includes(tag));
+                    if (!stillExists) {
+                        state.blockedTags = state.blockedTags.filter(t => t !== tag);
+                        if (state.filterTag === tag) state.filterTag = null;
+                    }
+                });
+                saveData();
+                renderList();
+                renderTags();
+            }
         }
 
         function handleImageUpload(input) {
@@ -1370,7 +1431,11 @@
             document.documentElement.style.setProperty('--frame-scale', s.frameScale || 1);
 
             document.getElementById('display-name').innerText = s.name;
+            const sigEl = document.getElementById('display-signature');
+            if (sigEl) sigEl.innerText = s.signature || '';
             document.getElementById('setting-name').value = s.name;
+            const sigInput = document.getElementById('setting-signature');
+            if (sigInput) sigInput.value = s.signature || '';
             const ncInput = document.getElementById('setting-name-color');
             if (ncInput) ncInput.value = s.nameColor || '#333333';
             document.getElementById('setting-color').value = s.themeColor;
@@ -1522,6 +1587,7 @@
         function updateSettings() {
             const s = state.settings;
             s.name = document.getElementById('setting-name').value;
+            s.signature = document.getElementById('setting-signature').value || '';
             s.nameColor = document.getElementById('setting-name-color').value || '#333333';
             s.themeColor = document.getElementById('setting-color').value;
 
@@ -1674,7 +1740,13 @@
         function renderTags() {
             const allTags = new Set(); state.notes.forEach(n => n.tags.forEach(t => allTags.add(t)));
             const container = document.getElementById('tag-filters');
-            container.innerHTML = `<div class="filter-tag ${!state.filterTag ? 'active' : ''}" onclick="filterByTag(null)">全部</div>`;
+            const allDiv = document.createElement('div');
+            allDiv.className = `filter-tag ${!state.filterTag ? 'active' : ''}`;
+            allDiv.innerText = '全部';
+            allDiv.onclick = () => filterByTag(null);
+            setupLongPress(allDiv, () => openTagManager());
+            container.innerHTML = '';
+            container.appendChild(allDiv);
             allTags.forEach(tag => {
                 const isBlocked = state.blockedTags.includes(tag);
                 const div = document.createElement('div');
@@ -1687,6 +1759,48 @@
         }
         function filterByTag(tag) { if(state.blockedTags.includes(tag)) return; state.filterTag = tag; renderList(); renderTags(); }
         function toggleBlockTag(tag) { if(state.blockedTags.includes(tag)) state.blockedTags = state.blockedTags.filter(t => t !== tag); else { state.blockedTags.push(tag); if(state.filterTag===tag) state.filterTag=null; } renderList(); renderTags(); }
+
+        let _selectedTagsToDelete = new Set();
+        function openTagManager() {
+            _selectedTagsToDelete = new Set();
+            const allTags = new Set();
+            state.notes.forEach(n => n.tags.forEach(t => allTags.add(t)));
+            const list = document.getElementById('tag-manage-list');
+            list.innerHTML = '';
+            allTags.forEach(tag => {
+                const el = document.createElement('div');
+                el.className = 'filter-tag';
+                el.innerText = tag;
+                el.style.cursor = 'pointer';
+                el.onclick = () => {
+                    if (_selectedTagsToDelete.has(tag)) {
+                        _selectedTagsToDelete.delete(tag);
+                        el.style.background = '';
+                        el.style.color = '';
+                    } else {
+                        _selectedTagsToDelete.add(tag);
+                        el.style.background = '#ff6b6b';
+                        el.style.color = '#fff';
+                    }
+                };
+                list.appendChild(el);
+            });
+            openModal('tag-manage-modal');
+        }
+
+        function deleteSelectedTags() {
+            if (_selectedTagsToDelete.size === 0) return;
+            if (!confirm(`确认删除这 ${_selectedTagsToDelete.size} 个标签？（笔记本身保留）`)) return;
+            state.notes.forEach(note => {
+                note.tags = note.tags.filter(t => !_selectedTagsToDelete.has(t));
+            });
+            // 同步清理blockedTags和filterTag
+            state.blockedTags = state.blockedTags.filter(t => !_selectedTagsToDelete.has(t));
+            if (_selectedTagsToDelete.has(state.filterTag)) state.filterTag = null;
+            _selectedTagsToDelete = new Set();
+            saveData(); renderList(); renderTags();
+            closeModal('tag-manage-modal');
+        }
         function handleSearch(val) { state.searchQuery = val; renderList(); }
         function openModal(id) { document.getElementById(id).classList.add('open'); }
         function closeModal(id) { document.getElementById(id).classList.remove('open'); }
