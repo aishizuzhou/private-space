@@ -172,7 +172,6 @@
             display: grid; grid-template-columns: repeat(7,1fr);
             gap: 0;
             margin-bottom: 10px;
-            overflow: hidden;
         }
         .cal-cell {
             aspect-ratio: 1; display:flex; align-items:center; justify-content:center;
@@ -180,7 +179,8 @@
             color:#333; user-select:none; position:relative;
         }
         .cal-cell:hover { background: rgba(0,0,0,0.04); }
-        .cal-cell.today { font-weight:bold; color: var(--accent-color); }
+        .cal-cell.today > .cal-num { font-weight:bold; color: var(--accent-color); }
+        .cal-cell.other-month { color:#bbb; }
 
         :root {
             --cal-range-bg: rgba(180,140,145,0.22);
@@ -188,71 +188,51 @@
             --cal-text-on-range: #3a2a2c;
         }
 
-        /* 单选圆形——用::before避免和has-note::after冲突 */
-        .cal-cell.selected::before {
-            content:''; position:absolute;
+        /* 所有高亮元素用真实div，不用伪元素 */
+        .cal-bg {
+            position:absolute; pointer-events:none; z-index:0;
+        }
+        /* 范围条 */
+        .cal-bar {
+            top:11%; bottom:11%; left:0; right:0;
+            background: var(--cal-range-bg);
+            border-radius:0;
+        }
+        .cal-bar-right { left:50%; right:0; }
+        .cal-bar-left  { left:0; right:50%; }
+        /* 圆圈 */
+        .cal-circle {
+            width:82%; padding-top:82%;
             top:50%; left:50%;
             transform:translate(-50%,-50%);
-            width:88%; padding-top:88%;
-            background: var(--cal-dot-bg);
-            border-radius:50%;
-            z-index:1;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-            pointer-events:none;
-        }
-        .cal-cell.selected span { color: var(--cal-text-on-range) !important; position:relative; z-index:3; font-weight:bold; }
-
-        /* 范围：中间条全宽 */
-        .cal-cell.in-range::before {
-            content:''; position:absolute;
-            top:11%; bottom:11%;
-            left:0; right:0;
-            background: var(--cal-range-bg);
-            z-index:0;
-            pointer-events:none;
-        }
-        .cal-cell.range-start::before {
-            content:''; position:absolute;
-            top:11%; bottom:11%;
-            left:89%; right:0;
-            background: var(--cal-range-bg);
-            z-index:0;
-            pointer-events:none;
-        }
-        .cal-cell.range-end::before {
-            content:''; position:absolute;
-            top:11%; bottom:11%;
-            left:0; right:89%;
-            background: var(--cal-range-bg);
-            z-index:0;
-            pointer-events:none;
-        }
-        .cal-cell.range-start, .cal-cell.range-end { isolation: isolate; }
-        .cal-cell.range-start::after, .cal-cell.range-end::after {
-            content:''; position:absolute;
-            top:50%; left:50%;
-            transform:translate(-50%,-50%);
-            width:78%; padding-top:78%;
             background: var(--cal-dot-bg);
             border-radius:50%;
             z-index:2;
+        }
+        .cal-circle-lg {
+            width:88%; padding-top:88%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        }
+        /* 数字层 */
+        .cal-num {
+            position:relative; z-index:3;
             pointer-events:none;
         }
-        .cal-cell.range-start span, .cal-cell.range-end span,
-        .cal-cell.in-range span { color: var(--cal-text-on-range); position:relative; z-index:3; }
-        .cal-cell.range-start.no-end::before { display:none; }
-        .cal-cell.has-note::after {
-            content:''; display:block; width:3px; height:3px;
-            background: var(--accent-color); border-radius:50%;
+        .cal-num.on-circle { color: var(--cal-text-on-range); font-weight:bold; }
+        /* 笔记小点 */
+        .cal-dot {
             position:absolute; bottom:3px; left:50%; transform:translateX(-50%);
-            z-index:4;
-            pointer-events:none;
+            width:3px; height:3px; border-radius:50%;
+            background: var(--accent-color);
+            z-index:4; pointer-events:none;
         }
-        .cal-cell { position:relative; }
-        .cal-cell.other-month { color:#bbb; }
-        .cal-cell.range-start.has-note::after,
-        .cal-cell.range-end.has-note::after,
-        .cal-cell.in-range.has-note::after { background:#fff; }
+        .cal-dot.on-circle { background: white; }
+        /* 纪念日星星 */
+        .cal-star {
+            position:absolute; top:2px; right:2px;
+            font-size:0.45rem; color:var(--accent-color);
+            z-index:4; line-height:1; pointer-events:none;
+        }
         .cal-weekday { font-size:0.7rem; color:#aaa; text-align:center; padding-bottom:4px; user-select:none; }
 
         .cal-input-row {
@@ -2558,44 +2538,74 @@
             for (let d = 1; d <= lastDay.getDate(); d++) {
                 const el = document.createElement('div');
                 el.className = 'cal-cell';
-                // 数字用span包裹确保在伪元素上层
-                const span = document.createElement('span');
-                span.style.cssText = 'position:relative;z-index:3;pointer-events:none;';
-                span.innerText = d;
-                el.appendChild(span);
 
+                const cy = _calYear, cm = _calMonth + 1, cd = d;
                 const noteKey = `${_calYear}-${_calMonth}-${d}`;
-                if (noteDates.has(noteKey)) el.classList.add('has-note');
-                if (specialDateKeys.has(noteKey)) {
-                    el.classList.add('has-special');
+                const isToday = (cy===today.getFullYear() && cm===today.getMonth()+1 && cd===today.getDate());
+                const hasNote = noteDates.has(noteKey);
+                const hasSpecial = specialDateKeys.has(noteKey);
+
+                // 判断高亮状态
+                let mode = 'none'; // none | selected | range-start | range-end | in-range
+                if (fromYMD && toYMD) {
+                    if (cy===fromYMD.y && cm===fromYMD.m && cd===fromYMD.d) mode = 'range-start';
+                    else if (cy===toYMD.y && cm===toYMD.m && cd===toYMD.d) mode = 'range-end';
+                    else {
+                        const after = cy>fromYMD.y||(cy===fromYMD.y&&(cm>fromYMD.m||(cm===fromYMD.m&&cd>fromYMD.d)));
+                        const before = cy<toYMD.y||(cy===toYMD.y&&(cm<toYMD.m||(cm===toYMD.m&&cd<toYMD.d)));
+                        if (after && before) mode = 'in-range';
+                    }
+                } else if (fromYMD) {
+                    if (cy===fromYMD.y && cm===fromYMD.m && cd===fromYMD.d) mode = 'selected';
+                }
+
+                const onCircle = (mode==='selected'||mode==='range-start'||mode==='range-end');
+
+                // 1. 范围条（在最下层）
+                if (mode === 'in-range') {
+                    const bar = document.createElement('div');
+                    bar.className = 'cal-bg cal-bar';
+                    el.appendChild(bar);
+                } else if (mode === 'range-start') {
+                    const bar = document.createElement('div');
+                    bar.className = 'cal-bg cal-bar cal-bar-right';
+                    el.appendChild(bar);
+                } else if (mode === 'range-end') {
+                    const bar = document.createElement('div');
+                    bar.className = 'cal-bg cal-bar cal-bar-left';
+                    el.appendChild(bar);
+                }
+
+                // 2. 圆圈
+                if (onCircle) {
+                    const circle = document.createElement('div');
+                    circle.className = 'cal-bg cal-circle' + (mode==='selected' ? ' cal-circle-lg' : '');
+                    el.appendChild(circle);
+                }
+
+                // 3. 数字
+                const num = document.createElement('span');
+                num.className = 'cal-num' + (onCircle ? ' on-circle' : '');
+                if (isToday && !onCircle) num.style.cssText = 'font-weight:bold;color:var(--accent-color);';
+                num.innerText = d;
+                el.appendChild(num);
+
+                // 4. 笔记小点
+                if (hasNote) {
+                    const dot = document.createElement('div');
+                    dot.className = 'cal-dot' + (onCircle ? ' on-circle' : '');
+                    el.appendChild(dot);
+                }
+
+                // 5. 纪念日星星
+                if (hasSpecial) {
                     const star = document.createElement('span');
-                    star.style.cssText = 'position:absolute;top:1px;right:1px;font-size:0.45rem;color:var(--accent-color);z-index:4;line-height:1;pointer-events:none;';
+                    star.className = 'cal-star';
                     star.innerText = '✦';
                     el.appendChild(star);
                 }
 
-                const thisDate = new Date(_calYear, _calMonth, d);
-                thisDate.setHours(0,0,0,0);
-
-                if (thisDate.getTime() === today.getTime()) el.classList.add('today');
-
-                const cy = _calYear, cm = _calMonth + 1, cd = d;
-                if (fromYMD && toYMD) {
-                    if (cy===fromYMD.y && cm===fromYMD.m && cd===fromYMD.d) {
-                        el.classList.add('range-start');
-                    } else if (cy===toYMD.y && cm===toYMD.m && cd===toYMD.d) {
-                        el.classList.add('range-end');
-                    } else {
-                        const after = cy>fromYMD.y || (cy===fromYMD.y && (cm>fromYMD.m || (cm===fromYMD.m && cd>fromYMD.d)));
-                        const before = cy<toYMD.y || (cy===toYMD.y && (cm<toYMD.m || (cm===toYMD.m && cd<toYMD.d)));
-                        if (after && before) el.classList.add('in-range');
-                    }
-                } else if (fromYMD) {
-                    if (cy===fromYMD.y && cm===fromYMD.m && cd===fromYMD.d) {
-                        el.classList.add('selected'); // 单日用 selected，更大更醒目
-                    }
-                }
-
+                if (isToday) el.classList.add('today');
                 el.onclick = () => calSelectDate(_calYear, _calMonth + 1, d);
                 grid.appendChild(el);
             }
