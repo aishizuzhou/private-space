@@ -172,6 +172,7 @@
             display: grid; grid-template-columns: repeat(7,1fr);
             gap: 0;
             margin-bottom: 10px;
+            overflow: hidden;
         }
         .cal-cell {
             aspect-ratio: 1; display:flex; align-items:center; justify-content:center;
@@ -187,46 +188,46 @@
             --cal-text-on-range: #3a2a2c;
         }
 
-        /* 单选圆形 */
-        .cal-cell.selected::after {
+        /* 单选圆形——用::before避免和has-note::after冲突 */
+        .cal-cell.selected::before {
             content:''; position:absolute;
             top:50%; left:50%;
             transform:translate(-50%,-50%);
-            width:78%; padding-top:78%;
+            width:88%; padding-top:88%;
             background: var(--cal-dot-bg);
             border-radius:50%;
             z-index:1;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            pointer-events:none;
         }
+        .cal-cell.selected span { color: var(--cal-text-on-range) !important; position:relative; z-index:3; font-weight:bold; }
 
-        /* 范围：中间条在圆形下面 */
+        /* 范围：中间条全宽 */
         .cal-cell.in-range::before {
             content:''; position:absolute;
             top:11%; bottom:11%;
             left:0; right:0;
             background: var(--cal-range-bg);
             z-index:0;
-            border-radius:0;
+            pointer-events:none;
         }
-        /* 首端：右半条 */
         .cal-cell.range-start::before {
             content:''; position:absolute;
             top:11%; bottom:11%;
-            left:50%; right:0;
+            left:89%; right:0;
             background: var(--cal-range-bg);
             z-index:0;
+            pointer-events:none;
         }
-        /* 末端：左半条 */
         .cal-cell.range-end::before {
             content:''; position:absolute;
             top:11%; bottom:11%;
-            left:0; right:50%;
+            left:0; right:89%;
             background: var(--cal-range-bg);
             z-index:0;
+            pointer-events:none;
         }
-        /* 首末圆帽：白色底层先铺，再盖实色圆 */
-        .cal-cell.range-start, .cal-cell.range-end {
-            isolation: isolate;
-        }
+        .cal-cell.range-start, .cal-cell.range-end { isolation: isolate; }
         .cal-cell.range-start::after, .cal-cell.range-end::after {
             content:''; position:absolute;
             top:50%; left:50%;
@@ -235,20 +236,17 @@
             background: var(--cal-dot-bg);
             border-radius:50%;
             z-index:2;
-            /* 白色描边遮住透明条，防止颜色叠加 */
-            box-shadow: 0 0 0 3px white;
+            pointer-events:none;
         }
-        /* 首末数字颜色 */
         .cal-cell.range-start span, .cal-cell.range-end span,
         .cal-cell.in-range span { color: var(--cal-text-on-range); position:relative; z-index:3; }
-
-        /* 只选了起始没有结束时不显示右延伸条 */
         .cal-cell.range-start.no-end::before { display:none; }
         .cal-cell.has-note::after {
             content:''; display:block; width:3px; height:3px;
             background: var(--accent-color); border-radius:50%;
-            position:absolute; bottom:2px; left:50%; transform:translateX(-50%);
+            position:absolute; bottom:3px; left:50%; transform:translateX(-50%);
             z-index:4;
+            pointer-events:none;
         }
         .cal-cell { position:relative; }
         .cal-cell.other-month { color:#bbb; }
@@ -1440,14 +1438,29 @@
                 if (state.filterTag && !item.tags.includes(state.filterTag)) return false;
                 if (state.filterDateFrom || state.filterDateTo) {
                     const itemDate = new Date(item.timestamp);
-                    itemDate.setHours(0,0,0,0);
+                    const iy = itemDate.getFullYear();
+                    const im = itemDate.getMonth() + 1;
+                    const id = itemDate.getDate();
+                    // 把key解析成年月日数字直接比较，绕过时区格式问题
+                    const toYMD = key => {
+                        if (!key) return null;
+                        const p = key.trim().split(/\s+/);
+                        if (p.length < 3) return null;
+                        return { y: parseInt(p[0]), m: parseInt(p[1]), d: parseInt(p[2]) };
+                    };
+                    const cmp = (a, b) => {
+                        if (a.y !== b.y) return a.y - b.y;
+                        if (a.m !== b.m) return a.m - b.m;
+                        return a.d - b.d;
+                    };
+                    const item_ymd = { y: iy, m: im, d: id };
                     if (state.filterDateFrom) {
-                        const from = new Date(state.filterDateFrom); from.setHours(0,0,0,0);
-                        if (itemDate < from) return false;
+                        const from = toYMD(state.filterDateFrom);
+                        if (from && cmp(item_ymd, from) < 0) return false;
                     }
                     if (state.filterDateTo) {
-                        const to = new Date(state.filterDateTo); to.setHours(23,59,59,999);
-                        if (itemDate > to) return false;
+                        const to = toYMD(state.filterDateTo);
+                        if (to && cmp(item_ymd, to) > 0) return false;
                     }
                 }
                 if (state.searchQuery) {
@@ -2447,20 +2460,16 @@
                 overlay.classList.remove('open');
                 btn.classList.remove('active');
             } else {
-                // 每次打开都重置到今天
                 const now = new Date();
                 _calYear = now.getFullYear();
                 _calMonth = now.getMonth();
-                // 默认筛选当天，同步 lastClick 让逻辑一致
-                const todayKey = dateToKey(now.getFullYear(), now.getMonth()+1, now.getDate());
-                state.filterDateFrom = todayKey;
+                _calPickStep = 0;
+                _calLastClick = null;
+                state.filterDateFrom = null;
                 state.filterDateTo = null;
-                _calPickStep = 1;
-                _calLastClick = todayKey; // 关键：同步，这样点今天=双击确认单日，点别的=范围
-                // 同步输入框
                 const fromInput = document.getElementById('cal-date-from');
                 const toInput = document.getElementById('cal-date-to');
-                if (fromInput) fromInput.value = todayKey;
+                if (fromInput) fromInput.value = '';
                 if (toInput) toInput.value = '';
 
                 const btnRect = btn.getBoundingClientRect();
@@ -2522,10 +2531,15 @@
             const lastDay = new Date(_calYear, _calMonth + 1, 0);
             const startDow = firstDay.getDay();
 
-            const fromDate = keyToDate(state.filterDateFrom);
-            if (fromDate) fromDate.setHours(0,0,0,0);
-            const toDate = keyToDate(state.filterDateTo);
-            if (toDate) toDate.setHours(0,0,0,0);
+            // 用年月日数字比较，避免时区格式问题
+            const parseKeyYMD = key => {
+                if (!key) return null;
+                const p = key.trim().split(/\s+/);
+                if (p.length < 3) return null;
+                return { y: parseInt(p[0]), m: parseInt(p[1]), d: parseInt(p[2]) };
+            };
+            const fromYMD = parseKeyYMD(state.filterDateFrom);
+            const toYMD = parseKeyYMD(state.filterDateTo);
 
             grid.innerHTML = '';
             ['日','一','二','三','四','五','六'].forEach(d => {
@@ -2546,7 +2560,7 @@
                 el.className = 'cal-cell';
                 // 数字用span包裹确保在伪元素上层
                 const span = document.createElement('span');
-                span.style.cssText = 'position:relative;z-index:3;';
+                span.style.cssText = 'position:relative;z-index:3;pointer-events:none;';
                 span.innerText = d;
                 el.appendChild(span);
 
@@ -2555,7 +2569,7 @@
                 if (specialDateKeys.has(noteKey)) {
                     el.classList.add('has-special');
                     const star = document.createElement('span');
-                    star.style.cssText = 'position:absolute;top:1px;right:1px;font-size:0.45rem;color:var(--accent-color);z-index:4;line-height:1;';
+                    star.style.cssText = 'position:absolute;top:1px;right:1px;font-size:0.45rem;color:var(--accent-color);z-index:4;line-height:1;pointer-events:none;';
                     star.innerText = '✦';
                     el.appendChild(star);
                 }
@@ -2565,12 +2579,21 @@
 
                 if (thisDate.getTime() === today.getTime()) el.classList.add('today');
 
-                if (fromDate && toDate) {
-                    if (thisDate.getTime() === fromDate.getTime()) el.classList.add('range-start');
-                    else if (thisDate.getTime() === toDate.getTime()) el.classList.add('range-end');
-                    else if (thisDate > fromDate && thisDate < toDate) el.classList.add('in-range');
-                } else if (fromDate) {
-                    if (thisDate.getTime() === fromDate.getTime()) el.classList.add('range-start', 'no-end');
+                const cy = _calYear, cm = _calMonth + 1, cd = d;
+                if (fromYMD && toYMD) {
+                    if (cy===fromYMD.y && cm===fromYMD.m && cd===fromYMD.d) {
+                        el.classList.add('range-start');
+                    } else if (cy===toYMD.y && cm===toYMD.m && cd===toYMD.d) {
+                        el.classList.add('range-end');
+                    } else {
+                        const after = cy>fromYMD.y || (cy===fromYMD.y && (cm>fromYMD.m || (cm===fromYMD.m && cd>fromYMD.d)));
+                        const before = cy<toYMD.y || (cy===toYMD.y && (cm<toYMD.m || (cm===toYMD.m && cd<toYMD.d)));
+                        if (after && before) el.classList.add('in-range');
+                    }
+                } else if (fromYMD) {
+                    if (cy===fromYMD.y && cm===fromYMD.m && cd===fromYMD.d) {
+                        el.classList.add('selected'); // 单日用 selected，更大更醒目
+                    }
                 }
 
                 el.onclick = () => calSelectDate(_calYear, _calMonth + 1, d);
@@ -2585,37 +2608,42 @@
             }
         }
 
-        let _calLastClick = null; // 记录上一次点击的key，用于判断双击
+        let _calLastClick = null;
 
         function calSelectDate(y, m, d) {
             const key = dateToKey(y, m, d);
-            const picked = new Date(y, m-1, d); picked.setHours(0,0,0,0);
 
             if (_calPickStep === 0 || _calPickStep === 2) {
-                // 全新开始：设起始，等待第二次点击
                 state.filterDateFrom = key;
                 state.filterDateTo = null;
                 _calLastClick = key;
                 _calPickStep = 1;
             } else if (_calPickStep === 1) {
-                // 已有起始，判断是否双击同一天
                 if (key === _calLastClick) {
-                    // 双击同一天 = 单日筛选，完成
+                    state.filterDateFrom = null;
                     state.filterDateTo = null;
-                    _calPickStep = 2;
-                } else {
-                    // 点了不同的天 = 设结束，完成范围
-                    const from = keyToDate(state.filterDateFrom);
-                    from.setHours(0,0,0,0);
-                    if (picked < from) {
-                        // 比起始早：交换
-                        state.filterDateTo = state.filterDateFrom;
-                        state.filterDateFrom = key;
-                    } else {
-                        state.filterDateTo = key;
-                    }
                     _calLastClick = null;
-                    _calPickStep = 2;
+                    _calPickStep = 0;
+                } else {
+                    const from = keyToDate(state.filterDateFrom);
+                    if (!from) {
+                        state.filterDateFrom = key;
+                        state.filterDateTo = null;
+                        _calLastClick = key;
+                        _calPickStep = 1;
+                    } else {
+                        from.setHours(0,0,0,0);
+                        const picked = new Date(y, m-1, d);
+                        picked.setHours(0,0,0,0);
+                        if (picked < from) {
+                            state.filterDateTo = state.filterDateFrom;
+                            state.filterDateFrom = key;
+                        } else {
+                            state.filterDateTo = key;
+                        }
+                        _calLastClick = null;
+                        _calPickStep = 2;
+                    }
                 }
             }
 
