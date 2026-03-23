@@ -1289,6 +1289,20 @@
             initBattery();
             renderSpecialPin();
 
+            // 恢复锁定状态（需在UI渲染完成后）
+            try {
+                const locked = JSON.parse(localStorage.getItem('wanwan_locked_controls'));
+                if (Array.isArray(locked)) {
+                    locked.forEach(key => {
+                        _lockedControls.add(key);
+                        const btn = document.getElementById('lock-' + key);
+                        const area = document.getElementById('lockable-' + key);
+                        if (btn) { btn.textContent = '🔒'; btn.classList.add('locked'); }
+                        if (area) { area.style.pointerEvents = 'none'; area.style.opacity = '0.4'; }
+                    });
+                }
+            } catch(e) {}
+
             // 启动遮罩淡出
             const splash = document.getElementById('splash-screen');
             if (splash) {
@@ -1961,6 +1975,7 @@
                 if (btn) { btn.textContent = '🔒'; btn.classList.add('locked'); }
                 if (area) { area.style.pointerEvents = 'none'; area.style.opacity = '0.4'; }
             }
+            saveData();
         }
         function rgbToHex(r, g, b) {
             return '#' + [r,g,b].map(v => v.toString(16).padStart(2,'0')).join('');
@@ -2787,6 +2802,7 @@
                 days: state.specialDays,
                 pinnedId: state.specialPinnedId
             }));
+            localStorage.setItem('wanwan_locked_controls', JSON.stringify([..._lockedControls]));
         }
 
         // 懒加载 JSZip + FileSaver（只在导出/导入时请求）
