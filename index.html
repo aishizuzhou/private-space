@@ -195,12 +195,20 @@
         }
         /* 范围条 */
         .cal-bar {
-            top:11%; bottom:11%; left:0; right:0;
+            top:15%; bottom:15%; left:0; right:0;
             background: var(--cal-range-bg);
         }
-        .cal-bar-right { left:91%; right:-200px; }
-        .cal-bar-left  { left:-200px; right:91%; }
+        .cal-bar-right { left:50%; right:0; }
+        .cal-bar-left  { left:0; right:50%; }
         /* 圆圈 */
+        .cal-circle-white {
+            width:92%; padding-top:92%;
+            top:50%; left:50%;
+            transform:translate(-50%,-50%);
+            background: white;
+            border-radius:50%;
+            z-index:1;
+        }
         .cal-circle {
             width:82%; padding-top:82%;
             top:50%; left:50%;
@@ -2573,8 +2581,11 @@
                     el.appendChild(bar);
                 }
 
-                // 2. 圆圈
+                // 2. 圆圈（白色垫底+实色圆）
                 if (onCircle) {
+                    const whiteBg = document.createElement('div');
+                    whiteBg.className = 'cal-bg cal-circle-white';
+                    el.appendChild(whiteBg);
                     const circle = document.createElement('div');
                     circle.className = 'cal-bg cal-circle' + (mode==='selected' ? ' cal-circle-lg' : '');
                     el.appendChild(circle);
