@@ -1,5 +1,5 @@
 // 画脂鏤氷 - Service Worker
-const CACHE_NAME = 'huazhi-v1774270545';
+const CACHE_NAME = 'huazhi-v1774270572';
 
 const ASSETS = [
   './index.html',
