@@ -847,7 +847,7 @@
     <!-- 日历面板遮罩 -->
     <div class="cal-overlay" id="cal-overlay" onclick="toggleCalPanel()"></div>
     <!-- 日历面板 -->
-    <div class="cal-panel" id="cal-panel">
+    <div class="cal-panel" id="cal-panel" onclick="event.stopPropagation()">
         <!-- tab切换 -->
         <div class="cal-tabs">
             <div class="cal-tab active" id="tab-daily" onclick="switchCalTab('daily')">✧𝓓𝓪𝓲𝓵𝔂</div>
@@ -1421,8 +1421,7 @@
                     const iy = itemDate.getFullYear();
                     const im = itemDate.getMonth() + 1;
                     const id = itemDate.getDate();
-                    // 把key解析成年月日数字直接比较，绕过时区格式问题
-                    const toYMD = key => {
+                    const parseYMD = key => {
                         if (!key) return null;
                         const p = key.trim().split(/\s+/);
                         if (p.length < 3) return null;
@@ -1434,14 +1433,11 @@
                         return a.d - b.d;
                     };
                     const item_ymd = { y: iy, m: im, d: id };
-                    if (state.filterDateFrom) {
-                        const from = toYMD(state.filterDateFrom);
-                        if (from && cmp(item_ymd, from) < 0) return false;
-                    }
-                    if (state.filterDateTo) {
-                        const to = toYMD(state.filterDateTo);
-                        if (to && cmp(item_ymd, to) > 0) return false;
-                    }
+                    const from = parseYMD(state.filterDateFrom);
+                    // 单日模式：to 为 null 时用 from 作为上限
+                    const to = parseYMD(state.filterDateTo) || from;
+                    if (from && cmp(item_ymd, from) < 0) return false;
+                    if (to && cmp(item_ymd, to) > 0) return false;
                 }
                 if (state.searchQuery) {
                     const inContent = item.content.includes(state.searchQuery);
@@ -2428,7 +2424,8 @@
         let _calYear = new Date().getFullYear();
         let _calMonth = new Date().getMonth();
         let _statsMode = {};
-        let _calPickStep = 0; // 0=没选 1=选了起始 2=选完
+        let _calPickStep = 0;
+        let _calLastClick = null;
 
         function toggleCalPanel() {
             const panel = document.getElementById('cal-panel');
@@ -2617,8 +2614,6 @@
                 el.innerText = i; grid.appendChild(el);
             }
         }
-
-        let _calLastClick = null;
 
         function calSelectDate(y, m, d) {
             const key = dateToKey(y, m, d);
