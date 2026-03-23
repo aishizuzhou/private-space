@@ -172,6 +172,7 @@
             display: grid; grid-template-columns: repeat(7,1fr);
             gap: 0;
             margin-bottom: 10px;
+            overflow: hidden;
         }
         .cal-cell {
             aspect-ratio: 1; display:flex; align-items:center; justify-content:center;
@@ -196,10 +197,9 @@
         .cal-bar {
             top:11%; bottom:11%; left:0; right:0;
             background: var(--cal-range-bg);
-            border-radius:0;
         }
-        .cal-bar-right { left:50%; right:0; }
-        .cal-bar-left  { left:0; right:50%; }
+        .cal-bar-right { left:91%; right:-200px; }
+        .cal-bar-left  { left:-200px; right:91%; }
         /* 圆圈 */
         .cal-circle {
             width:82%; padding-top:82%;
