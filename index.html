@@ -50,24 +50,29 @@
         body.dark-mode #app-container { background: rgba(20, 16, 28, 0.75); }
         body.dark-mode .note-card { background: rgba(40, 32, 50, 0.6); border-color: rgba(255,255,255,0.1); }
         body.dark-mode .note-card:hover, body.dark-mode .note-card:active { background: rgba(60, 48, 72, 0.75); }
-        body.dark-mode .modal-content { background: rgba(28, 22, 38, 0.95) !important; border-color: rgba(255,255,255,0.1); color: #e0d8e8; }
+        body.dark-mode .modal-content { background: rgba(22, 17, 32, 0.97) !important; border-color: rgba(255,255,255,0.08); color: #e0d8e8; }
         body.dark-mode .modal-content h3, body.dark-mode .modal-content label, body.dark-mode .settings-title { color: #c8bcd8; }
-        body.dark-mode .modal-content input, body.dark-mode .modal-content textarea, body.dark-mode .modal-content select { background: rgba(255,255,255,0.07); color: #e0d8e8; border-color: rgba(255,255,255,0.15); }
-        body.dark-mode .cal-panel { background: rgba(28, 22, 38, 0.95) !important; border: 1px solid rgba(255,255,255,0.1); color: #e0d8e8; }
+        body.dark-mode .modal-content input, body.dark-mode .modal-content textarea, body.dark-mode .modal-content select { background: rgba(255,255,255,0.06); color: #e0d8e8; border-color: rgba(255,255,255,0.1); }
+        body.dark-mode .cal-panel { background: rgba(22, 17, 32, 0.97) !important; border: 1px solid rgba(255,255,255,0.08); color: #e0d8e8; }
         body.dark-mode .cal-cell { color: #c8bcd8; }
         body.dark-mode .cal-cell.other-month { color: #555; }
         body.dark-mode .cal-month-label { color: #e0d8e8; }
         body.dark-mode .cal-nav { color: #aaa; }
         body.dark-mode .stats-cell { background: rgba(255,255,255,0.06); }
         body.dark-mode .stats-cell .stats-val { color: #e0d8e8; }
-        body.dark-mode .filter-tag { background: rgba(255,255,255,0.1); color: #e0d8e8; }
-        body.dark-mode .filter-tag.active { background: rgba(255,255,255,0.2); }
-        body.dark-mode .tag { background: rgba(255,255,255,0.12); color: #c8bcd8; }
-        body.dark-mode .cal-input-row input { background: rgba(255,255,255,0.07); color: #e0d8e8; border-color: rgba(255,255,255,0.15); }
-        body.dark-mode #full-note-body { color: #e0d8e8; }
-        body.dark-mode .glass-modal-content { background: rgba(28,22,38,0.95) !important; }
+        body.dark-mode .filter-tag { background: rgba(255,255,255,0.08); color: #e0d8e8; }
+        body.dark-mode .filter-tag.active { background: rgba(255,255,255,0.18); }
+        body.dark-mode .tag { background: rgba(255,255,255,0.1); color: #c8bcd8; }
+        body.dark-mode .cal-input-row input { background: rgba(255,255,255,0.06); color: #e0d8e8; border-color: rgba(255,255,255,0.1); }
+        body.dark-mode #full-note-body { color: #e0d8e8; background: rgba(22, 17, 32, 0.97); }
+        body.dark-mode .glass-modal-content { background: rgba(22, 17, 32, 0.97) !important; }
         body.dark-mode .status-bar { color: #e0d8e8; }
         body.dark-mode { background-color: #120e1c; }
+        body.dark-mode .full-note-comment-bar { background: rgba(28, 22, 40, 0.98) !important; border-color: rgba(255,255,255,0.07) !important; }
+        body.dark-mode #comment-input { background: rgba(255,255,255,0.06) !important; color: #e0d8e8 !important; border-color: rgba(255,255,255,0.1) !important; }
+        body.dark-mode .todo-editor-row { background: rgba(255,255,255,0.05) !important; }
+        body.dark-mode .todo-editor-row input { color: #e0d8e8 !important; }
+        body.dark-mode .full-note-modal-wrap { background: rgba(22, 17, 32, 0.97) !important; }
 
         body {
             margin: 0; padding: 0;
@@ -461,7 +466,7 @@
             transform: translateY(-3px);
             box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.08), inset 1px 1px 2px rgba(255, 255, 255, 0.8);
         }
-        .filter-tag.blocked { background: #ff4d4d; color: #fff; text-decoration: line-through; }
+        .filter-tag.blocked { background: #ff4d4d !important; color: #fff !important; text-decoration: line-through; }
 
         .content-area {
             flex: 1;
@@ -964,12 +969,10 @@
     </div>
 
     <div class="modal" id="full-note-modal">
-        <div class="modal-content glass-modal-content" style="display:flex; flex-direction:column; padding:0; overflow:hidden; max-height:88vh; background:rgba(255,255,255,0.94)!important;">
+        <div class="modal-content glass-modal-content full-note-modal-wrap" style="display:flex; flex-direction:column; padding:0; overflow:hidden; max-height:88vh; background:rgba(255,255,255,0.94)!important;">
             <button class="close-btn" onclick="closeModal('full-note-modal')" style="position:absolute; top:10px; right:15px; z-index:10;">＞</button>
-            <!-- 正文+评论列表，合并滚动 -->
             <div id="full-note-body" style="flex:1; overflow-y:auto; padding:30px 20px 12px;"></div>
-            <!-- 底部固定输入栏 -->
-            <div style="display:flex; align-items:flex-start; gap:8px; padding:10px 16px 14px; border-top:1px solid rgba(0,0,0,0.08); background:rgba(255,255,255,0.6); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); flex-shrink:0;">
+            <div class="full-note-comment-bar" style="display:flex; align-items:flex-start; gap:8px; padding:10px 16px 14px; border-top:1px solid rgba(0,0,0,0.08); background:rgba(255,255,255,0.6); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); flex-shrink:0;">
                 <textarea id="comment-input" rows="1" placeholder="何か言いたいの？" style="flex:1; padding:9px 16px; border-radius:18px; border:1px solid rgba(200,200,200,0.8); background:rgba(245,245,245,0.9); font-size:0.9rem; outline:none; margin:0; resize:none; overflow-y:auto; max-height:100px; line-height:1.5; font-family:var(--custom-font);"
                     oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,100)+'px';"
                     onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submitComment();}"></textarea>
@@ -992,7 +995,14 @@
 
     <div class="modal" id="editor-modal">
         <div class="modal-content">
-            <h3 id="editor-title">言って。</h3>
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+                <h3 id="editor-title">言って。</h3>
+                <button id="todo-mode-btn" onclick="toggleTodoMode()" style="padding:4px 12px; border-radius:20px; border:1px solid var(--accent-color); background:transparent; color:var(--accent-color); font-size:0.78rem; cursor:pointer; transition:all 0.2s; flex-shrink:0;">☐ 待办</button>
+            </div>
+            <div id="todo-editor-area" style="display:none; margin-bottom:10px;">
+                <div id="todo-items-list" style="display:flex; flex-direction:column; gap:6px; margin-bottom:8px;"></div>
+                <button onclick="addTodoItem()" style="width:100%; padding:7px; border-radius:8px; border:1px dashed rgba(0,0,0,0.15); background:transparent; color:#aaa; font-size:0.82rem; cursor:pointer;">+ 添加待办项</button>
+            </div>
             <textarea id="edit-content" rows="5" placeholder="おかえりなさい♡"></textarea>
             <input type="text" id="edit-tags" placeholder="标签 (用空格分隔)">
             <div style="margin-bottom: 10px;">
@@ -1404,6 +1414,12 @@
                 state.tempImages = [];
             }
 
+            // Todo 模式初始化
+            const isTodo = id ? (state.notes.find(n => n.id === id) || {}).isTodo : false;
+            _todoMode = !!isTodo;
+            _todoItems = id && isTodo ? [...(state.notes.find(n => n.id === id).todoItems || [])] : [];
+            applyTodoModeUI();
+
             renderTempImages();
             openModal('editor-modal');
         }
@@ -1424,7 +1440,7 @@
             const tagsInput = document.getElementById('edit-tags').value;
             const timerVal = parseInt(document.getElementById('edit-timer').value);
 
-            if (!content && state.tempImages.length === 0) return;
+            if (!content && state.tempImages.length === 0 && !(_todoMode && _todoItems.length > 0)) return;
 
             let tags = tagsInput.split(' ').filter(t => t.trim() !== '');
             const destructTime = timerVal > 0 ? Date.now() + timerVal * 60 * 1000 : null;
@@ -1440,16 +1456,20 @@
                 note.tags = tags;
                 note.images = state.tempImages;
                 note.destructTime = destructTime;
+                note.isTodo = _todoMode;
+                note.todoItems = _todoMode ? [..._todoItems] : [];
             } else {
                 state.notes.unshift({
                     id: Date.now(),
-                    content: content,
+                    content: _todoMode ? '' : content,
                     tags: tags,
                     images: state.tempImages,
                     timestamp: new Date().toLocaleString(),
                     createdTime: Date.now(),
                     destructTime: destructTime,
-                    isTrash: false
+                    isTrash: false,
+                    isTodo: _todoMode,
+                    todoItems: _todoMode ? [..._todoItems] : []
                 });
             }
 
@@ -1489,7 +1509,16 @@
                 if (item.destructTime && now >= item.destructTime) return false;
 
                 if (item.tags.some(t => state.blockedTags.includes(t))) return false;
-                if (state.filterTag && !item.tags.includes(state.filterTag)) return false;
+                if (state.filterTag) {
+                    // filterTagIsParent=true时匹配所有"父/"开头的子tag，也匹配父tag本身
+                    if (state.filterTagIsParent) {
+                        const prefix = state.filterTag + '/';
+                        const match = item.tags.some(t => t === state.filterTag || t.startsWith(prefix));
+                        if (!match) return false;
+                    } else {
+                        if (!item.tags.includes(state.filterTag)) return false;
+                    }
+                }
                 if (state.filterDateFrom || state.filterDateTo) {
                     const itemDate = new Date(item.timestamp);
                     const iy = itemDate.getFullYear();
@@ -1642,6 +1671,20 @@
                         ${itemSpecials.map(sd => `<span style="font-size:0.72rem; color:var(--accent-color); opacity:0.85;">${sd.emoji ? sd.emoji + ' ' : '✦ '}${sd.name}</span>`).join('')}
                     </div>` : '';
 
+                // Todo 渲染
+                let todoHtml = '';
+                if (item.isTodo && item.todoItems && item.todoItems.length > 0) {
+                    const doneCount = item.todoItems.filter(t => t.done).length;
+                    todoHtml = `<div style="margin-top:6px;">
+                        <div style="font-size:0.7rem; color:#aaa; margin-bottom:5px;">☑ ${doneCount}/${item.todoItems.length}</div>
+                        ${item.todoItems.map((t, idx) => `
+                        <div style="display:flex; align-items:center; gap:8px; padding:3px 0; cursor:pointer;" onclick="event.stopPropagation(); toggleTodoDone(${item.id}, ${idx})">
+                            <span style="font-size:1rem; flex-shrink:0; color:${t.done ? 'var(--accent-color)' : '#ccc'};">${t.done ? '☑' : '☐'}</span>
+                            <span style="font-size:0.85rem; line-height:1.4; color:var(--text-color); ${t.done ? 'text-decoration:line-through; opacity:0.5;' : ''}">${t.text}</span>
+                        </div>`).join('')}
+                    </div>`;
+                }
+
                 card.innerHTML = `
                     <div class="note-header">
                         <span class="note-time">${pinIcon}${item.timestamp}</span>
@@ -1650,7 +1693,7 @@
                             <span class="edit-btn" onclick="openEditor(${item.id})">📝</span>
                         </div>
                     </div>
-                    <div class="note-content">${item.content}</div>
+                    ${item.isTodo ? todoHtml : `<div class="note-content">${item.content}</div>`}
                     ${imagesHtml}
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
                         <div class="note-tags">${tagsHtml}</div>
@@ -1687,12 +1730,29 @@
             }
             let tagsHtml = note.tags.map(t => `<span class="tag" style="background:rgba(255,255,255,0.6); border:1px solid #eee;">#${t}</span>`).join('');
 
+            // Todo 正文或普通正文
+            let bodyContentHtml = '';
+            if (note.isTodo && note.todoItems && note.todoItems.length > 0) {
+                const doneCount = note.todoItems.filter(t => t.done).length;
+                bodyContentHtml = `
+                    <div style="margin-bottom:4px; font-size:0.75rem; color:#aaa;">☑ ${doneCount} / ${note.todoItems.length}</div>
+                    <div id="full-note-todo-list" style="display:flex; flex-direction:column; gap:2px;">
+                        ${note.todoItems.map((t, idx) => `
+                        <div onclick="toggleTodoDoneFromFull(${note.id}, ${idx})" style="display:flex; align-items:flex-start; gap:10px; padding:8px 10px; border-radius:10px; cursor:pointer; transition:background 0.15s; background:${t.done ? 'rgba(0,0,0,0.02)' : 'transparent'};">
+                            <span style="font-size:1.2rem; flex-shrink:0; margin-top:1px; color:${t.done ? 'var(--accent-color)' : 'rgba(0,0,0,0.2)'};">${t.done ? '☑' : '☐'}</span>
+                            <span style="font-size:1rem; line-height:1.55; color:var(--text-color); ${t.done ? 'text-decoration:line-through; opacity:0.45;' : ''}">${t.text}</span>
+                        </div>`).join('')}
+                    </div>`;
+            } else {
+                bodyContentHtml = `<div style="font-size: 1.05rem; line-height: 1.6; white-space: pre-wrap; color:var(--text-color);">${note.content}</div>`;
+            }
+
             document.getElementById('full-note-body').innerHTML = `
                 <div style="display: flex; align-items: center; margin-bottom: 15px;">
                     <img src="${state.settings.currentAvatar}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; margin-right: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
                     <span style="font-weight: bold; font-size: 1.1rem; ${(()=>{ const nc = state.settings.nameColor||'#333'; return nc.includes('gradient') ? `background:${nc};-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;` : `color:${nc};`; })()}">${state.settings.name}</span>
                 </div>
-                <div style="font-size: 1.05rem; line-height: 1.6; white-space: pre-wrap; color:var(--text-color);">${note.content}</div>
+                ${bodyContentHtml}
                 ${imagesHtml}
                 <div style="margin-top: 20px; display: flex; gap: 8px; flex-wrap: wrap;">${tagsHtml}</div>
                 <div style="font-size: 0.8rem; color: #999; text-align: right; margin-top: 12px; font-style: italic;">${note.timestamp}</div>
@@ -2325,7 +2385,22 @@
             const container = document.getElementById('tag-filters');
             container.innerHTML = '';
 
-            // 常驻「全部」
+            // 解析父子结构
+            const parentMap = {}; // { parentName: [fullChildTag, ...] }
+            const childSet = new Set();
+            allTags.forEach(tag => {
+                if (tag.includes('/')) {
+                    const slash = tag.indexOf('/');
+                    const parent = tag.slice(0, slash);
+                    if (!parentMap[parent]) parentMap[parent] = [];
+                    parentMap[parent].push(tag);
+                    childSet.add(tag);
+                }
+            });
+
+            if (!state._expandedParentTags) state._expandedParentTags = new Set();
+
+            // 「全部」
             const allDiv = document.createElement('div');
             allDiv.className = `filter-tag ${!state.filterTag ? 'active' : ''}`;
             allDiv.innerText = '全部';
@@ -2333,26 +2408,210 @@
             setupLongPress(allDiv, () => openTagManager());
             container.appendChild(allDiv);
 
-            // 常驻「⏳」——始终显示
+            // 「⏳」
             const timerDiv = document.createElement('div');
-            timerDiv.className = `filter-tag ${state.filterTag === '⏳' ? 'active' : ''}`;
+            timerDiv.className = `filter-tag ${state.filterTag === '⏳' && !state.filterTagIsParent ? 'active' : ''}`;
             timerDiv.innerText = '⏳';
             timerDiv.onclick = () => filterByTag('⏳');
+            setupLongPress(timerDiv, () => toggleBlockTag('⏳'));
             container.appendChild(timerDiv);
-            allTags.delete('⏳'); // 避免后面重复渲染
+            allTags.delete('⏳');
 
             allTags.forEach(tag => {
+                if (childSet.has(tag)) return;
+
                 const isBlocked = state.blockedTags.includes(tag);
+                const hasChildren = !!parentMap[tag];
+                const isExpanded = hasChildren && state._expandedParentTags.has(tag);
+                const isActive = hasChildren
+                    ? (state.filterTag === tag && state.filterTagIsParent)
+                    : (state.filterTag === tag && !state.filterTagIsParent);
+
                 const div = document.createElement('div');
-                div.className = `filter-tag ${state.filterTag === tag ? 'active' : ''} ${isBlocked ? 'blocked' : ''}`;
-                div.innerText = tag;
-                div.onclick = () => filterByTag(tag);
-                div.oncontextmenu = (e) => { e.preventDefault(); toggleBlockTag(tag); };
+                div.className = `filter-tag ${isActive ? 'active' : ''} ${isBlocked ? 'blocked' : ''}`;
+                div.style.cssText = 'display:flex; align-items:center; gap:2px;';
+
+                if (hasChildren) {
+                    div.innerHTML = `<span>${tag}</span><span style="font-size:0.6rem; opacity:0.55;">${isExpanded ? ' ▴' : ' ▾'}</span>`;
+                    div.onclick = () => {
+                        if (isBlocked) return;
+                        if (isExpanded) {
+                            // 已展开 → 单击筛选父+子
+                            filterByTag(tag, true);
+                        } else {
+                            // 未展开 → 展开
+                            state._expandedParentTags.add(tag);
+                            renderTags();
+                        }
+                    };
+                    setupLongPress(div, () => toggleBlockTag(tag));
+                } else {
+                    div.innerText = tag;
+                    div.onclick = () => filterByTag(tag, false);
+                    setupLongPress(div, () => toggleBlockTag(tag));
+                }
                 container.appendChild(div);
+
+                // 展开时渲染子tag
+                if (isExpanded) {
+                    parentMap[tag].forEach(childTag => {
+                        const isChildBlocked = state.blockedTags.includes(childTag);
+                        const isChildActive = state.filterTag === childTag && !state.filterTagIsParent;
+                        const childLabel = childTag.slice(childTag.indexOf('/') + 1);
+                        const childDiv = document.createElement('div');
+                        childDiv.className = `filter-tag ${isChildActive ? 'active' : ''} ${isChildBlocked ? 'blocked' : ''}`;
+                        childDiv.style.cssText = 'font-size:0.78rem; padding-left:10px; border-left:2px solid var(--accent-color);';
+                        childDiv.innerText = childLabel;
+                        childDiv.onclick = () => filterByTag(childTag, false);
+                        setupLongPress(childDiv, () => toggleBlockTag(childTag));
+                        container.appendChild(childDiv);
+                    });
+                }
             });
         }
-        function filterByTag(tag) { if(state.blockedTags.includes(tag)) return; state.filterTag = tag; renderList(); renderTags(); }
-        function toggleBlockTag(tag) { if(state.blockedTags.includes(tag)) state.blockedTags = state.blockedTags.filter(t => t !== tag); else { state.blockedTags.push(tag); if(state.filterTag===tag) state.filterTag=null; } renderList(); renderTags(); }
+        // ===================== Todo 模式 =====================
+        let _todoMode = false;
+        let _todoItems = []; // [{text, done}, ...]
+
+        function toggleTodoMode() {
+            _todoMode = !_todoMode;
+            applyTodoModeUI();
+        }
+
+        function applyTodoModeUI() {
+            const btn = document.getElementById('todo-mode-btn');
+            const todoArea = document.getElementById('todo-editor-area');
+            const textarea = document.getElementById('edit-content');
+            if (_todoMode) {
+                btn.style.background = 'var(--accent-color)';
+                btn.style.color = 'var(--accent-text)';
+                btn.innerText = '☑ 待办';
+                todoArea.style.display = 'block';
+                textarea.style.display = 'none';
+                renderTodoEditorItems();
+            } else {
+                btn.style.background = 'transparent';
+                btn.style.color = 'var(--accent-color)';
+                btn.innerText = '☐ 待办';
+                todoArea.style.display = 'none';
+                textarea.style.display = '';
+            }
+        }
+
+        function renderTodoEditorItems() {
+            const list = document.getElementById('todo-items-list');
+            list.innerHTML = '';
+            _todoItems.forEach((item, idx) => {
+                const row = document.createElement('div');
+                row.className = 'todo-editor-row';
+                row.style.cssText = 'display:flex; align-items:flex-start; gap:10px; background:rgba(0,0,0,0.03); border-radius:10px; padding:8px 10px;';
+                row.innerHTML = `
+                    <span onclick="toggleTodoEditorDone(${idx})" style="font-size:1.25rem; cursor:pointer; flex-shrink:0; margin-top:2px; color:${item.done ? 'var(--accent-color)' : '#ccc'}; line-height:1.4;">${item.done ? '☑' : '☐'}</span>
+                    <textarea rows="1" data-idx="${idx}"
+                        style="flex:1; border:none; background:transparent; outline:none; font-size:0.95rem; padding:0; margin:0; color:var(--text-color); resize:none; overflow:hidden; line-height:1.5; font-family:var(--custom-font); ${item.done ? 'text-decoration:line-through; opacity:0.5;' : ''}"
+                        placeholder="待办内容..."
+                        oninput="syncTodoText(${idx}, this)"
+                        onkeydown="handleTodoKey(event, ${idx})"
+                    >${item.text}</textarea>
+                    <span onclick="removeTodoItem(${idx})" style="color:#ccc; cursor:pointer; font-size:1.1rem; flex-shrink:0; margin-top:2px; line-height:1.4;">×</span>
+                `;
+                list.appendChild(row);
+            });
+            // 自动撑高所有textarea
+            list.querySelectorAll('textarea').forEach(ta => {
+                ta.style.height = 'auto';
+                ta.style.height = ta.scrollHeight + 'px';
+            });
+        }
+
+        function syncTodoText(idx, ta) {
+            _todoItems[idx].text = ta.value;
+            ta.style.height = 'auto';
+            ta.style.height = ta.scrollHeight + 'px';
+        }
+
+        function handleTodoKey(e, idx) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                // 在当前idx后插入新项
+                _todoItems.splice(idx + 1, 0, { text: '', done: false });
+                renderTodoEditorItems();
+                setTimeout(() => {
+                    const tas = document.querySelectorAll('#todo-items-list textarea');
+                    if (tas[idx + 1]) tas[idx + 1].focus();
+                }, 30);
+            } else if (e.key === 'Backspace') {
+                const ta = e.target;
+                if (ta.value === '' && _todoItems.length > 1) {
+                    e.preventDefault();
+                    _todoItems.splice(idx, 1);
+                    renderTodoEditorItems();
+                    setTimeout(() => {
+                        const tas = document.querySelectorAll('#todo-items-list textarea');
+                        const focusIdx = Math.max(0, idx - 1);
+                        if (tas[focusIdx]) {
+                            tas[focusIdx].focus();
+                            // 光标移到末尾
+                            const len = tas[focusIdx].value.length;
+                            tas[focusIdx].setSelectionRange(len, len);
+                        }
+                    }, 30);
+                }
+            }
+        }
+
+        function addTodoItem() {
+            _todoItems.push({ text: '', done: false });
+            renderTodoEditorItems();
+            setTimeout(() => {
+                const tas = document.querySelectorAll('#todo-items-list textarea');
+                if (tas.length) tas[tas.length - 1].focus();
+            }, 30);
+        }
+
+        function removeTodoItem(idx) {
+            _todoItems.splice(idx, 1);
+            renderTodoEditorItems();
+        }
+
+        function toggleTodoEditorDone(idx) {
+            _todoItems[idx].done = !_todoItems[idx].done;
+            renderTodoEditorItems();
+        }
+
+        function toggleTodoDone(noteId, idx) {
+            const note = state.notes.find(n => n.id === noteId);
+            if (!note || !note.todoItems) return;
+            note.todoItems[idx].done = !note.todoItems[idx].done;
+            saveData();
+            renderList();
+        }
+
+        function toggleTodoDoneFromFull(noteId, idx) {
+            const note = state.notes.find(n => n.id === noteId);
+            if (!note || !note.todoItems) return;
+            note.todoItems[idx].done = !note.todoItems[idx].done;
+            saveData();
+            renderList();
+            // 刷新正文页todo列表，不关弹窗
+            openFullNote(noteId);
+        }
+
+        function filterByTag(tag, isParent) {
+            if (tag && state.blockedTags.includes(tag)) return;
+            state.filterTag = tag;
+            state.filterTagIsParent = !!isParent;
+            renderList(); renderTags();
+        }
+        function toggleBlockTag(tag) {
+            if (state.blockedTags.includes(tag)) {
+                state.blockedTags = state.blockedTags.filter(t => t !== tag);
+            } else {
+                state.blockedTags.push(tag);
+                if (state.filterTag === tag) { state.filterTag = null; state.filterTagIsParent = false; }
+            }
+            renderList(); renderTags();
+        }
 
         let _selectedTagsToDelete = new Set();
         function openTagManager() {
