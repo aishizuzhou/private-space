@@ -39,6 +39,7 @@
             --avatar-scale: 1;
             --frame-scale: 1;
             --content-padding: 16px;
+            --glass-blur: 15px;
         }
 
         body.dark-mode {
@@ -87,7 +88,7 @@
         #app-container {
             width: 100%; height: 100%; max-width: 500px;
             background: var(--glass-bg);
-            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
             border: 1px solid var(--glass-border);
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
             display: flex; flex-direction: column; position: relative; overflow: hidden;
@@ -169,28 +170,6 @@
             user-select: none; -webkit-user-select: none;
         }
         .cal-btn.active { box-shadow: 0 0 0 2px var(--accent-color), 0 2px 8px rgba(0,0,0,0.2); }
-
-        /* 日历面板 - 用modal遮罩方式 */
-        .cal-overlay {
-            position: fixed; top:0; left:0; right:0; bottom:0;
-            z-index: 8999;
-            display: none;
-        }
-        .cal-overlay.open { display: block; }
-        .cal-panel {
-            position: fixed;
-            left: 12px; right: 12px;
-            background: rgba(255,255,255,0.88);
-            backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.25);
-            z-index: 9000;
-            padding: 14px;
-            display: none;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-        .cal-panel.open { display: block; }
 
         /* 日历头部 */
         .cal-header {
@@ -504,12 +483,13 @@
         }
 
         .note-card.is-pinned {
-            border-left: 3px solid var(--accent-color);
+            background: var(--accent-color-30, rgba(255,154,158,0.3));
+            border-color: var(--accent-color-20, rgba(255,154,158,0.2));
         }
 
         .note-card {
             background: var(--glass-bg);
-            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
             border: 1px solid var(--glass-border);
             border-radius: 12px; padding: 10px 12px;
             position: relative; z-index: 2;
@@ -751,13 +731,9 @@
             0%, 100% { opacity: 0.2; }
             50%       { opacity: 1; }
         }
-        .lock-btn {
-            background: none; border: 1px solid #ddd; border-radius: 6px;
-            padding: 2px 6px; cursor: pointer; font-size: 0.85rem;
-            color: #aaa; flex-shrink: 0; line-height: 1;
-            transition: color 0.2s, border-color 0.2s;
-        }
-        .lock-btn.locked { color: #e08; border-color: #e08; }
+        .lock-btn { background:none; border:1px solid rgba(0,0,0,0.12); border-radius:6px; padding:2px 6px; cursor:pointer; font-size:0.8rem; color:#bbb; flex-shrink:0; transition:color 0.2s,border-color 0.2s; }
+        .lock-btn.locked { color:#e08; border-color:#e08; }
+        body.dark-mode .lock-btn { border-color:rgba(255,255,255,0.15); color:#555; }
         /* 防止非交互元素被选中 */
         .status-bar, .status-time, .status-battery, .battery-infinity,
         .user-name, .user-signature, .note-time, .live-timer,
@@ -791,21 +767,10 @@
         .special-pin-name { color: var(--text-color); opacity:0.9; font-weight:500; flex:1; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
         .special-pin-days { color: var(--accent-color); font-weight:bold; font-size:0.85rem; flex-shrink:0; }
 
-        /* 日历面板 tab */
-        .cal-tabs {
-            display: flex; margin-bottom: 12px;
-            border-bottom: 1px solid rgba(0,0,0,0.08);
-        }
-        .cal-tab {
-            flex:1; text-align:center; padding:6px 0;
-            font-size:0.85rem; cursor:pointer; color:#aaa;
-            border-bottom: 2px solid transparent;
-            transition: color 0.2s, border-color 0.2s;
-            user-select:none; -webkit-user-select:none;
-        }
+        /* 日历面板 tab - drawer内用，保留 */
+        .cal-tabs { display: flex; margin-bottom: 12px; border-bottom: 1px solid rgba(0,0,0,0.08); }
+        .cal-tab { flex:1; text-align:center; padding:6px 0; font-size:0.85rem; cursor:pointer; color:#aaa; border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s; user-select:none; -webkit-user-select:none; }
         .cal-tab.active { color: var(--accent-color); border-bottom-color: var(--accent-color); }
-
-        /* Special Days 面板 */
         .special-panel { display:none; }
         .special-panel.active { display:block; }
         .daily-panel { display:none; }
@@ -848,6 +813,57 @@
         }
         .special-form-row { display:flex; gap:6px; }
         .special-form-row button { flex:1; padding:7px; border-radius:8px; font-size:0.82rem; border:none; cursor:pointer; }
+
+        /* ===== 抽屉 tag 列表 ===== */
+        .drawer-tag-list { padding: 0 0 4px; }
+        .drawer-tag-row {
+            display: flex; align-items: center;
+            padding: 10px 20px;
+            gap: 10px;
+            cursor: pointer;
+            transition: background 0.15s;
+            user-select: none;
+        }
+        .drawer-tag-row:active { background: rgba(0,0,0,0.04); }
+        body.dark-mode .drawer-tag-row:active { background: rgba(255,255,255,0.05); }
+        .drawer-tag-row.active { background: rgba(0,0,0,0.05); }
+        body.dark-mode .drawer-tag-row.active { background: rgba(255,255,255,0.07); }
+        .drawer-tag-row.blocked { opacity: 0.3; }
+        .drawer-tag-hash { font-size: 0.9rem; opacity: 0.35; flex-shrink: 0; width: 16px; }
+        .drawer-tag-name { flex: 1; font-size: 0.9rem; color: var(--text-color); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .drawer-tag-name.active-filter { color: var(--accent-color); font-weight: 600; }
+        .drawer-tag-arrow { font-size: 0.7rem; opacity: 0.3; flex-shrink: 0; transition: transform 0.18s; }
+        .drawer-tag-arrow.expanded { transform: rotate(180deg); }
+        .drawer-tag-more { width: 28px; height: 28px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0.35; border-radius: 50%; flex-shrink: 0; font-size: 1rem; letter-spacing: 0.05em; transition: opacity 0.15s; padding: 0; }
+        .drawer-tag-more:active { opacity: 1; background: rgba(0,0,0,0.06); }
+        /* 子tag缩进 */
+        .drawer-tag-row.child { padding-left: 46px; }
+        .drawer-tag-row.child .drawer-tag-hash { opacity: 0.2; }
+        /* tag操作菜单 */
+        .tag-action-menu {
+            position: fixed; z-index: 99998;
+            background: rgba(255,255,255,0.97);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-radius: 14px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+            min-width: 160px;
+            overflow: hidden;
+        }
+        body.dark-mode .tag-action-menu { background: rgba(30,24,42,0.97); }
+        .tag-action-item {
+            padding: 13px 18px;
+            font-size: 0.88rem;
+            cursor: pointer;
+            color: var(--text-color);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            transition: background 0.15s;
+        }
+        body.dark-mode .tag-action-item { border-bottom-color: rgba(255,255,255,0.06); }
+        .tag-action-item:last-child { border-bottom: none; }
+        .tag-action-item:active { background: rgba(0,0,0,0.05); }
+        .tag-action-item.danger { color: #e05; }
+        .tag-action-overlay { position: fixed; inset: 0; z-index: 99997; }
+        /* ===== 抽屉 tag 列表 END ===== */
 
         /* ===== Todo 页面 ===== */
         .todo-tabs {
@@ -1074,47 +1090,61 @@
         .sb-portrait {
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            width: 100%;
-            height: 100%;
-            padding: 10vw 8vw 8vw;
+            width: 100%; height: 100%;
+            padding: 6vw 6vw 6vw;
         }
         .sb-portrait .sb-top-row {
-            display: flex;
-            align-items: baseline;
-            gap: 0.5em;
-            font-size: 4vw;
+            font-size: 3.5vw;
             font-weight: 300;
-            opacity: 0.75;
-            letter-spacing: 0.05em;
-            flex-wrap: wrap;
+            opacity: 0.6;
+            letter-spacing: 0.06em;
+            display: flex;
+            align-items: center;
+            gap: 0.6em;
+            flex-shrink: 0;
+            margin-bottom: 1vw;
         }
-        .sb-portrait .sb-big-hour {
-            font-size: 38vw;
-            font-weight: 700;
-            line-height: 0.88;
-            letter-spacing: -0.02em;
-            display: block;
-        }
-        .sb-portrait .sb-big-min {
-            font-size: 38vw;
-            font-weight: 700;
-            line-height: 0.88;
-            letter-spacing: -0.02em;
-            display: block;
-            margin-top: 0.05em;
-        }
-        .sb-portrait .sb-bottom-row {
+        .sb-portrait .sb-time-block {
+            flex: 1;
             display: flex;
             flex-direction: column;
-            gap: 0.6em;
-            font-size: 3.8vw;
+            min-height: 0;
+        }
+        .sb-portrait .sb-big-hour,
+        .sb-portrait .sb-big-min {
+            font-size: 47vw;
+            font-weight: 700;
+            line-height: 0.9;
+            letter-spacing: -0.03em;
+            display: block;
+            flex: 1;
+        }
+        .sb-portrait .sb-min-row {
+            position: relative;
+        }
+        .sb-portrait .sb-sec {
+            position: absolute;
+            right: 0;
+            bottom: 0.05em;
+            font-size: 7vw;
+            font-weight: 400;
+            opacity: 0.45;
+            letter-spacing: 0;
+            line-height: 1;
+        }
+        .sb-portrait .sb-bottom-row {
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5em;
+            font-size: 3.5vw;
             font-weight: 300;
-            opacity: 0.7;
+            opacity: 0.6;
+            margin-top: 2vw;
         }
         .sb-portrait .sb-todo-line {
-            font-size: 3.8vw;
-            opacity: 0.6;
+            font-size: 3.5vw;
+            opacity: 0.55;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -1123,27 +1153,45 @@
         .sb-landscape {
             display: none;
             flex-direction: row;
-            align-items: center;
-            justify-content: space-between;
-            width: 100%;
-            height: 100%;
-            padding: 6vh 8vw;
+            align-items: stretch;
+            width: 100%; height: 100%;
+            padding: 4vh 5vw;
+        }
+        .sb-landscape .sb-land-time {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            flex: 1;
         }
         .sb-landscape .sb-big-time {
-            font-size: 28vh;
+            font-size: 34vh;
             font-weight: 700;
-            letter-spacing: -0.02em;
-            line-height: 1;
+            letter-spacing: -0.03em;
+            line-height: 0.88;
+            display: block;
+        }
+        .sb-landscape .sb-land-sec-row {
+            display: flex;
+            align-items: baseline;
+            gap: 0.4em;
+        }
+        .sb-landscape .sb-land-sec {
+            font-size: 5vh;
+            font-weight: 400;
+            opacity: 0.45;
         }
         .sb-landscape .sb-right-col {
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            gap: 1.4vh;
-            font-size: 2.8vh;
+            justify-content: flex-end;
+            align-items: flex-end;
+            gap: 1.2vh;
+            font-size: 2.4vh;
             font-weight: 300;
-            opacity: 0.75;
+            opacity: 0.7;
             text-align: right;
+            min-width: 0;
+            padding-left: 3vw;
         }
 
         @media (orientation: landscape) {
@@ -1240,12 +1288,15 @@
             overscroll-behavior: contain;
         }
         .drawer-header {
-            padding: 52px 20px 18px;
-            display: flex; flex-direction: column; align-items: center; gap: 8px;
+            padding: 48px 20px 16px;
+            display: flex; flex-direction: row; align-items: center; gap: 14px;
             background: linear-gradient(160deg, rgba(187,224,226,0.22) 0%, rgba(255,255,255,0) 100%);
             flex-shrink: 0;
+            cursor: pointer; user-select: none;
+            transition: opacity 0.15s;
         }
-        .drawer-avatar-wrap { position: relative; width: 72px; height: 72px; }
+        .drawer-header:active { opacity: 0.75; }
+        .drawer-avatar-wrap { position: relative; width: 56px; height: 56px; flex-shrink: 0; }
         .drawer-avatar-wrap img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
         .drawer-name { font-size: 1rem; font-weight: 600; color: var(--text-color); }
         .drawer-standby-btn {
@@ -1358,24 +1409,120 @@
 
     <!-- 抽屉本体 - 内容从这里开始 -->
     <div id="drawer">
-        <!-- 头部：头像+昵称+待机 -->
-        <div class="drawer-header">
+        <!-- 头部：点击头像展开个人设置 -->
+        <div class="drawer-header" id="drawer-header" onclick="toggleDrawerAvatarPanel()">
             <div class="drawer-avatar-wrap">
                 <img id="drawer-avatar-img" src="https://via.placeholder.com/150" alt="">
             </div>
-            <div class="drawer-name" id="drawer-display-name">宛宛</div>
-            <button class="drawer-standby-btn" onclick="closeDrawer(); setTimeout(enterStandby,300);">⏾ 进入待机</button>
+            <div style="flex:1;">
+                <div class="drawer-name" id="drawer-display-name">宛宛</div>
+                <div style="font-size:0.7rem;opacity:0.38;margin-top:2px;">点击编辑头像与挂件</div>
+            </div>
+            <span id="drawer-avatar-arrow" style="font-size:0.8rem;opacity:0.3;transition:transform 0.2s;flex-shrink:0;">▾</span>
+        </div>
+
+        <!-- 头像/昵称/头像框/挂件 展开面板 -->
+        <div id="drawer-avatar-panel" style="display:none;border-bottom:1px solid rgba(0,0,0,0.06);">
+            <div class="drawer-settings-area" style="padding-top:4px;">
+                <div class="drawer-row">
+                    <label>昵称</label>
+                    <input type="text" id="setting-name" class="drawer-input" onchange="updateSettings()">
+                </div>
+                <div class="drawer-row" style="align-items:flex-start;">
+                    <label style="padding-top:8px;">签名</label>
+                    <textarea id="setting-signature" class="drawer-input" rows="1" placeholder="留空不显示" style="resize:none;overflow:hidden;line-height:1.5;font-family:var(--custom-font);" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';updateSettings()"></textarea>
+                </div>
+                <div class="drawer-row">
+                    <label>昵称颜色</label>
+                    <div style="display:flex;gap:6px;align-items:center;flex:1;">
+                        <input type="text" id="setting-name-color" class="drawer-input" placeholder="#333 或 gradient" style="flex:1;" oninput="updateSettings()">
+                        <div id="name-color-preview" style="width:30px;height:28px;border-radius:6px;border:1px solid #ddd;flex-shrink:0;cursor:pointer;" onclick="toggleNameColorPicker()"></div>
+                    </div>
+                </div>
+                <div id="name-color-picker" style="display:none;padding:8px 16px 4px;">
+                    <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><span style="font-size:0.72rem;color:#aaa;width:12px;">R</span><input type="range" id="nc-r" min="0" max="255" value="51" style="flex:1;height:5px;accent-color:#f66;" oninput="onNameRgbChange()"><span id="nc-r-val" style="font-size:0.72rem;color:#aaa;width:22px;text-align:right;">51</span></div>
+                    <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><span style="font-size:0.72rem;color:#aaa;width:12px;">G</span><input type="range" id="nc-g" min="0" max="255" value="51" style="flex:1;height:5px;accent-color:#4c4;" oninput="onNameRgbChange()"><span id="nc-g-val" style="font-size:0.72rem;color:#aaa;width:22px;text-align:right;">51</span></div>
+                    <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:0.72rem;color:#aaa;width:12px;">B</span><input type="range" id="nc-b" min="0" max="255" value="51" style="flex:1;height:5px;accent-color:#66f;" oninput="onNameRgbChange()"><span id="nc-b-val" style="font-size:0.72rem;color:#aaa;width:22px;text-align:right;">51</span></div>
+                </div>
+            </div>
+            <div class="drawer-section-title" style="padding-top:8px;">头像</div>
+            <div class="drawer-settings-area">
+                <div style="display:flex;gap:5px;margin-bottom:8px;">
+                    <button onclick="document.getElementById('avatar-input').click()" style="flex:1;padding:7px;border-radius:8px;border:1px dashed rgba(0,0,0,0.15);background:transparent;color:#aaa;font-size:0.82rem;cursor:pointer;">更换头像</button>
+                    <input type="file" id="avatar-input" style="display:none" accept="image/*" onchange="changeAvatar(this)">
+                </div>
+                <div id="history-avatars" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;"></div>
+                <div class="drawer-row">
+                    <label>缩放</label>
+                    <div id="lockable-avatarscale" style="display:flex;flex:1;gap:6px;align-items:center;">
+                        <input type="range" id="setting-avatar-scale" min="0.5" max="3" step="0.1" value="1" style="flex:1;height:5px;" onchange="updateSettings()">
+                    </div>
+                    <button class="lock-btn" id="lock-avatarscale" onclick="toggleLock('avatarscale')">🔓</button>
+                </div>
+                <div class="drawer-row">
+                    <label>X偏移</label>
+                    <div id="lockable-avataroffset-x" style="flex:1;">
+                        <input type="number" id="setting-avatar-x" class="drawer-input" placeholder="0" style="width:100%;" onchange="updateSettings()">
+                    </div>
+                    <button class="lock-btn" id="lock-avataroffset-x" onclick="toggleLock('avataroffset-x')">🔓</button>
+                </div>
+                <div class="drawer-row">
+                    <label>Y偏移</label>
+                    <div id="lockable-avataroffset-y" style="flex:1;">
+                        <input type="number" id="setting-avatar-y" class="drawer-input" placeholder="0" style="width:100%;" onchange="updateSettings()">
+                    </div>
+                    <button class="lock-btn" id="lock-avataroffset-y" onclick="toggleLock('avataroffset-y')">🔓</button>
+                </div>
+            </div>
+            <div class="drawer-section-title" style="padding-top:8px;">头像框</div>
+            <div class="drawer-settings-area">
+                <div class="frame-preset-list" id="frame-preset-list" style="margin-bottom:6px;"></div>
+                <div style="display:flex;gap:5px;margin-bottom:8px;">
+                    <button onclick="document.getElementById('frame-preset-input').click()" style="flex:1;padding:7px;border-radius:8px;border:1px dashed rgba(0,0,0,0.15);background:transparent;color:#aaa;font-size:0.82rem;cursor:pointer;">＋ 上传头像框</button>
+                    <input type="file" id="frame-preset-input" style="display:none" accept="image/*" onchange="addFramePresetFromFile(this)">
+                </div>
+                <div class="drawer-row">
+                    <label>框大小</label>
+                    <div id="lockable-framescale" style="display:flex;flex:1;gap:6px;align-items:center;">
+                        <input type="range" id="setting-frame-scale" min="0.5" max="2" step="0.05" value="1" style="flex:1;height:5px;" onchange="updateSettings()">
+                    </div>
+                    <button class="lock-btn" id="lock-framescale" onclick="toggleLock('framescale')">🔓</button>
+                </div>
+            </div>
+            <div class="drawer-section-title" style="padding-top:8px;">挂件</div>
+            <div class="drawer-settings-area" style="padding-bottom:12px;">
+                <div class="drawer-row">
+                    <label>启用</label>
+                    <input type="checkbox" id="setting-charm-toggle" style="width:auto;margin:0;" onchange="updateSettings()">
+                </div>
+                <div style="display:flex;gap:5px;margin-bottom:8px;">
+                    <button onclick="document.getElementById('charm-input').click()" style="flex:1;padding:7px;border-radius:8px;border:1px dashed rgba(0,0,0,0.15);background:transparent;color:#aaa;font-size:0.82rem;cursor:pointer;">更换挂件</button>
+                    <input type="file" id="charm-input" style="display:none" accept="image/*" onchange="changeCharm(this)">
+                </div>
+                <div class="drawer-row"><label>X坐标</label><input type="number" id="setting-charm-x" class="drawer-input" placeholder="距右侧px" onchange="updateSettings()"></div>
+                <div class="drawer-row"><label>Y坐标</label><input type="number" id="setting-charm-y" class="drawer-input" placeholder="距顶部px" onchange="updateSettings()"></div>
+                <div class="drawer-row">
+                    <label>大小</label>
+                    <div id="lockable-charmsize" style="display:flex;flex:1;gap:6px;align-items:center;">
+                        <input type="range" id="setting-charm-size" min="20" max="150" style="flex:1;height:5px;" onchange="updateSettings()">
+                    </div>
+                    <button class="lock-btn" id="lock-charmsize" onclick="toggleLock('charmsize')">🔓</button>
+                </div>
+                <div class="drawer-row">
+                    <label>摇晃幅度</label>
+                    <div id="lockable-charmswing" style="display:flex;flex:1;gap:6px;align-items:center;">
+                        <input type="range" id="setting-charm-swing" min="0" max="45" style="flex:1;height:5px;" onchange="updateSettings()">
+                    </div>
+                    <button class="lock-btn" id="lock-charmswing" onclick="toggleLock('charmswing')">🔓</button>
+                </div>
+            </div>
+            <div style="padding:0 20px 12px;">
+                <button class="drawer-standby-btn" onclick="closeDrawer(); setTimeout(enterStandby,300);" style="width:100%;">⏾ 进入待机</button>
+            </div>
         </div>
 
         <div class="drawer-scroll">
-            <!-- 标签筛选 -->
-            <div class="drawer-section-title">标签</div>
-            <div class="drawer-tags" id="drawer-tag-filters"></div>
-
-            <!-- 分隔线 -->
-            <div class="drawer-divider"></div>
-
-            <!-- 日历（纯月历，无 special tab） -->
+            <!-- 日历 -->
             <div class="drawer-section-title">✧𝓓𝓪𝓲𝓵𝔂</div>
             <div class="drawer-cal-area">
                 <div class="cal-header" style="padding:0 4px 8px;">
@@ -1403,29 +1550,15 @@
 
             <div class="drawer-divider"></div>
 
+            <!-- 标签列表（统计下面） -->
+            <div class="drawer-section-title">标签</div>
+            <div class="drawer-tag-list" id="drawer-tag-list"></div>
+
+            <div class="drawer-divider"></div>
+
             <!-- 设置 -->
             <div class="drawer-section-title">基础设置</div>
             <div class="drawer-settings-area">
-                <div class="drawer-row">
-                    <label>昵称</label>
-                    <input type="text" id="setting-name" class="drawer-input" onchange="updateSettings()">
-                </div>
-                <div class="drawer-row" style="align-items:flex-start;">
-                    <label style="padding-top:8px;">签名</label>
-                    <textarea id="setting-signature" class="drawer-input" rows="1" placeholder="留空不显示" style="resize:none;overflow:hidden;line-height:1.5;font-family:var(--custom-font);" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';updateSettings()"></textarea>
-                </div>
-                <div class="drawer-row">
-                    <label>昵称颜色</label>
-                    <div style="display:flex;gap:6px;align-items:center;flex:1;">
-                        <input type="text" id="setting-name-color" class="drawer-input" placeholder="#333 或 gradient" style="flex:1;" oninput="updateSettings()">
-                        <div id="name-color-preview" style="width:30px;height:28px;border-radius:6px;border:1px solid #ddd;flex-shrink:0;cursor:pointer;" onclick="toggleNameColorPicker()"></div>
-                    </div>
-                </div>
-                <div id="name-color-picker" style="display:none;padding:8px 16px 4px;">
-                    <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><span style="font-size:0.72rem;color:#aaa;width:12px;">R</span><input type="range" id="nc-r" min="0" max="255" value="51" style="flex:1;height:5px;accent-color:#f66;" oninput="onNameRgbChange()"><span id="nc-r-val" style="font-size:0.72rem;color:#aaa;width:22px;text-align:right;">51</span></div>
-                    <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><span style="font-size:0.72rem;color:#aaa;width:12px;">G</span><input type="range" id="nc-g" min="0" max="255" value="51" style="flex:1;height:5px;accent-color:#4c4;" oninput="onNameRgbChange()"><span id="nc-g-val" style="font-size:0.72rem;color:#aaa;width:22px;text-align:right;">51</span></div>
-                    <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:0.72rem;color:#aaa;width:12px;">B</span><input type="range" id="nc-b" min="0" max="255" value="51" style="flex:1;height:5px;accent-color:#66f;" oninput="onNameRgbChange()"><span id="nc-b-val" style="font-size:0.72rem;color:#aaa;width:22px;text-align:right;">51</span></div>
-                </div>
                 <div class="drawer-row">
                     <label>主题色</label>
                     <input type="color" id="setting-color" style="width:60px;height:28px;padding:0;border:none;background:none;cursor:pointer;" onchange="updateSettings()">
@@ -1442,6 +1575,11 @@
                 <div class="drawer-row">
                     <label>深色模式</label>
                     <input type="checkbox" id="setting-dark-mode" style="width:auto;margin:0;" onchange="toggleDarkMode(this.checked)">
+                </div>
+                <div class="drawer-row">
+                    <label>毛玻璃</label>
+                    <input type="range" id="setting-glass-blur" min="0" max="40" step="1" style="flex:1;height:5px;" onchange="updateGlassBlur(this.value)">
+                    <span id="setting-glass-blur-val" style="font-size:0.72rem;color:#aaa;width:28px;text-align:right;flex-shrink:0;">15</span>
                 </div>
                 <div class="drawer-row">
                     <label>字体大小</label>
@@ -1479,70 +1617,22 @@
             <div class="drawer-settings-area">
                 <div class="preset-list" id="font-preset-list" style="margin-bottom:6px;"></div>
                 <button onclick="document.getElementById('font-input').click()" style="width:100%;padding:7px;border-radius:8px;border:1px dashed rgba(0,0,0,0.15);background:transparent;color:#aaa;font-size:0.82rem;cursor:pointer;">＋ 上传字体</button>
-                <input type="file" id="font-input" accept=".ttf,.otf,.woff,.woff2" onchange="addFontPreset(this)">
-            </div>
-
-            <div class="drawer-divider"></div>
-            <div class="drawer-section-title">头像与头像框</div>
-            <div class="drawer-settings-area">
-                <div class="frame-preset-list" id="frame-preset-list" style="margin-bottom:6px;"></div>
-                <div style="display:flex;gap:5px;margin-bottom:8px;">
-                    <button onclick="document.getElementById('frame-preset-input').click()" style="flex:1;padding:7px;border-radius:8px;border:1px dashed rgba(0,0,0,0.15);background:transparent;color:#aaa;font-size:0.82rem;cursor:pointer;">＋ 上传头像框</button>
-                    <input type="file" id="frame-preset-input" accept="image/*" onchange="addFramePresetFromFile(this)">
-                </div>
-                <div style="display:flex;gap:5px;margin-bottom:8px;">
-                    <button onclick="document.getElementById('avatar-input').click()" style="flex:1;padding:7px;border-radius:8px;border:1px dashed rgba(0,0,0,0.15);background:transparent;color:#aaa;font-size:0.82rem;cursor:pointer;">更换头像</button>
-                    <input type="file" id="avatar-input" accept="image/*" onchange="changeAvatar(this)">
-                </div>
-                <div id="history-avatars" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;"></div>
-                <div class="drawer-row">
-                    <label>头像缩放</label>
-                    <input type="range" id="setting-avatar-scale" min="0.5" max="3" step="0.1" value="1" style="flex:1;height:5px;" onchange="updateSettings()">
-                </div>
-                <div class="drawer-row">
-                    <label>X偏移</label>
-                    <input type="number" id="setting-avatar-x" class="drawer-input" placeholder="0" onchange="updateSettings()">
-                </div>
-                <div class="drawer-row">
-                    <label>Y偏移</label>
-                    <input type="number" id="setting-avatar-y" class="drawer-input" placeholder="0" onchange="updateSettings()">
-                </div>
-                <div class="drawer-row">
-                    <label>头像框大小</label>
-                    <input type="range" id="setting-frame-scale" min="0.5" max="2" step="0.05" value="1" style="flex:1;height:5px;" onchange="updateSettings()">
-                </div>
-            </div>
-
-            <div class="drawer-divider"></div>
-            <div class="drawer-section-title">挂件</div>
-            <div class="drawer-settings-area">
-                <div class="drawer-row">
-                    <label>启用挂件</label>
-                    <input type="checkbox" id="setting-charm-toggle" style="width:auto;margin:0;" onchange="updateSettings()">
-                </div>
-                <div style="display:flex;gap:5px;margin-bottom:8px;">
-                    <button onclick="document.getElementById('charm-input').click()" style="flex:1;padding:7px;border-radius:8px;border:1px dashed rgba(0,0,0,0.15);background:transparent;color:#aaa;font-size:0.82rem;cursor:pointer;">更换挂件</button>
-                    <input type="file" id="charm-input" accept="image/*" onchange="changeCharm(this)">
-                </div>
-                <div class="drawer-row"><label>X坐标</label><input type="number" id="setting-charm-x" class="drawer-input" placeholder="距右侧px" onchange="updateSettings()"></div>
-                <div class="drawer-row"><label>Y坐标</label><input type="number" id="setting-charm-y" class="drawer-input" placeholder="距顶部px" onchange="updateSettings()"></div>
-                <div class="drawer-row"><label>大小</label><input type="range" id="setting-charm-size" min="20" max="150" style="flex:1;height:5px;" onchange="updateSettings()"></div>
-                <div class="drawer-row"><label>摇晃幅度</label><input type="range" id="setting-charm-swing" min="0" max="45" style="flex:1;height:5px;" onchange="updateSettings()"></div>
+                <input type="file" id="font-input" style="display:none" accept=".ttf,.otf,.woff,.woff2" onchange="addFontPreset(this)">
             </div>
 
             <div class="drawer-divider"></div>
             <div class="drawer-section-title">背景</div>
             <div class="drawer-settings-area">
-                <button onclick="document.getElementById('bg-input').click()" style="width:100%;padding:7px;border-radius:8px;border:1px dashed rgba(0,0,0,0.15);background:transparent;color:#aaa;font-size:0.82rem;cursor:pointer;margin-bottom:6px;">全局背景</button>
-                <input type="file" id="bg-input" accept="image/*" onchange="changeBg(this)">
-                <div style="display:flex;gap:6px;margin-bottom:4px;">
+                <button onclick="document.getElementById('bg-input').click()" style="width:100%;padding:7px;border-radius:8px;border:1px dashed rgba(0,0,0,0.15);background:transparent;color:#aaa;font-size:0.82rem;cursor:pointer;margin-bottom:8px;">全局背景</button>
+                <input type="file" id="bg-input" accept="image/*" style="display:none" onchange="changeBg(this)">
+                <div style="display:flex;gap:6px;margin-bottom:6px;">
                     <button onclick="document.getElementById('bg-note-input').click()" style="flex:1;padding:6px 4px;border-radius:8px;border:1px solid rgba(187,224,226,0.7);background:rgba(187,224,226,0.2);font-size:0.78rem;cursor:pointer;color:var(--text-color);">笔记背景</button>
                     <button onclick="document.getElementById('bg-todo-input').click()" style="flex:1;padding:6px 4px;border-radius:8px;border:1px solid rgba(200,235,190,0.7);background:rgba(238,251,224,0.3);font-size:0.78rem;cursor:pointer;color:var(--text-color);">待办背景</button>
                     <button onclick="document.getElementById('bg-pomo-input').click()" style="flex:1;padding:6px 4px;border-radius:8px;border:1px solid rgba(210,180,210,0.7);background:rgba(230,208,227,0.25);font-size:0.78rem;cursor:pointer;color:var(--text-color);">番茄背景</button>
                 </div>
-                <input type="file" id="bg-note-input" accept="image/*" onchange="changeModeBg(this,'bgNote')">
-                <input type="file" id="bg-todo-input" accept="image/*" onchange="changeModeBg(this,'bgTodo')">
-                <input type="file" id="bg-pomo-input" accept="image/*" onchange="changeModeBg(this,'bgPomodoro')">
+                <input type="file" id="bg-note-input" accept="image/*" onchange="changeModeBg(this,'bgNote')" style="display:none;">
+                <input type="file" id="bg-todo-input" accept="image/*" onchange="changeModeBg(this,'bgTodo')" style="display:none;">
+                <input type="file" id="bg-pomo-input" accept="image/*" onchange="changeModeBg(this,'bgPomodoro')" style="display:none;">
                 <button onclick="clearModeBg()" style="width:100%;padding:6px;border-radius:8px;background:rgba(0,0,0,0.04);border:none;color:#aaa;font-size:0.78rem;cursor:pointer;margin-top:2px;">清除当前模式背景</button>
                 <div id="history-bgs" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;"></div>
             </div>
@@ -1560,7 +1650,7 @@
                 <div style="display:flex;gap:8px;">
                     <button onclick="exportDataToZip()" style="flex:1;padding:8px;border-radius:8px;background:rgba(220,150,160,0.15);color:#8b3a45;border:1px solid rgba(220,150,160,0.4);font-weight:bold;font-size:0.82rem;cursor:pointer;">⬆ 导出</button>
                     <button onclick="document.getElementById('import-zip-input').click()" style="flex:1;padding:8px;border-radius:8px;background:rgba(210,185,80,0.15);color:#6b5500;border:1px solid rgba(210,185,80,0.4);font-weight:bold;font-size:0.82rem;cursor:pointer;">⬇ 导入</button>
-                    <input type="file" id="import-zip-input" accept=".zip" onchange="importDataFromZip(this)">
+                    <input type="file" id="import-zip-input" style="display:none" accept=".zip" onchange="importDataFromZip(this)">
                 </div>
             </div>
         </div>
@@ -1589,9 +1679,9 @@
                     </span>
                 </div>
                 <div class="user-name" id="display-name">宛宛</div>
-                <div class="user-signature" id="display-signature"></div>
+                <div class="user-signature" id="display-signature" onclick="openDrawer()" style="cursor:pointer;min-height:1.2em;"></div>
             </div>
-            <button class="cal-btn" id="special-days-btn" onclick="openSpecialModal()" title="特别的日子"><span>𝓼𝓹𝓮𝓬𝓲𝓪𝓵 ✦</span></button>
+            <button class="cal-btn" id="special-days-btn" onclick="openSpecialModal()" title="特别的日子"><span>✦</span></button>
         </div>
 
         <div class="content-wrapper">
@@ -1605,7 +1695,6 @@
             <!-- ===== 笔记页面 ===== -->
             <div id="page-note" class="mode-page">
                 <input type="text" class="search-bar" placeholder="搜索内容、图片备注..." oninput="handleSearch(this.value)">
-                <div class="tag-filters" id="tag-filters"></div>
                 <div class="content-area" id="list-container"></div>
             </div>
 
@@ -1686,7 +1775,7 @@
             </div>
             <div style="margin-bottom: 10px;">
                 <button onclick="document.getElementById('file-input').click()">上传图片</button>
-                <input type="file" id="file-input" multiple accept="image/*" onchange="handleImageUpload(this)">
+                <input type="file" id="file-input" style="display:none" multiple accept="image/*" onchange="handleImageUpload(this)">
             </div>
             <div id="image-preview-area" style="display:flex; gap:5px; overflow-x:auto; margin-bottom:10px;"></div>
             <div class="btn-group">
@@ -1710,7 +1799,7 @@
     <!-- 特别的日子 modal（从 header ✦ 按钮打开） -->
     <div class="modal" id="special-modal">
         <div class="modal-content" style="max-height:80vh;display:flex;flex-direction:column;">
-            <h3 style="margin-bottom:12px;">𝓼𝓹𝓮𝓬𝓲𝓪𝓵 ✦</h3>
+            <h3 style="margin-bottom:12px;">✦𝓼𝓹𝓮𝓬𝓲𝓪𝓵</h3>
             <div class="special-list" id="special-list" style="flex:1;overflow-y:auto;margin-bottom:8px;"></div>
             <button class="special-add-btn" onclick="toggleSpecialForm()">＋ 新增特别的日子</button>
             <div class="special-form" id="special-form">
@@ -2473,14 +2562,16 @@
             document.documentElement.style.setProperty('--accent-color', s.themeColor);
 
             // accent-color 文字可读性：用感知亮度公式判断白字还是黑字
-            // 感知亮度 = 0.299R + 0.587G + 0.114B（人眼对绿色最敏感）
             const hex = s.themeColor.replace('#', '');
             const r = parseInt(hex.substring(0,2), 16);
             const g = parseInt(hex.substring(2,4), 16);
             const b = parseInt(hex.substring(4,6), 16);
             const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
-            // 亮度 > 186（约73%）时背景太亮，换黑字；否则白字
             document.documentElement.style.setProperty('--accent-text', luminance > 186 ? '#222' : '#fff');
+            document.documentElement.style.setProperty('--accent-color-60', `rgba(${r},${g},${b},0.6)`);
+            document.documentElement.style.setProperty('--accent-color-40', `rgba(${r},${g},${b},0.4)`);
+            document.documentElement.style.setProperty('--accent-color-30', `rgba(${r},${g},${b},0.3)`);
+            document.documentElement.style.setProperty('--accent-color-20', `rgba(${r},${g},${b},0.2)`);
 
             // 日历范围色跟着 accent-color 走，低饱和处理
             // 把 accent-color 混入灰色降饱和，透明度控制
@@ -2571,7 +2662,11 @@
 
             document.getElementById('display-name').innerText = s.name;
             const sigEl = document.getElementById('display-signature');
-            if (sigEl) sigEl.innerText = s.signature || '';
+            if (sigEl) {
+                sigEl.innerText = s.signature || '';
+                sigEl.style.opacity = s.signature ? '' : '0.25';
+                if (!s.signature) sigEl.innerText = '···';
+            }
             document.getElementById('setting-name').value = s.name;
             const sigInput = document.getElementById('setting-signature');
             if (sigInput) {
@@ -2652,11 +2747,28 @@
             if (darkEl) darkEl.checked = !!state.settings.darkMode;
             if (state.settings.darkMode) document.body.classList.add('dark-mode');
             else document.body.classList.remove('dark-mode');
+
+            // 毛玻璃程度
+            const blur = state.settings.glassBlur ?? 15;
+            document.documentElement.style.setProperty('--glass-blur', blur + 'px');
+            const blurSlider = document.getElementById('setting-glass-blur');
+            const blurVal = document.getElementById('setting-glass-blur-val');
+            if (blurSlider) blurSlider.value = blur;
+            if (blurVal) blurVal.textContent = blur;
         }
 
         function toggleDarkMode(on) {
             state.settings.darkMode = on;
             document.body.classList.toggle('dark-mode', on);
+            saveData();
+        }
+
+        function updateGlassBlur(val) {
+            const v = parseInt(val) || 15;
+            state.settings.glassBlur = v;
+            document.documentElement.style.setProperty('--glass-blur', v + 'px');
+            const valEl = document.getElementById('setting-glass-blur-val');
+            if (valEl) valEl.textContent = v;
             saveData();
         }
 
@@ -2920,12 +3032,15 @@
         function changeCharmUrl(url) { if(url) { state.settings.charmImage = url; saveData(); applySettings(); } }
 
         function renderTags() {
-            const allTags = new Set(); state.notes.forEach(n => n.tags.forEach(t => allTags.add(t)));
-            const container = document.getElementById('tag-filters');
+            const container = document.getElementById('drawer-tag-list');
+            if (!container) return;
             container.innerHTML = '';
 
-            // 解析父子结构
-            const parentMap = {}; // { parentName: [fullChildTag, ...] }
+            const allTags = new Set();
+            state.notes.forEach(n => n.tags.forEach(t => allTags.add(t)));
+
+            // 父子结构
+            const parentMap = {};
             const childSet = new Set();
             allTags.forEach(tag => {
                 if (tag.includes('/')) {
@@ -2938,76 +3053,170 @@
             });
 
             if (!state._expandedParentTags) state._expandedParentTags = new Set();
+            if (!state._pinnedTags) state._pinnedTags = [];
 
-            // 「全部」
-            const allDiv = document.createElement('div');
-            allDiv.className = `filter-tag ${!state.filterTag ? 'active' : ''}`;
-            allDiv.innerText = '全部';
-            allDiv.onclick = () => filterByTag(null);
-            setupLongPress(allDiv, () => openTagManager());
-            container.appendChild(allDiv);
+            // 排序：置顶的排最前
+            const topLevelTags = [...allTags].filter(t => !childSet.has(t));
+            topLevelTags.sort((a, b) => {
+                const aPin = state._pinnedTags.includes(a) ? 0 : 1;
+                const bPin = state._pinnedTags.includes(b) ? 0 : 1;
+                return aPin - bPin;
+            });
 
-            // 「⏳」
-            const timerDiv = document.createElement('div');
-            timerDiv.className = `filter-tag ${state.filterTag === '⏳' && !state.filterTagIsParent ? 'active' : ''}`;
-            timerDiv.innerText = '⏳';
-            timerDiv.onclick = () => filterByTag('⏳');
-            setupLongPress(timerDiv, () => toggleBlockTag('⏳'));
-            container.appendChild(timerDiv);
-            allTags.delete('⏳');
-
-            allTags.forEach(tag => {
-                if (childSet.has(tag)) return;
-
+            const addRow = (tag, isChild) => {
                 const isBlocked = state.blockedTags.includes(tag);
                 const hasChildren = !!parentMap[tag];
                 const isExpanded = hasChildren && state._expandedParentTags.has(tag);
-                const isActive = hasChildren
-                    ? (state.filterTag === tag && state.filterTagIsParent)
-                    : (state.filterTag === tag && !state.filterTagIsParent);
+                const label = isChild ? tag.slice(tag.indexOf('/') + 1) : tag;
+                const isActive = state.filterTag === tag && (isChild ? !state.filterTagIsParent : !state.filterTagIsParent && !hasChildren);
 
-                const div = document.createElement('div');
-                div.className = `filter-tag ${isActive ? 'active' : ''} ${isBlocked ? 'blocked' : ''}`;
-                div.style.cssText = 'display:flex; align-items:center; gap:2px;';
+                const row = document.createElement('div');
+                row.className = `drawer-tag-row${isChild ? ' child' : ''}${isBlocked ? ' blocked' : ''}${isActive ? ' active' : ''}`;
+
+                const hash = document.createElement('span');
+                hash.className = 'drawer-tag-hash';
+                hash.textContent = '#';
+
+                const name = document.createElement('span');
+                name.className = 'drawer-tag-name' + (isActive ? ' active-filter' : '');
+                name.textContent = label;
+
+                const more = document.createElement('button');
+                more.className = 'drawer-tag-more';
+                more.textContent = '···';
+                more.onclick = (e) => { e.stopPropagation(); showTagMenu(e, tag, isChild); };
+
+                row.appendChild(hash);
+                row.appendChild(name);
 
                 if (hasChildren) {
-                    div.innerHTML = `<span>${tag}</span><span style="font-size:0.6rem; opacity:0.55;">${isExpanded ? ' ▴' : ' ▾'}</span>`;
-                    div.onclick = () => {
-                        if (isBlocked) return;
-                        if (isExpanded) {
-                            // 已展开 → 单击筛选父+子
-                            filterByTag(tag, true);
-                        } else {
-                            // 未展开 → 展开
-                            state._expandedParentTags.add(tag);
-                            renderTags();
-                        }
-                    };
-                    setupLongPress(div, () => toggleBlockTag(tag));
-                } else {
-                    div.innerText = tag;
-                    div.onclick = () => filterByTag(tag, false);
-                    setupLongPress(div, () => toggleBlockTag(tag));
+                    const arrow = document.createElement('span');
+                    arrow.className = 'drawer-tag-arrow' + (isExpanded ? ' expanded' : '');
+                    arrow.textContent = '▾';
+                    row.appendChild(arrow);
                 }
-                container.appendChild(div);
 
-                // 展开时渲染子tag
+                row.appendChild(more);
+
+                row.onclick = () => {
+                    if (isBlocked) return;
+                    if (hasChildren && !isExpanded) {
+                        state._expandedParentTags.add(tag);
+                        renderTags(); return;
+                    }
+                    if (hasChildren && isExpanded) {
+                        filterByTag(tag, true);
+                    } else {
+                        filterByTag(tag, false);
+                    }
+                    renderList();
+                    renderTags();
+                };
+
+                container.appendChild(row);
+
                 if (isExpanded) {
-                    parentMap[tag].forEach(childTag => {
-                        const isChildBlocked = state.blockedTags.includes(childTag);
-                        const isChildActive = state.filterTag === childTag && !state.filterTagIsParent;
-                        const childLabel = childTag.slice(childTag.indexOf('/') + 1);
-                        const childDiv = document.createElement('div');
-                        childDiv.className = `filter-tag ${isChildActive ? 'active' : ''} ${isChildBlocked ? 'blocked' : ''}`;
-                        childDiv.style.cssText = 'font-size:0.78rem; padding-left:10px; border-left:2px solid var(--accent-color);';
-                        childDiv.innerText = childLabel;
-                        childDiv.onclick = () => filterByTag(childTag, false);
-                        setupLongPress(childDiv, () => toggleBlockTag(childTag));
-                        container.appendChild(childDiv);
-                    });
+                    parentMap[tag].forEach(child => addRow(child, true));
                 }
-            });
+            };
+
+            topLevelTags.forEach(tag => addRow(tag, false));
+
+            if (topLevelTags.length === 0) {
+                container.innerHTML = '<div style="padding:12px 20px;font-size:0.82rem;opacity:0.35;">还没有标签</div>';
+            }
         }
+
+        let _tagMenuActive = false;
+        function showTagMenu(e, tag, isChild) {
+            // 关掉旧的
+            closeTagMenu();
+            _tagMenuActive = true;
+
+            const overlay = document.createElement('div');
+            overlay.className = 'tag-action-overlay';
+            overlay.onclick = closeTagMenu;
+
+            const menu = document.createElement('div');
+            menu.className = 'tag-action-menu';
+            menu.id = 'tag-action-menu';
+
+            const items = [];
+            if (!isChild) {
+                items.push({ label: state._pinnedTags?.includes(tag) ? '取消置顶' : '置顶', fn: () => { togglePinTag(tag); } });
+                items.push({ label: '编辑名称', fn: () => { renameTag(tag); } });
+            }
+            items.push({ label: '仅移除标签', fn: () => { removeTagFromNotes(tag); }, danger: false });
+            items.push({ label: '删除标签和笔记', fn: () => { deleteTagAndNotes(tag); }, danger: true });
+
+            items.forEach(item => {
+                const el = document.createElement('div');
+                el.className = 'tag-action-item' + (item.danger ? ' danger' : '');
+                el.textContent = item.label;
+                el.onclick = () => { closeTagMenu(); item.fn(); };
+                menu.appendChild(el);
+            });
+
+            // 定位：靠近点击位置
+            document.body.appendChild(overlay);
+            document.body.appendChild(menu);
+            const rect = e.target.getBoundingClientRect();
+            const menuW = 180, menuH = items.length * 46;
+            let left = rect.right - menuW;
+            let top = rect.bottom + 4;
+            if (left < 8) left = 8;
+            if (top + menuH > window.innerHeight - 8) top = rect.top - menuH - 4;
+            menu.style.left = left + 'px';
+            menu.style.top = top + 'px';
+            menu.style.minWidth = menuW + 'px';
+        }
+
+        function closeTagMenu() {
+            _tagMenuActive = false;
+            document.getElementById('tag-action-menu')?.remove();
+            document.querySelector('.tag-action-overlay')?.remove();
+        }
+
+        function togglePinTag(tag) {
+            if (!state._pinnedTags) state._pinnedTags = [];
+            const idx = state._pinnedTags.indexOf(tag);
+            if (idx >= 0) state._pinnedTags.splice(idx, 1);
+            else state._pinnedTags.unshift(tag);
+            renderTags();
+        }
+
+        function renameTag(oldName) {
+            const newName = prompt('标签新名称：', oldName);
+            if (!newName || newName.trim() === oldName) return;
+            const n = newName.trim();
+            state.notes.forEach(note => {
+                note.tags = note.tags.map(t => {
+                    if (t === oldName) return n;
+                    if (t.startsWith(oldName + '/')) return n + t.slice(oldName.length);
+                    return t;
+                });
+            });
+            if (state.filterTag === oldName) state.filterTag = n;
+            saveData(); renderList(); renderTags();
+        }
+
+        function removeTagFromNotes(tag) {
+            state.notes.forEach(note => {
+                note.tags = note.tags.filter(t => t !== tag && !t.startsWith(tag + '/'));
+            });
+            if (state.filterTag === tag) { state.filterTag = null; state.filterTagIsParent = false; }
+            saveData(); renderList(); renderTags();
+        }
+
+        function deleteTagAndNotes(tag) {
+            if (!confirm(`删除标签「${tag}」及所有相关笔记？`)) return;
+            state.notes = state.notes.filter(note =>
+                !note.tags.includes(tag) && !note.tags.some(t => t.startsWith(tag + '/'))
+            );
+            if (state.filterTag === tag) { state.filterTag = null; state.filterTagIsParent = false; }
+            saveData(); renderList(); renderTags();
+        }
+
         // ===================== Todo 模式 =====================
         let _todoMode = false;
         let _todoItems = []; // [{text, done}, ...]
@@ -3832,11 +4041,14 @@
             <div class="sb-top-row">
                 <span id="sb-p-date">--年--月--日</span>
                 <span id="sb-p-weekday">星期-</span>
-                <span id="sb-p-battery" style="margin-left:auto; opacity:0.55;"></span>
+                <span id="sb-p-battery" style="margin-left:auto;"></span>
             </div>
-            <div>
+            <div class="sb-time-block">
                 <span class="sb-big-hour" id="sb-p-hour">--</span>
-                <span class="sb-big-min" id="sb-p-min">--</span>
+                <div class="sb-min-row">
+                    <span class="sb-big-min" id="sb-p-min">--</span>
+                    <span class="sb-sec" id="sb-p-sec">00</span>
+                </div>
             </div>
             <div class="sb-bottom-row">
                 <span id="sb-p-special" style="display:none;"></span>
@@ -3845,13 +4057,18 @@
         </div>
         <!-- 横屏 -->
         <div class="sb-landscape">
-            <span class="sb-big-time" id="sb-l-time">--:--</span>
+            <div class="sb-land-time">
+                <span class="sb-big-time" id="sb-l-time">--:--</span>
+                <div class="sb-land-sec-row">
+                    <span class="sb-land-sec" id="sb-l-sec">00</span>
+                </div>
+            </div>
             <div class="sb-right-col">
                 <span id="sb-l-date">--年--月--日</span>
                 <span id="sb-l-weekday">星期-</span>
-                <span id="sb-l-battery" style="opacity:0.5;"></span>
-                <span id="sb-l-special" style="display:none; margin-top:0.8vh;"></span>
-                <span id="sb-l-todo" style="display:none; font-size:2.4vh; opacity:0.6; max-width:30vw; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></span>
+                <span id="sb-l-battery"></span>
+                <span id="sb-l-special" style="display:none;"></span>
+                <span id="sb-l-todo" style="display:none; font-size:2.2vh; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:28vw;"></span>
             </div>
         </div>
         <div class="sb-exit-hint">点击退出</div>
@@ -3878,7 +4095,7 @@
         async function enterStandby() {
             _sbActive = true;
             updateStandbyDisplay();
-            _sbTimer = setInterval(updateStandbyDisplay, 10000); // 每10秒刷新（分钟级）
+            _sbTimer = setInterval(updateStandbyDisplay, 1000); // 每秒刷新（显示秒）
             document.getElementById('standby-overlay').classList.add('active');
             // WakeLock 保持屏幕常亮
             try {
@@ -3937,21 +4154,23 @@
             const now = new Date();
             const hh = String(now.getHours()).padStart(2, '0');
             const mm = String(now.getMinutes()).padStart(2, '0');
+            const ss = String(now.getSeconds()).padStart(2, '0');
             const yyyy = now.getFullYear();
             const mo = String(now.getMonth() + 1).padStart(2, '0');
             const dd = String(now.getDate()).padStart(2, '0');
             const weekDays = ['日','一','二','三','四','五','六'];
             const wd = '星期' + weekDays[now.getDay()];
 
-            // 电量
+            // 电量：复用主页的 ∞ 符号 + xx% 格式
             const cfg = getSbSettings();
             let batStr = '';
-            const batTxt = document.getElementById('battery-text');
-            if (cfg.showBattery && batTxt) {
-                batStr = '🔋 ' + (batTxt.innerText || '--');
+            if (cfg.showBattery) {
+                const sym = document.getElementById('battery-infinity');
+                const txt = document.getElementById('battery-text');
+                if (sym && txt) batStr = sym.textContent + ' ' + txt.textContent;
             }
 
-            // 纪念日/特别的日子——取最近一个有倒计时的
+            // 纪念日
             let specialStr = '';
             if (cfg.showSpecial && typeof state !== 'undefined' && state.specialDays && state.specialDays.length) {
                 const today = new Date(yyyy, now.getMonth(), now.getDate());
@@ -3965,10 +4184,7 @@
                         if (target < today) target.setFullYear(target.getFullYear() + 1);
                     }
                     const diff = Math.round((target - today) / 86400000);
-                    if (diff >= 0 && diff < nearestDays) {
-                        nearestDays = diff;
-                        nearest = sd;
-                    }
+                    if (diff >= 0 && diff < nearestDays) { nearestDays = diff; nearest = sd; }
                 });
                 if (nearest) {
                     const label = (nearest.emoji ? nearest.emoji + ' ' : '') + nearest.name;
@@ -3976,38 +4192,34 @@
                 }
             }
 
-            // 最近一条未完成 todo
+            // 最近一条未完成 todo（从独立 todoSections 取）
             let todoStr = '';
-            if (cfg.showTodo && typeof state !== 'undefined' && state.notes) {
-                // 找最近一条含有未完成todo项的note
-                for (let i = state.notes.length - 1; i >= 0; i--) {
-                    const n = state.notes[i];
-                    if (n.isTodo && n.todoItems && n.todoItems.length) {
-                        const pending = n.todoItems.filter(t => !t.done);
-                        if (pending.length) {
-                            todoStr = '☐ ' + pending[0].text;
-                            break;
-                        }
+            if (cfg.showTodo && typeof state !== 'undefined' && state.todoSections) {
+                outer: for (const sec of state.todoSections) {
+                    for (const item of sec.items) {
+                        if (!item.done) { todoStr = '☐ ' + item.text; break outer; }
                     }
                 }
             }
 
             const dateStr = `${yyyy}年${mo}月${dd}日`;
 
-            // 填入竖屏
+            // 竖屏
             _sbSet('sb-p-hour', hh);
             _sbSet('sb-p-min', mm);
+            _sbSet('sb-p-sec', ss);
             _sbSet('sb-p-date', dateStr);
             _sbSet('sb-p-weekday', wd);
-            _sbSetOptional('sb-p-battery', batStr, cfg.showBattery);
+            _sbSetOptional('sb-p-battery', batStr, cfg.showBattery && batStr);
             _sbSetOptional('sb-p-special', specialStr, cfg.showSpecial && specialStr);
             _sbSetOptional('sb-p-todo', todoStr, cfg.showTodo && todoStr);
 
-            // 填入横屏
+            // 横屏
             _sbSet('sb-l-time', hh + ':' + mm);
+            _sbSet('sb-l-sec', ss);
             _sbSet('sb-l-date', dateStr);
             _sbSet('sb-l-weekday', wd);
-            _sbSetOptional('sb-l-battery', batStr, cfg.showBattery);
+            _sbSetOptional('sb-l-battery', batStr, cfg.showBattery && batStr);
             _sbSetOptional('sb-l-special', specialStr, cfg.showSpecial && specialStr);
             _sbSetOptional('sb-l-todo', todoStr, cfg.showTodo && todoStr);
         }
@@ -4040,9 +4252,36 @@
                 state.settings[key] = e.target.result;
                 saveData();
                 applySettings();
+                syncBgLabels();
             };
             reader.readAsDataURL(input.files[0]);
             input.value = '';
+        }
+
+        function switchToModeAndUploadBg(mode) {
+            const inputMap = { note: 'bg-note-input', todo: 'bg-todo-input', pomodoro: 'bg-pomo-input' };
+            closeDrawer();
+            // 切换到目标模式，然后打开文件选择
+            if (_currentMode !== mode) {
+                const dot = document.getElementById('mode-dot');
+                const idx = MODES.indexOf(mode);
+                if (idx !== -1) {
+                    _currentMode = mode;
+                    if (dot) dot.dataset.mode = mode;
+                    applyModeView(mode);
+                }
+            }
+            setTimeout(() => document.getElementById(inputMap[mode])?.click(), 150);
+        }
+
+        function syncBgLabels() {
+            const s = state.settings;
+            const noteEl = document.getElementById('bg-note-label');
+            const todoEl = document.getElementById('bg-todo-label');
+            const pomoEl = document.getElementById('bg-pomo-label');
+            if (noteEl) noteEl.textContent = s.bgNote ? '已设置' : '未设置';
+            if (todoEl) todoEl.textContent = s.bgTodo ? '已设置' : '未设置';
+            if (pomoEl) pomoEl.textContent = s.bgPomodoro ? '已设置' : '未设置';
         }
         function clearModeBg() {
             const modeKey = { note: 'bgNote', todo: 'bgTodo', pomodoro: 'bgPomodoro' };
@@ -4053,6 +4292,15 @@
         }
 
         // --- 抽屉开关 ---
+        function toggleDrawerAvatarPanel() {
+            const panel = document.getElementById('drawer-avatar-panel');
+            const arrow = document.getElementById('drawer-avatar-arrow');
+            if (!panel) return;
+            const isOpen = panel.style.display !== 'none';
+            panel.style.display = isOpen ? 'none' : 'block';
+            if (arrow) arrow.style.transform = isOpen ? '' : 'rotate(180deg)';
+        }
+
         function openDrawer() {
             document.getElementById('drawer').classList.add('open');
             document.getElementById('drawer-overlay').classList.add('open');
@@ -4091,6 +4339,7 @@
             const elSpecial = document.getElementById('sb-show-special');
             if (elTodo) elTodo.checked = s.sbShowTodo !== false;
             if (elSpecial) elSpecial.checked = s.sbShowSpecial !== false;
+            if (typeof syncBgLabels === 'function') syncBgLabels();
         }
 
         function closeDrawer() {
@@ -4124,18 +4373,7 @@
 
         // --- 同步 tag 到抽屉 ---
         function syncDrawerTags() {
-            const mainTags = document.getElementById('tag-filters');
-            const drawerTags = document.getElementById('drawer-tag-filters');
-            if (!mainTags || !drawerTags) return;
-            drawerTags.innerHTML = mainTags.innerHTML;
-            // 给抽屉里的 tag 重新绑定 onclick
-            drawerTags.querySelectorAll('.filter-tag').forEach(el => {
-                const tag = el.dataset.tag;
-                el.onclick = () => {
-                    filterByTag(tag);
-                    closeDrawer();
-                };
-            });
+            renderTags();
         }
 
         // --- 同步统计到抽屉 ---
