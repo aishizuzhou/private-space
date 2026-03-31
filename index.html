@@ -49,7 +49,7 @@
             --name-color: #e0d8e8;
         }
         body.dark-mode #app-container { background: rgba(20, 16, 28, 0.75); }
-        body.dark-mode .note-card { background: rgba(40, 32, 50, 0.6); border-color: rgba(255,255,255,0.1); }
+        body.dark-mode .note-card { background: rgba(38, 31, 53, 0.98) !important; border-color: rgba(255,255,255,0.08) !important; }
         body.dark-mode .note-card:hover, body.dark-mode .note-card:active { background: rgba(60, 48, 72, 0.75); }
         body.dark-mode .modal-content { background: rgba(22, 17, 32, 0.97) !important; border-color: rgba(255,255,255,0.08); color: #e0d8e8; }
         body.dark-mode .modal-content h3, body.dark-mode .modal-content label, body.dark-mode .settings-title { color: #c8bcd8; }
@@ -457,29 +457,44 @@
         }
 
         .note-wrapper {
-            position: relative; margin-bottom: 15px; border-radius: 12px;
+            position: relative; margin-bottom: 10px; border-radius: 12px;
             overflow: hidden;
         }
 
         /* 左滑操作按钮区 */
         .note-action-bg {
             position: absolute;
-            top: 0; right: 0; bottom: 0; width: 180px;
-            display: flex; align-items: stretch;
-            z-index: 1;
-            border-radius: 0 12px 12px 0;
+            top: 0; right: 0; bottom: 0; width: 100%;
+            display: flex; align-items: center; justify-content: center;
+            gap: 2px; padding: 0 12px;
+            z-index: 3;
+            background: #f5f4f6;
+            border-radius: 12px;
             overflow: hidden;
+            transform: translateX(100%);
+            transition: transform 0.25s ease;
         }
+        body.dark-mode .note-action-bg { background: #1e1828; }
         .note-action-btn {
-            flex: 1; border: none; cursor: pointer;
-            font-size: 0.78rem; font-weight: 600;
-            color: #fff; padding: 0;
-            transition: filter 0.15s;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 4px; border: none; cursor: pointer; background: transparent;
+            padding: 4px 3px; min-width: 46px;
+            transition: opacity 0.15s;
         }
-        .note-action-btn:active { filter: brightness(1.15); }
-        .note-action-edit  { background: rgba(100,160,220,0.82); }
-        .note-action-pin   { background: rgba(var(--accent-color-rgb, 255,154,158),0.82); background: var(--accent-color-60, rgba(255,154,158,0.82)); }
-        .note-action-del   { background: rgba(220,80,80,0.82); }
+        .note-action-btn:active { opacity: 0.6; }
+        .note-action-icon {
+            width: 44px; height: 44px; border-radius: 50%;
+            background: #e8e7ea;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        body.dark-mode .note-action-icon { background: #302840; }
+        .note-action-icon svg { width: 20px; height: 20px; }
+        .note-action-label {
+            font-size: 0.65rem; font-weight: 500;
+            color: #333; white-space: nowrap; letter-spacing: 0;
+        }
+        body.dark-mode .note-action-label { color: #c8bcd8; }
 
         .note-card.is-pinned {
             background: var(--accent-color-30, rgba(255,154,158,0.3));
@@ -487,9 +502,8 @@
         }
 
         .note-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
-            border: 1px solid var(--glass-border);
+            background: rgba(255,255,255,0.96);
+            border: 1px solid rgba(0,0,0,0.05);
             border-radius: 12px; padding: 10px 12px;
             position: relative; z-index: 2;
             transform: translateZ(0);
@@ -500,7 +514,7 @@
         }
 
         .note-card:active {
-            background: rgba(255, 255, 255, 0.4);
+            background: rgba(255,255,255,0.88);
         }
 
         .note-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; margin-bottom: 8px; }
@@ -1001,18 +1015,49 @@
             font-size: 0.85rem;
             letter-spacing: 0.18em;
             opacity: 0.45;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
             font-weight: 400;
         }
-        .pomo-clock {
-            font-size: 18vw;
+        .pomo-clock-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 32px;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .pomo-big-clock {
+            font-size: clamp(56px, 18vw, 96px);
             font-weight: 700;
             letter-spacing: -0.02em;
             font-variant-numeric: tabular-nums;
             line-height: 1;
-            margin-bottom: 32px;
             color: var(--text-color);
+            cursor: pointer;
+            display: flex;
+            align-items: baseline;
+            gap: 0;
+            transition: opacity 0.2s;
         }
+        .pomo-big-clock.adjusting {
+            opacity: 0.75;
+        }
+        .pomo-colon {
+            opacity: 0.35;
+            margin: 0 2px;
+        }
+        #pomo-display-sec { opacity: 0.35; }
+        .pomo-big-clock.running #pomo-display-sec { opacity: 1; }
+        .pomo-adjust-hint {
+            font-size: 0.7rem;
+            letter-spacing: 0.06em;
+            opacity: 0;
+            margin-top: 8px;
+            color: var(--text-color);
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+        .pomo-adjust-hint.visible { opacity: 0.4; }
         .pomo-reason-wrap {
             width: 100%;
             border-bottom: 1.5px solid rgba(0,0,0,0.12);
@@ -1677,7 +1722,7 @@
                     <img id="current-avatar" class="avatar-img" src="https://via.placeholder.com/150" alt="Avatar">
                 </div>
                 <!-- 模式指示点：左下角 -->
-                <div class="mode-dot" id="mode-dot" data-mode="note" style="pointer-events:none;top:auto;right:auto;bottom:-3px;left:-3px;"></div>
+                <div class="mode-dot" id="mode-dot" data-mode="note" style="pointer-events:none;"></div>
             </div>
             <div class="header-info">
                 <!-- status-bar 点击进入待机 -->
@@ -1725,14 +1770,17 @@
             <div id="page-pomodoro" class="mode-page" style="display:none;">
                 <div class="pomo-page">
                     <div class="pomo-title">专注时间</div>
-                    <!-- 未开始时显示输入，进行中显示倒计时 -->
-                    <div id="pomo-input-wrap" style="display:flex;align-items:center;justify-content:center;gap:4px;margin-bottom:32px;">
-                        <input id="pomo-min-input" type="number" min="1" max="99" value="25" style="width:3.2em;font-size:18vw;font-weight:700;letter-spacing:-0.02em;border:none;background:transparent;color:var(--text-color);text-align:right;outline:none;-moz-appearance:textfield;padding:0;" oninput="onPomoInputChange()">
-                        <span style="font-size:14vw;font-weight:700;opacity:0.4;line-height:1;">:</span>
-                        <span style="font-size:18vw;font-weight:700;letter-spacing:-0.02em;line-height:1;opacity:0.4;">00</span>
+
+                    <!-- 大字时钟：未开始时点击可调节 -->
+                    <div class="pomo-clock-wrap" id="pomo-clock-wrap">
+                        <div class="pomo-big-clock" id="pomo-timer" onclick="pomoClockTap()">
+                            <span id="pomo-display-min">25</span><span class="pomo-colon">:</span><span id="pomo-display-sec">00</span>
+                        </div>
+                        <!-- 调节提示 -->
+                        <div class="pomo-adjust-hint" id="pomo-adjust-hint">↑ 上下滑动调节分钟 ↓</div>
                     </div>
-                    <div class="pomo-clock" id="pomo-timer" style="display:none;">25:00</div>
-                    <div class="pomo-reason-wrap">
+
+                    <div class="pomo-reason-wrap" id="pomo-reason-wrap">
                         <input type="text" id="pomo-reason" class="pomo-reason-input" placeholder="为何专注">
                     </div>
                     <div class="pomo-controls">
@@ -2222,22 +2270,33 @@
                 const actionBg = document.createElement('div');
                 actionBg.className = 'note-action-bg';
                 actionBg.innerHTML = `
-                    <button class="note-action-btn note-action-edit" onclick="event.stopPropagation();openEditor(${item.id});resetCardSwipe(this)">编辑</button>
-                    <button class="note-action-btn note-action-pin" onclick="event.stopPropagation();togglePin(${item.id});resetCardSwipe(this)">${item.isPinned ? '取消置顶' : '置顶'}</button>
-                    <button class="note-action-btn note-action-del" onclick="event.stopPropagation();deleteNote(${item.id})">删除</button>
+                    <button class="note-action-btn" onclick="event.stopPropagation();togglePin(${item.id});resetCardSwipe(this)">
+                        <span class="note-action-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${item.isPinned ? '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>' : '<line x1="12" y1="5" x2="12" y2="19"/><polyline points="5 12 12 5 19 12"/>'}</svg></span>
+                        <span class="note-action-label">${item.isPinned ? '取消置顶' : '置顶'}</span>
+                    </button>
+                    <button class="note-action-btn" onclick="event.stopPropagation();openTagManager();resetCardSwipe(this)">
+                        <span class="note-action-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></span>
+                        <span class="note-action-label">标签</span>
+                    </button>
+                    <button class="note-action-btn" onclick="event.stopPropagation();openEditor(${item.id});resetCardSwipe(this)">
+                        <span class="note-action-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span>
+                        <span class="note-action-label">编辑</span>
+                    </button>
+                    <button class="note-action-btn" onclick="event.stopPropagation();deleteNote(${item.id})" style="--icon-bg:#fde8e8;">
+                        <span class="note-action-icon" style="background:#fde8e8;"><svg viewBox="0 0 24 24" fill="none" stroke="#e05555" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></span>
+                        <span class="note-action-label" style="color:#e05555;">删除</span>
+                    </button>
                 `;
 
                 let startX = 0, startY = 0, currentX = 0;
                 let isSwiping = false, isHorizontal = null;
                 let isOpen = false;
 
-                const ACTION_W = 180;
-
                 card.addEventListener('touchstart', e => {
                     startX = e.touches[0].clientX;
                     startY = e.touches[0].clientY;
                     isSwiping = false; isHorizontal = null;
-                    card.style.transition = 'none';
+                    actionBg.style.transition = 'none';
                 }, {passive: true});
 
                 card.addEventListener('touchmove', e => {
@@ -2250,32 +2309,32 @@
                     if (!isHorizontal) return;
                     if (Math.abs(diffX) > 8) isSwiping = true;
                     e.preventDefault();
-                    const base = isOpen ? -ACTION_W : 0;
-                    const raw = base + diffX;
-                    const clamped = Math.max(-ACTION_W, Math.min(0, raw));
-                    card.style.transform = `translateX(${clamped}px)`;
+                    // actionBg 从右侧滑入：diffX为负时（左滑）逐渐显现
+                    const base = isOpen ? 0 : 100; // percent
+                    const pct = Math.max(0, Math.min(100, base + (diffX / wrapper.offsetWidth) * 100));
+                    actionBg.style.transform = `translateX(${pct}%)`;
                 }, {passive: false});
 
                 card.addEventListener('touchend', () => {
-                    card.style.transition = 'transform 0.25s ease';
+                    actionBg.style.transition = 'transform 0.25s ease';
                     const diff = currentX - startX;
                     if (!isOpen && diff < -60) {
-                        card.style.transform = `translateX(-${ACTION_W}px)`;
+                        actionBg.style.transform = 'translateX(0)';
                         isOpen = true;
                     } else if (isOpen && diff > 40) {
-                        card.style.transform = 'translateX(0)';
+                        actionBg.style.transform = 'translateX(100%)';
                         isOpen = false;
                     } else if (isOpen) {
-                        card.style.transform = `translateX(-${ACTION_W}px)`;
+                        actionBg.style.transform = 'translateX(0)';
                     } else {
-                        card.style.transform = 'translateX(0)';
+                        actionBg.style.transform = 'translateX(100%)';
                     }
                     startX = 0; startY = 0; currentX = 0; isHorizontal = null;
                 }, {passive: true});
 
                 card._resetSwipe = () => {
-                    card.style.transition = 'transform 0.25s ease';
-                    card.style.transform = 'translateX(0)';
+                    actionBg.style.transition = 'transform 0.25s ease';
+                    actionBg.style.transform = 'translateX(100%)';
                     isOpen = false;
                 };
 
@@ -2350,6 +2409,17 @@
                     ${commentPreviewHtml}
                     ${specialNoteHtml}
                 `;
+
+                // 在 actionBg 上右滑可关闭
+                let abStartX = 0;
+                actionBg.addEventListener('touchstart', e => { abStartX = e.touches[0].clientX; }, {passive: true});
+                actionBg.addEventListener('touchend', e => {
+                    if (e.changedTouches[0].clientX - abStartX > 40) {
+                        actionBg.style.transition = 'transform 0.25s ease';
+                        actionBg.style.transform = 'translateX(100%)';
+                        isOpen = false;
+                    }
+                }, {passive: true});
 
                 wrapper.appendChild(actionBg);
                 wrapper.appendChild(card);
@@ -4633,15 +4703,59 @@
         let _pomoRunning = false;
         let _pomoSeconds = 25 * 60;
         let _pomoInterval = null;
-        let _pomoDuration = 25 * 60; // 可变时长
+        let _pomoDuration = 25 * 60;
+        let _pomoAdjusting = false; // 是否处于调节模式
 
-        function onPomoInputChange() {
-            const inp = document.getElementById('pomo-min-input');
-            if (!inp) return;
-            const mins = Math.max(1, Math.min(99, parseInt(inp.value) || 25));
+        // 更新大字显示
+        function renderPomoTimer() {
+            const m = String(Math.floor(_pomoSeconds / 60)).padStart(2, '0');
+            const s = String(_pomoSeconds % 60).padStart(2, '0');
+            const minEl = document.getElementById('pomo-display-min');
+            const secEl = document.getElementById('pomo-display-sec');
+            if (minEl) minEl.textContent = m;
+            if (secEl) secEl.textContent = s;
+        }
+
+        // 点击大字时钟：未开始时进入/退出调节模式
+        function pomoClockTap() {
+            if (_pomoRunning) return;
+            _pomoAdjusting = !_pomoAdjusting;
+            const clock = document.getElementById('pomo-timer');
+            const hint = document.getElementById('pomo-adjust-hint');
+            if (_pomoAdjusting) {
+                clock.classList.add('adjusting');
+                hint.classList.add('visible');
+            } else {
+                clock.classList.remove('adjusting');
+                hint.classList.remove('visible');
+            }
+        }
+
+        // 调节分钟数
+        function _pomoSetMinutes(mins) {
+            mins = Math.max(1, Math.min(99, mins));
             _pomoDuration = mins * 60;
             _pomoSeconds = _pomoDuration;
+            renderPomoTimer();
         }
+
+        // 大字时钟上下滑动调节
+        (function initPomoSwipe() {
+            let startY = 0, lastMins = 25, dragging = false;
+            document.addEventListener('touchstart', e => {
+                if (!_pomoAdjusting) return;
+                startY = e.touches[0].clientY;
+                lastMins = Math.round(_pomoDuration / 60);
+                dragging = true;
+            }, {passive: true});
+            document.addEventListener('touchmove', e => {
+                if (!_pomoAdjusting || !dragging) return;
+                const dy = startY - e.touches[0].clientY; // 上滑为正
+                const delta = Math.round(dy / 12); // 每12px = 1分钟
+                _pomoSetMinutes(lastMins + delta);
+            }, {passive: true});
+            document.addEventListener('touchend', () => { dragging = false; }, {passive: true});
+        })();
 
         function pomoTick() {
             if (_pomoSeconds <= 0) {
@@ -4654,37 +4768,31 @@
             renderPomoTimer();
         }
 
-        function renderPomoTimer() {
-            const m = String(Math.floor(_pomoSeconds / 60)).padStart(2, '0');
-            const s = String(_pomoSeconds % 60).padStart(2, '0');
-            const el = document.getElementById('pomo-timer');
-            if (el) el.textContent = `${m}:${s}`;
-        }
-
         function pomoToggle() {
             const btn = document.getElementById('pomo-btn');
             const label = document.getElementById('pomo-label');
             const reason = document.getElementById('pomo-reason');
-            const inputWrap = document.getElementById('pomo-input-wrap');
-            const timerEl = document.getElementById('pomo-timer');
+            const clock = document.getElementById('pomo-timer');
+            const hint = document.getElementById('pomo-adjust-hint');
 
             if (_pomoRunning) {
-                // 暂停
                 clearInterval(_pomoInterval); _pomoInterval = null;
                 _pomoRunning = false;
                 if (btn) btn.textContent = '继续';
                 if (label) label.textContent = '已暂停';
             } else {
-                // 开始/继续
-                if (!_pomoRunning && _pomoSeconds === _pomoDuration) {
-                    // 首次开始：读取输入时间，锁定输入和原因
-                    onPomoInputChange();
-                    _pomoSeconds = _pomoDuration;
-                    if (inputWrap) inputWrap.style.display = 'none';
-                    if (timerEl) timerEl.style.display = '';
-                    if (reason) reason.readOnly = true;
-                    renderPomoTimer();
+                // 退出调节模式
+                _pomoAdjusting = false;
+                if (clock) clock.classList.remove('adjusting');
+                if (hint) hint.classList.remove('visible');
+                // 首次开始：隐藏原因输入框
+                if (_pomoSeconds === _pomoDuration) {
+                    const wrap = document.getElementById('pomo-reason-wrap');
+                    if (wrap) wrap.style.display = 'none';
                 }
+                // 秒数显示激活
+                if (clock) clock.classList.add('running');
+                renderPomoTimer();
                 _pomoRunning = true;
                 _pomoInterval = setInterval(pomoTick, 1000);
                 if (btn) btn.textContent = '暂停';
@@ -4695,19 +4803,25 @@
         function pomoReset() {
             clearInterval(_pomoInterval); _pomoInterval = null;
             _pomoRunning = false;
+            _pomoAdjusting = false;
             _pomoSeconds = _pomoDuration;
             renderPomoTimer();
             const btn = document.getElementById('pomo-btn');
             const label = document.getElementById('pomo-label');
             const reason = document.getElementById('pomo-reason');
-            const inputWrap = document.getElementById('pomo-input-wrap');
-            const timerEl = document.getElementById('pomo-timer');
+            const clock = document.getElementById('pomo-timer');
+            const hint = document.getElementById('pomo-adjust-hint');
             if (btn) btn.textContent = '开始';
             if (label) label.textContent = '';
-            if (reason) reason.readOnly = false;
-            if (inputWrap) inputWrap.style.display = 'flex';
-            if (timerEl) timerEl.style.display = 'none';
+            if (reason) { reason.readOnly = false; reason.value = ''; }
+            const wrap = document.getElementById('pomo-reason-wrap');
+            if (wrap) wrap.style.display = '';
+            if (clock) { clock.classList.remove('adjusting'); clock.classList.remove('running'); }
+            if (hint) hint.classList.remove('visible');
         }
+
+        // 兼容旧函数引用
+        function onPomoInputChange() {}
 
         // 初始化：从 state 恢复模式
         window.addEventListener('load', () => {
