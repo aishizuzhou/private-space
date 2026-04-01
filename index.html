@@ -1469,8 +1469,6 @@
             <span id="drawer-avatar-arrow" style="font-size:0.8rem;opacity:0.3;transition:transform 0.2s;flex-shrink:0;">▾</span>
         </div>
 
-        </div>
-
         <div class="drawer-scroll">
             <!-- 头像/昵称/头像框/挂件 展开面板（在scroll内，可滚动） -->
             <div id="drawer-avatar-panel" style="display:none;border-bottom:1px solid rgba(0,0,0,0.06);margin-bottom:4px;">            <div class="drawer-settings-area" style="padding-top:4px;">
@@ -2295,8 +2293,8 @@
                 card.addEventListener('touchstart', e => {
                     startX = e.touches[0].clientX;
                     startY = e.touches[0].clientY;
+                    currentX = startX;
                     isSwiping = false; isHorizontal = null;
-                    actionBg.style.transition = 'none';
                 }, {passive: true});
 
                 card.addEventListener('touchmove', e => {
@@ -2309,16 +2307,13 @@
                     if (!isHorizontal) return;
                     if (Math.abs(diffX) > 8) isSwiping = true;
                     e.preventDefault();
-                    // actionBg 从右侧滑入：diffX为负时（左滑）逐渐显现
-                    const base = isOpen ? 0 : 100; // percent
-                    const pct = Math.max(0, Math.min(100, base + (diffX / wrapper.offsetWidth) * 100));
-                    actionBg.style.transform = `translateX(${pct}%)`;
                 }, {passive: false});
 
                 card.addEventListener('touchend', () => {
-                    actionBg.style.transition = 'transform 0.25s ease';
+                    actionBg.style.transition = 'transform 0.28s ease';
                     const diff = currentX - startX;
-                    if (!isOpen && diff < -60) {
+                    const threshold = wrapper.offsetWidth * 0.3; // 划过30%触发
+                    if (!isOpen && diff < -threshold) {
                         actionBg.style.transform = 'translateX(0)';
                         isOpen = true;
                     } else if (isOpen && diff > 40) {
@@ -2358,7 +2353,7 @@
                 const cpName = state.commentPreviewName || '';
                 const cpSuffix = state.commentPreviewSuffix !== undefined ? state.commentPreviewSuffix : '说：';
                 const commentPreviewHtml = (cpEnabled && comments.length > 0) ? `
-                    <div style="margin-top:8px; display:flex; flex-direction:column; gap:3px;">
+                    <div style="margin-top:8px; display:flex; flex-direction:column; gap:6px;">
                         ${comments.map(c => `
                             <div>
                                 <span style="font-size:0.78rem; color:var(--text-color); opacity:0.87; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; display:block;">${cpName}${cpSuffix}${c.text}</span>
@@ -4813,7 +4808,7 @@
             const hint = document.getElementById('pomo-adjust-hint');
             if (btn) btn.textContent = '开始';
             if (label) label.textContent = '';
-            if (reason) { reason.readOnly = false; reason.value = ''; }
+            if (reason) reason.readOnly = false;
             const wrap = document.getElementById('pomo-reason-wrap');
             if (wrap) wrap.style.display = '';
             if (clock) { clock.classList.remove('adjusting'); clock.classList.remove('running'); }
