@@ -1139,7 +1139,7 @@
             display: flex;
             flex-direction: column;
             width: 100%; height: 100%;
-            padding: 6vw 6vw 6vw;
+            padding: 3vw 2vw 3vw;
         }
         .sb-portrait .sb-top-row {
             font-size: 3.5vw;
@@ -1150,7 +1150,7 @@
             align-items: center;
             gap: 0.6em;
             flex-shrink: 0;
-            margin-bottom: 1vw;
+            margin-bottom: 0;
         }
         .sb-portrait .sb-time-block {
             flex: 1;
@@ -1160,15 +1160,21 @@
         }
         .sb-portrait .sb-big-hour,
         .sb-portrait .sb-big-min {
-            font-size: 47vw;
+            font-size: clamp(120px, 48vw, 48vw);
             font-weight: 700;
-            line-height: 0.9;
+            line-height: 1;
             letter-spacing: -0.03em;
-            display: block;
+            display: flex;
+            align-items: center;
             flex: 1;
+            min-height: 0;
         }
         .sb-portrait .sb-min-row {
             position: relative;
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            align-items: center;
         }
         .sb-portrait .sb-sec {
             position: absolute;
@@ -1188,7 +1194,7 @@
             font-size: 3.5vw;
             font-weight: 300;
             opacity: 0.6;
-            margin-top: 2vw;
+            margin-top: 1vw;
         }
         .sb-portrait .sb-todo-line {
             font-size: 3.5vw;
@@ -2487,9 +2493,9 @@
                 return;
             }
             container.innerHTML = comments.map((c, i) => `
-                <div class="comment-item" data-note-id="${note.id}" data-idx="${i}" style="position:relative; overflow:hidden; border-radius:8px; margin-bottom:2px;">
+                <div class="comment-item" data-note-id="${note.id}" data-idx="${i}" style="position:relative; overflow:hidden; border-radius:8px; margin-bottom:8px;">
                     <div class="comment-delete-bg" style="position:absolute; top:0; right:0; bottom:0; width:60px; background:transparent; display:flex; align-items:center; justify-content:center; font-size:1.4rem; cursor:pointer; opacity:0; transition:opacity 0.3s;" onclick="deleteComment(${note.id},${i})">🗑️</div>
-                    <div class="comment-inner" style="display:flex; align-items:flex-start; gap:8px; padding:10px 4px; background:transparent; position:relative; z-index:2; transition:transform 0.3s ease; will-change:transform;">
+                    <div class="comment-inner" style="display:flex; align-items:flex-start; gap:10px; padding:14px 6px; background:transparent; position:relative; z-index:2; transition:transform 0.3s ease; will-change:transform;">
                         <img src="${state.settings.currentAvatar}" style="width:26px; height:26px; border-radius:50%; object-fit:cover; flex-shrink:0; margin-top:2px;">
                         <div style="flex:1;">
                             <div style="font-size:0.78rem; color:#bbb; margin-bottom:3px;">${c.time}</div>
