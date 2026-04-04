@@ -19,12 +19,12 @@
 
         :root {
             --bg-image: none;
-            --glass-bg: rgba(255, 255, 255, 0.25);
-            --glass-border: rgba(255, 255, 255, 0.8);
-            --text-color: #333;
-            --name-color: #333;
+            --glass-bg: rgba(242, 234, 230, 0.55);
+            --glass-border: rgba(210, 185, 178, 0.5);
+            --text-color: #4a3c38;
+            --name-color: #4a3c38;
             --accent-text: #fff;
-            --accent-color: #ff9a9e;
+            --accent-color: #c8848e;
             --font-size-base: 14px;
             --preview-lines: 3;
             --custom-font: system-ui, -apple-system, sans-serif;
@@ -40,21 +40,125 @@
             --frame-scale: 1;
             --content-padding: 16px;
             --glass-blur: 15px;
+            --card-opacity: 0.96;
+        }
+
+
+        /* ══════════════════════════════════════
+           实色主题 — body.ui-solid
+        ══════════════════════════════════════ */
+        body.ui-solid {
+            background-color: #c4b0a6;
+        }
+        body.ui-solid #app-container {
+            background: #e8ddd6;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            border: none;
+            box-shadow: none;
+        }
+        body.ui-solid .note-card {
+            background: #faf4f0 !important;
+            border: none !important;
+            box-shadow: 0 2px 12px rgba(120,85,75,0.1);
+        }
+        body.ui-solid .note-card:active {
+            background: #f5ede8 !important;
+            box-shadow: 0 1px 4px rgba(140,100,90,0.07) !important;
+        }
+        body.ui-solid .note-card.is-pinned {
+            background: rgba(200,148,158,0.1) !important;
+        }
+        body.ui-solid .filter-tag {
+            background: #e0d4ce;
+            color: var(--text-color);
+            border: none;
+            border-radius: 8px;
+        }
+        body.ui-solid .filter-tag:hover,
+        body.ui-solid .filter-tag:active {
+            background: #ddd0ca;
+            box-shadow: none;
+            transform: none;
+        }
+        body.ui-solid .filter-tag.active {
+            background: var(--accent-color);
+            color: #fff;
+            box-shadow: none;
+        }
+        body.ui-solid .search-bar {
+            background: #faf4f0 !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            border: none !important;
+            border-radius: 10px !important;
+            box-shadow: 0 2px 10px rgba(120,85,75,0.08) !important;
+        }
+        body.ui-solid #drawer {
+            background: #e8ddd8;
+            border-right: none;
+        }
+        body.ui-solid .drawer-header {
+            background: #ddd0c8;
+        }
+
+        body.ui-solid .stats-cell {
+            background: rgba(200,178,170,0.12);
+        }
+        body.ui-solid .modal-content {
+            background: #fdf9f7 !important;
+        }
+        body.ui-solid .glass-modal-content,
+        body.ui-solid .full-note-modal-wrap {
+            background: #fdf9f7 !important;
+        }
+        body.ui-solid .full-note-comment-bar {
+            background: #f2ebe6 !important;
+        }
+        body.ui-solid .drawer-cal-tab.active {
+            background: #faf6f3;
+        }
+        body.ui-solid .drawer-cal-tabs {
+            background: rgba(200,178,170,0.15);
+        }
+        /* dark + solid */
+        body.dark-mode.ui-solid {
+            background-color: #1e1714;
+        }
+        body.dark-mode.ui-solid #app-container {
+            background: #251e1a;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            border-color: rgba(80,60,50,0.4);
+            box-shadow: none;
+        }
+        body.dark-mode.ui-solid .note-card {
+            background: #332620 !important;
+            border: none !important;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+        }
+        body.dark-mode.ui-solid .modal-content,
+        body.dark-mode.ui-solid .glass-modal-content,
+        body.dark-mode.ui-solid .full-note-modal-wrap {
+            background: #2a201c !important;
+        }
+        body.dark-mode.ui-solid #drawer {
+            background: #251e1a;
         }
 
         body.dark-mode {
-            --glass-bg: rgba(30, 25, 35, 0.55);
-            --glass-border: rgba(255, 255, 255, 0.12);
-            --text-color: #e0d8e8;
-            --name-color: #e0d8e8;
+            --glass-bg: rgba(32, 24, 20, 0.62);
+            --glass-border: rgba(200, 165, 155, 0.15);
+            --text-color: #e8ddd8;
+            --name-color: #e8ddd8;
         }
-        body.dark-mode #app-container { background: rgba(20, 16, 28, 0.75); }
-        body.dark-mode .note-card { background: rgba(38, 31, 53, 0.98) !important; border-color: rgba(255,255,255,0.08) !important; }
-        body.dark-mode .note-card:hover, body.dark-mode .note-card:active { background: rgba(60, 48, 72, 0.75); }
-        body.dark-mode .modal-content { background: rgba(22, 17, 32, 0.97) !important; border-color: rgba(255,255,255,0.08); color: #e0d8e8; }
+        body.dark-mode #app-container { background: rgba(28, 22, 18, 0.78); }
+        body.dark-mode .note-card { background: rgba(42, 34, 30, 0.98) !important; border-color: rgba(255,255,255,0.07) !important; }
+        body.dark-mode .note-card:hover, body.dark-mode .note-card:active { background: rgba(60, 46, 40, 0.75); }
+        body.dark-mode .modal-content { background: rgba(28, 22, 18, 0.97) !important; border-color: rgba(255,255,255,0.08); color: #e0d8e8; }
         body.dark-mode .modal-content h3, body.dark-mode .modal-content label, body.dark-mode .settings-title { color: #c8bcd8; }
         body.dark-mode .modal-content input, body.dark-mode .modal-content textarea, body.dark-mode .modal-content select { background: rgba(255,255,255,0.06); color: #e0d8e8; border-color: rgba(255,255,255,0.1); }
-        body.dark-mode .cal-panel { background: rgba(22, 17, 32, 0.97) !important; border: 1px solid rgba(255,255,255,0.08); color: #e0d8e8; }
+        body.dark-mode .cal-panel { background: rgba(28, 22, 18, 0.97) !important; border: 1px solid rgba(255,255,255,0.08); color: #e0d8e8; }
         body.dark-mode .cal-cell { color: #c8bcd8; }
         body.dark-mode .cal-cell.other-month { color: #555; }
         body.dark-mode .cal-month-label { color: #e0d8e8; }
@@ -66,17 +170,18 @@
         body.dark-mode .tag { background: rgba(255,255,255,0.1); color: #c8bcd8; }
         body.dark-mode .cal-input-row input { background: rgba(255,255,255,0.06); color: #e0d8e8; border-color: rgba(255,255,255,0.1); }
         body.dark-mode #full-note-body { color: #e0d8e8; background: rgba(22, 17, 32, 0.97); }
-        body.dark-mode .glass-modal-content { background: rgba(22, 17, 32, 0.97) !important; }
+        body.dark-mode .glass-modal-content { background: rgba(28, 22, 18, 0.97) !important; }
         body.dark-mode .status-bar { color: #e0d8e8; }
-        body.dark-mode { background-color: #120e1c; }
-        body.dark-mode .full-note-comment-bar { background: rgba(28, 22, 40, 0.98) !important; border-color: rgba(255,255,255,0.07) !important; }
+        body.dark-mode { background-color: #1e1714; }
+        body.dark-mode .full-note-comment-bar { background: rgba(32, 25, 20, 0.98) !important; border-color: rgba(255,255,255,0.07) !important; }
         body.dark-mode #comment-input { background: rgba(255,255,255,0.06) !important; color: #e0d8e8 !important; border-color: rgba(255,255,255,0.1) !important; }
         body.dark-mode .todo-editor-row { background: rgba(255,255,255,0.05) !important; }
         body.dark-mode .todo-editor-row input { color: #e0d8e8 !important; }
-        body.dark-mode .full-note-modal-wrap { background: rgba(22, 17, 32, 0.97) !important; }
+        body.dark-mode .full-note-modal-wrap { background: rgba(28, 22, 18, 0.97) !important; }
 
         body {
             margin: 0; padding: 0;
+            background-color: #c8b0a8;
             background-image: var(--bg-image);
             background-size: cover; background-position: center; background-attachment: fixed;
             font-family: var(--custom-font); font-weight: var(--custom-font-weight); color: var(--text-color);
@@ -91,7 +196,7 @@
             background: var(--glass-bg);
             backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
             border: 1px solid var(--glass-border);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            box-shadow: 0 8px 32px 0 rgba(120, 80, 70, 0.18);
             display: flex; flex-direction: column; position: relative; overflow: hidden;
             z-index: 1;
         }
@@ -103,7 +208,7 @@
         }
         .qw-particle {
             position: absolute;
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(200, 165, 155, 0.25);
             top: -10%;
             animation: qw-float-down linear infinite;
         }
@@ -382,7 +487,7 @@
             pointer-events: none; z-index: 4;
         }
 
-        .user-name { font-size: 1.2rem; font-weight: bold; text-shadow: 0 1px 3px rgba(0,0,0,0.2); color: var(--name-color); }
+        .user-name { font-size: 1.15rem; font-weight: 600; color: var(--name-color); letter-spacing: 0.02em; }
         .user-signature { font-size: 0.78rem; margin-top: 2px; color: var(--text-color); opacity: 0.8; max-width: 180px; white-space: pre-wrap; word-break: break-word; }
 
         .content-wrapper {
@@ -394,10 +499,10 @@
 
         .search-bar {
             width: 100% !important;
-            height: 50px !important;
+            height: 40px !important;
             padding: 0 20px !important;
             margin: 0 0 15px 0 !important;
-            border-radius: 999px !important;
+            border-radius: 10px !important;
             border: 1px solid var(--glass-border) !important;
             background: var(--glass-bg) !important;
             backdrop-filter: blur(15px) !important;
@@ -407,7 +512,7 @@
             outline: none !important;
             box-sizing: border-box !important;
             display: block !important;
-            line-height: 50px !important;
+            line-height: 40px !important;
             transition: all 0.3s ease !important;
             position: relative !important;
             z-index: 10 !important;
@@ -426,8 +531,8 @@
         .filter-tag {
             padding: 6px 14px;
             background: rgba(255,255,255,0.4);
-            border-radius: 999px;
-            font-size: 0.8rem;
+            border-radius: 8px;
+            font-size: 0.78rem;
             white-space: nowrap;
             cursor: pointer;
             color: #333;
@@ -436,28 +541,29 @@
             transition: transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
         }
         .filter-tag:hover, .filter-tag:active {
-            transform: translateY(-3px);
-            background: rgba(255, 255, 255, 0.8);
-            box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.08), inset 1px 1px 2px rgba(255, 255, 255, 0.8);
+            transform: none;
+            background: rgba(255, 255, 255, 0.55);
+            box-shadow: none;
         }
         .filter-tag.active {
-            background: rgba(255, 255, 255, 0.7);
-            font-weight: bold;
-            transform: translateY(-3px);
-            box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.08), inset 1px 1px 2px rgba(255, 255, 255, 0.8);
+            background: var(--accent-color);
+            color: #fff;
+            font-weight: 600;
+            transform: none;
+            box-shadow: none;
         }
         .filter-tag.blocked { background: #ff4d4d !important; color: #fff !important; text-decoration: line-through; }
 
         .content-area {
             flex: 1;
             overflow-y: auto; overflow-x: hidden;
-            padding: 0 0 80px 0;
+            padding: 0 0 90px 0;
             position: relative;
             z-index: 10;
         }
 
         .note-wrapper {
-            position: relative; margin-bottom: 10px; border-radius: 12px;
+            position: relative; margin-bottom: 8px; border-radius: 14px;
             overflow: hidden;
         }
 
@@ -468,13 +574,13 @@
             display: flex; align-items: center; justify-content: center;
             gap: 2px; padding: 0 12px;
             z-index: 3;
-            background: #f5f4f6;
+            background: #f0e8e4;
             border-radius: 12px;
             overflow: hidden;
             transform: translateX(100%);
             transition: transform 0.25s ease;
         }
-        body.dark-mode .note-action-bg { background: #1e1828; }
+        body.dark-mode .note-action-bg { background: #241c18; }
         .note-action-btn {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             gap: 4px; border: none; cursor: pointer; background: transparent;
@@ -484,11 +590,11 @@
         .note-action-btn:active { opacity: 0.6; }
         .note-action-icon {
             width: 44px; height: 44px; border-radius: 50%;
-            background: #e8e7ea;
+            background: #e8ddd8;
             display: flex; align-items: center; justify-content: center;
             flex-shrink: 0;
         }
-        body.dark-mode .note-action-icon { background: #302840; }
+        body.dark-mode .note-action-icon { background: #30251e; }
         .note-action-icon svg { width: 20px; height: 20px; }
         .note-action-label {
             font-size: 0.65rem; font-weight: 500;
@@ -497,14 +603,28 @@
         body.dark-mode .note-action-label { color: #c8bcd8; }
 
         .note-card.is-pinned {
-            background: var(--accent-color-30, rgba(255,154,158,0.3));
-            border-color: var(--accent-color-20, rgba(255,154,158,0.2));
+            background: rgba(212,146,154,0.1);
+        }
+        .note-card.is-pinned .pin-bar {
+            display: flex;
+        }
+        .pin-bar {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            margin: -10px -12px 8px;
+            padding: 5px 12px 5px;
+            border-bottom: 1px solid rgba(212,146,154,0.15);
+            font-size: 0.72rem;
+            color: var(--accent-color);
+            opacity: 0.6;
+            letter-spacing: 0.05em;
         }
 
         .note-card {
-            background: rgba(255,255,255,0.96);
-            border: 1px solid rgba(0,0,0,0.05);
-            border-radius: 12px; padding: 10px 12px;
+            background: rgba(252,247,244,var(--card-opacity));
+            border: none;
+            border-radius: 14px; padding: 13px 14px;
             position: relative; z-index: 2;
             transform: translateZ(0);
             transition: transform 0.25s ease;
@@ -514,15 +634,17 @@
         }
 
         .note-card:active {
-            background: rgba(255,255,255,0.88);
+            background: rgba(245,236,230,0.88);
         }
 
         .note-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; margin-bottom: 8px; }
 
         .note-time {
             color: var(--text-color);
-            font-weight: bold;
-            text-shadow: 0 0 4px rgba(0,0,0,0.4);
+            font-weight: 500;
+            opacity: 0.45;
+            font-size: 0.75rem;
+            letter-spacing: 0.02em;
         }
 
         .note-actions { display: flex; gap: 10px; align-items: center; }
@@ -627,123 +749,161 @@
             max-width: 55px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
         }
         /* ═开场加载遮罩═ */
-        #launch-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: #f5f5f5;
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: opacity 0.6s ease;
-        }
-        #launch-overlay.fade-out {
-            opacity: 0;
-            pointer-events: none;
-        }
-        #load-spinner {
-            position: relative;
-            width: 200px;
-            height: 200px;
-            background: transparent;
-            border: none;
-            animation: none;
-        }
-        #load-spinner::before {
-            content: "";
-            position: absolute;
-            top: 50%; left: 50%;
-            width: 56px; height: 56px;
-            transform: translate(-50%, -50%);
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpolygon points='12,0 15,9 24,12 15,15 12,24 9,15 0,12 9,9' fill='%23000'/%3E%3C/svg%3E");
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            z-index: 2;
-            animation: spinnerBreathe 3s ease-in-out infinite;
-        }
-        #load-spinner::after {
-            content: "";
-            position: absolute;
-            top: 50%; left: 50%;
-            width: 180px; height: 180px;
-            transform: translate(-50%, -50%);
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cpolygon points='100,20 105,30 115,35 105,40 100,50 95,40 85,35 95,30' fill='none' stroke='%23000' stroke-width='1.5'/%3E%3Cpolygon points='146,44 149,51 156,54 149,57 146,64 143,57 136,54 143,51' fill='none' stroke='%23000' stroke-width='1.5'/%3E%3Cpolygon points='165,87 169,96 178,100 169,104 165,113 161,104 152,100 161,96' fill='none' stroke='%23000' stroke-width='1.5'/%3E%3Cpolygon points='146,139 148,144 153,146 148,148 146,153 144,148 139,146 144,144' fill='none' stroke='%23000' stroke-width='1.5'/%3E%3Cpolygon points='100,155 103,162 110,165 103,168 100,175 97,168 90,165 97,162' fill='none' stroke='%23000' stroke-width='1.5'/%3E%3Cpolygon points='54,131 59,141 69,146 59,151 54,161 49,151 39,146 49,141' fill='none' stroke='%23000' stroke-width='1.5'/%3E%3Cpolygon points='35,88 39,96 47,100 39,104 35,112 31,104 23,100 31,96' fill='none' stroke='%23000' stroke-width='1.5'/%3E%3Cpolygon points='54,47 56,52 61,54 56,56 54,61 52,56 47,54 52,52' fill='none' stroke='%23000' stroke-width='1.5'/%3E%3C/svg%3E");
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            animation: spinnerRotate 15s linear infinite, spinnerBreathe 3s ease-in-out infinite;
-            z-index: 1;
-        }
-        @keyframes spinnerRotate {
-            from { transform: translate(-50%, -50%) rotate(0deg); }
-            to { transform: translate(-50%, -50%) rotate(360deg); }
-        }
-        @keyframes spinnerBreathe {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 1; }
-        }
-        /* ═ 启动遮罩 ═ */
-        #splash-screen {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: #fff;
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: opacity 0.8s ease;
-        }
-        #splash-screen.fade-out {
-            opacity: 0;
-            pointer-events: none;
-        }
-        .splash-spinner {
-            position: relative;
-            width: 160px;
-            height: 160px;
-        }
-        /* 中间八角星 */
-        .splash-center {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 36px; height: 36px;
-            background: #000;
-            clip-path: polygon(50% 0%, 65% 35%, 100% 50%, 65% 65%, 50% 100%, 35% 65%, 0% 50%, 35% 35%);
-        }
-        /* 外圈旋转容器 */
-        .splash-ring {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            animation: splashRotate 12s linear infinite;
-        }
-        /* 外圈八个小星星 */
-        .splash-ring span {
-            position: absolute;
-            top: 50%; left: 50%;
-            background: #000;
-            clip-path: polygon(50% 0%, 65% 35%, 100% 50%, 65% 65%, 50% 100%, 35% 65%, 0% 50%, 35% 35%);
-            animation: splashBreathe 3s ease-in-out infinite;
-        }
-        .splash-ring span:nth-child(1) { width:14px;height:14px; transform: translate(-50%,-50%) rotate(0deg)   translateY(-68px); animation-delay:0s; }
-        .splash-ring span:nth-child(2) { width:9px; height:9px;  transform: translate(-50%,-50%) rotate(45deg)  translateY(-68px); animation-delay:0.375s; }
-        .splash-ring span:nth-child(3) { width:14px;height:14px; transform: translate(-50%,-50%) rotate(90deg)  translateY(-68px); animation-delay:0.75s; }
-        .splash-ring span:nth-child(4) { width:9px; height:9px;  transform: translate(-50%,-50%) rotate(135deg) translateY(-68px); animation-delay:1.125s; }
-        .splash-ring span:nth-child(5) { width:14px;height:14px; transform: translate(-50%,-50%) rotate(180deg) translateY(-68px); animation-delay:1.5s; }
-        .splash-ring span:nth-child(6) { width:9px; height:9px;  transform: translate(-50%,-50%) rotate(225deg) translateY(-68px); animation-delay:1.875s; }
-        .splash-ring span:nth-child(7) { width:14px;height:14px; transform: translate(-50%,-50%) rotate(270deg) translateY(-68px); animation-delay:2.25s; }
-        .splash-ring span:nth-child(8) { width:9px; height:9px;  transform: translate(-50%,-50%) rotate(315deg) translateY(-68px); animation-delay:2.625s; }
 
-        @keyframes splashRotate {
-            from { transform: rotate(0deg); }
-            to   { transform: rotate(360deg); }
+        /* ══════════════════════════════════════
+           形象调整浮层
+        ══════════════════════════════════════ */
+        #portrait-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 88888;
+            flex-direction: column;
         }
-        @keyframes splashBreathe {
-            0%, 100% { opacity: 0.2; }
-            50%       { opacity: 1; }
+        #portrait-overlay.active { display: flex; }
+
+        /* 背景：透出主界面，深色遮罩 */
+        .portrait-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(30, 20, 18, 0.45);
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
         }
+
+        /* 底部面板 */
+        .portrait-panel {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            background: var(--portrait-panel-bg, #f0e8e3);
+            border-radius: 20px 20px 0 0;
+            max-height: 62vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 -4px 32px rgba(0,0,0,0.18);
+        }
+        body.dark-mode .portrait-panel { background: #2a201c; }
+        body.ui-solid .portrait-panel { background: #ede4de; }
+        body.dark-mode.ui-solid .portrait-panel { background: #2a201c; }
+
+        /* 面板顶部拖条 + 标题 */
+        .portrait-panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px 0;
+            flex-shrink: 0;
+        }
+        .portrait-panel-title {
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            color: var(--text-color);
+            opacity: 0.6;
+            text-transform: uppercase;
+        }
+        .portrait-panel-close {
+            background: none; border: none;
+            font-size: 1.1rem; color: var(--text-color);
+            opacity: 0.4; cursor: pointer; padding: 4px;
+        }
+        .portrait-drag-bar {
+            width: 36px; height: 4px;
+            background: rgba(0,0,0,0.15);
+            border-radius: 2px;
+            margin: 0 auto 0;
+            position: absolute;
+            top: 8px; left: 50%; transform: translateX(-50%);
+        }
+        body.dark-mode .portrait-drag-bar { background: rgba(255,255,255,0.15); }
+
+        /* 三个 tab */
+        .portrait-tabs {
+            display: flex;
+            margin: 10px 16px 0;
+            background: rgba(0,0,0,0.06);
+            border-radius: 10px;
+            padding: 3px;
+            gap: 2px;
+            flex-shrink: 0;
+        }
+        body.dark-mode .portrait-tabs { background: rgba(255,255,255,0.08); }
+        .portrait-tab {
+            flex: 1; text-align: center;
+            padding: 6px 0; font-size: 0.75rem;
+            border-radius: 8px; cursor: pointer;
+            color: var(--text-color); opacity: 0.5;
+            transition: background 0.18s, opacity 0.18s;
+            user-select: none;
+        }
+        .portrait-tab.active {
+            background: #fff; opacity: 1;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+        }
+        body.dark-mode .portrait-tab.active { background: rgba(255,255,255,0.14); }
+        body.ui-solid .portrait-tab.active { background: #faf4f0; }
+
+        /* 各 tab 内容 */
+        .portrait-content {
+            flex: 1; overflow-y: auto;
+            padding: 12px 20px 32px;
+        }
+        .portrait-tab-panel { display: none; }
+        .portrait-tab-panel.active { display: block; }
+
+        /* 调节行 */
+        .portrait-row {
+            display: flex; align-items: center;
+            gap: 12px; padding: 10px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        body.dark-mode .portrait-row { border-bottom-color: rgba(255,255,255,0.06); }
+        .portrait-row:last-child { border-bottom: none; }
+        .portrait-row label {
+            font-size: 0.8rem; color: var(--text-color);
+            opacity: 0.65; min-width: 58px; flex-shrink: 0;
+        }
+        .portrait-row input[type=range] {
+            flex: 1; height: 4px; accent-color: var(--accent-color);
+        }
+        .portrait-row input[type=number] {
+            flex: 1; padding: 5px 10px; border-radius: 8px;
+            border: 1px solid rgba(0,0,0,0.1);
+            background: rgba(255,255,255,0.6);
+            font-size: 0.82rem; color: var(--text-color); outline: none;
+        }
+        body.dark-mode .portrait-row input[type=number] {
+            background: rgba(255,255,255,0.07);
+            border-color: rgba(255,255,255,0.1); color: #e8ddd8;
+        }
+        .portrait-snap-btn {
+            padding: 4px 9px; border-radius: 7px;
+            border: 1px solid rgba(0,0,0,0.1);
+            background: transparent; font-size: 0.7rem;
+            color: var(--text-color); opacity: 0.5;
+            cursor: pointer; flex-shrink: 0;
+        }
+        .portrait-val {
+            font-size: 0.72rem; color: var(--text-color);
+            opacity: 0.4; min-width: 26px; text-align: right; flex-shrink: 0;
+        }
+
+        /* 上传/预设区 */
+        .portrait-upload-btn {
+            width: 100%; padding: 9px;
+            border-radius: 10px;
+            border: 1px dashed rgba(0,0,0,0.15);
+            background: transparent;
+            color: var(--text-color); opacity: 0.55;
+            font-size: 0.82rem; cursor: pointer;
+            margin-bottom: 10px;
+        }
+        body.dark-mode .portrait-upload-btn { border-color: rgba(255,255,255,0.15); }
+        .portrait-presets {
+            display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;
+        }
+
         .lock-btn { background:none; border:1px solid rgba(0,0,0,0.12); border-radius:6px; padding:2px 6px; cursor:pointer; font-size:0.8rem; color:#bbb; flex-shrink:0; transition:color 0.2s,border-color 0.2s; }
         .lock-btn.locked { color:#e08; border-color:#e08; }
         body.dark-mode .lock-btn { border-color:rgba(255,255,255,0.15); color:#555; }
@@ -799,7 +959,7 @@
             cursor:pointer;
             position:relative;
         }
-        .special-item.pinned { background: rgba(255,154,158,0.1); }
+        .special-item.pinned { background: rgba(212,146,154,0.1); }
         .special-item-emoji { font-size:1.2rem; flex-shrink:0; }
         .special-item-info { flex:1; min-width:0; }
         .special-item-name { font-size:0.88rem; font-weight:500; color:#333; }
@@ -1027,7 +1187,7 @@
             -webkit-user-select: none;
         }
         .pomo-big-clock {
-            font-size: clamp(56px, 18vw, 96px);
+            font-size: clamp(72px, 22vw, 128px);
             font-weight: 700;
             letter-spacing: -0.02em;
             font-variant-numeric: tabular-nums;
@@ -1139,7 +1299,8 @@
             display: flex;
             flex-direction: column;
             width: 100%; height: 100%;
-            padding: 3vw 2vw 3vw;
+            padding: 0;
+            overflow: hidden;
         }
         .sb-portrait .sb-top-row {
             font-size: 3.5vw;
@@ -1150,24 +1311,27 @@
             align-items: center;
             gap: 0.6em;
             flex-shrink: 0;
-            margin-bottom: 0;
+            padding: 4vw 5vw 0;
         }
         .sb-portrait .sb-time-block {
             flex: 1;
             display: flex;
             flex-direction: column;
             min-height: 0;
+            overflow: hidden;
         }
         .sb-portrait .sb-big-hour,
         .sb-portrait .sb-big-min {
-            font-size: clamp(120px, 48vw, 48vw);
+            font-size: 49vw;
             font-weight: 700;
             line-height: 1;
-            letter-spacing: -0.03em;
+            letter-spacing: -0.04em;
             display: flex;
             align-items: center;
             flex: 1;
             min-height: 0;
+            overflow: hidden;
+            padding: 0 3vw;
         }
         .sb-portrait .sb-min-row {
             position: relative;
@@ -1175,12 +1339,13 @@
             min-height: 0;
             display: flex;
             align-items: center;
+            overflow: hidden;
         }
         .sb-portrait .sb-sec {
             position: absolute;
-            right: 0;
-            bottom: 0.05em;
-            font-size: 7vw;
+            right: 3vw;
+            bottom: 0.1em;
+            font-size: 6.5vw;
             font-weight: 400;
             opacity: 0.45;
             letter-spacing: 0;
@@ -1194,7 +1359,7 @@
             font-size: 3.5vw;
             font-weight: 300;
             opacity: 0.6;
-            margin-top: 1vw;
+            padding: 0 5vw 4vw;
         }
         .sb-portrait .sb-todo-line {
             font-size: 3.5vw;
@@ -1362,18 +1527,33 @@
         body.dark-mode .drawer-standby-btn { border-color: rgba(255,255,255,0.15); }
 
         .drawer-section-title {
-            padding: 16px 20px 6px;
+            padding: 14px 16px 4px;
             font-size: 0.65rem; font-weight: 700;
-            letter-spacing: 0.12em; color: #bbb; text-transform: uppercase;
+            letter-spacing: 0.12em; color: #c0b0b8; text-transform: uppercase;
+            display: flex; align-items: center; gap: 8px;
         }
-        body.dark-mode .drawer-section-title { color: #555; }
+        .drawer-section-title::before {
+            content: '';
+            display: inline-block;
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            background: #c0b0b8;
+        }
+        .dst-daily::before      { background: #b8d8f4; }
+        .dst-stats::before      { background: #b8e8c8; }
+        .dst-card::before       { background: #e8d4b8; }
+        .dst-appearance::before { background: #d4b8e8; }
+        .dst-bg::before         { background: #f4d4b8; }
+        .dst-other::before      { background: #c8c8d8; }
+        body.dark-mode .drawer-section-title { color: #484048; }
 
         .drawer-divider {
             height: 1px;
-            background: rgba(0,0,0,0.06);
-            margin: 8px 20px 0;
+            background: rgba(0,0,0,0.05);
+            margin: 6px 16px 0;
         }
-        body.dark-mode .drawer-divider { background: rgba(255,255,255,0.07); }
+        body.dark-mode .drawer-divider { background: rgba(255,255,255,0.06); }
 
         .drawer-tags { padding: 4px 16px 8px; display: flex; flex-wrap: wrap; gap: 6px; }
 
@@ -1391,6 +1571,83 @@
             text-align: left;
             cursor: pointer;
         }
+
+        /* 日历/特别的日子 tab */
+        .drawer-cal-tabs {
+            display: flex;
+            margin: 6px 14px 8px;
+            border-radius: 10px;
+            background: rgba(0,0,0,0.04);
+            padding: 3px;
+            gap: 2px;
+        }
+        body.dark-mode .drawer-cal-tabs { background: rgba(255,255,255,0.06); }
+        .drawer-cal-tab {
+            flex: 1; text-align: center;
+            padding: 5px 0;
+            font-size: 0.72rem;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #aaa;
+            transition: background 0.18s, color 0.18s;
+            user-select: none;
+        }
+        .drawer-cal-tab.active {
+            background: #fff;
+            color: var(--text-color);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        }
+        body.dark-mode .drawer-cal-tab.active { background: rgba(255,255,255,0.12); color: #e0d8e8; }
+
+        /* 特别的日子 内嵌列表 */
+        .drawer-special-area { padding: 0 14px 8px; }
+        .drawer-special-item {
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px 10px;
+            border-radius: 10px;
+            background: rgba(0,0,0,0.03);
+            margin-bottom: 6px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        body.dark-mode .drawer-special-item { background: rgba(255,255,255,0.04); }
+        .drawer-special-item:active { background: rgba(0,0,0,0.07); }
+        .drawer-special-item.pinned { background: rgba(212,146,154,0.1); }
+        .drawer-special-info { flex: 1; min-width: 0; }
+        .drawer-special-name { font-size: 0.82rem; color: var(--text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .drawer-special-date { font-size: 0.65rem; color: #aaa; margin-top: 2px; }
+        .drawer-special-days { font-size: 1rem; font-weight: 700; color: var(--accent-color); flex-shrink: 0; text-align: right; min-width: 36px; }
+        .drawer-special-days span { display: block; font-size: 0.55rem; font-weight: normal; color: #aaa; }
+        .drawer-special-del { background: none; border: none; color: #ddd; font-size: 1.1rem; cursor: pointer; padding: 0 2px; flex-shrink: 0; }
+        .drawer-special-add-btn {
+            width: 100%; padding: 7px;
+            border-radius: 8px;
+            border: 1px dashed rgba(0,0,0,0.12);
+            background: transparent; color: #aaa;
+            font-size: 0.8rem; cursor: pointer;
+            margin-top: 2px;
+        }
+        body.dark-mode .drawer-special-add-btn { border-color: rgba(255,255,255,0.12); }
+        .drawer-special-form {
+            display: none;
+            background: rgba(0,0,0,0.03);
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 6px;
+        }
+        body.dark-mode .drawer-special-form { background: rgba(255,255,255,0.04); }
+        .drawer-special-form.open { display: block; }
+        .drawer-special-form input {
+            width: 100%; margin-bottom: 6px;
+            padding: 6px 10px; border-radius: 7px;
+            border: 1px solid rgba(0,0,0,0.08);
+            background: rgba(255,255,255,0.8);
+            font-size: 0.8rem; color: var(--text-color);
+            outline: none;
+        }
+        body.dark-mode .drawer-special-form input { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.1); color: #e0d8e8; }
+        .drawer-special-form-row { display: flex; gap: 6px; margin-top: 2px; }
+        .drawer-special-form-row button { flex: 1; padding: 7px; border-radius: 8px; font-size: 0.8rem; border: none; cursor: pointer; }
 
         /* 统计区 */
         .drawer-stats-area {
@@ -1433,21 +1690,7 @@
     </style>
 </head>
 <body>
-    <div id="launch-overlay">
-        <div id="load-spinner"></div>
-    </div>
     <!-- JSZip 和 FileSaver 按需懒加载，点导出/导入时才请求 -->
-
-    <!-- 启动遮罩 -->
-    <div id="splash-screen">
-        <div class="splash-spinner">
-            <div class="splash-ring">
-                <span></span><span></span><span></span><span></span>
-                <span></span><span></span><span></span><span></span>
-            </div>
-            <div class="splash-center"></div>
-        </div>
-    </div>
 
     <div class="qw-particles-bg">
         <div class="qw-particle"></div>
@@ -1470,7 +1713,10 @@
             </div>
             <div style="flex:1;">
                 <div class="drawer-name" id="drawer-display-name">宛宛</div>
-                <div style="font-size:0.7rem;opacity:0.38;margin-top:2px;">点击编辑头像与挂件</div>
+                <div style="display:flex;align-items:center;gap:8px;margin-top:3px;">
+                    <span style="font-size:0.7rem;opacity:0.38;">昵称 / 签名 / 昵称颜色</span>
+                    <button onclick="event.stopPropagation();openPortrait();" style="padding:2px 10px;border-radius:20px;background:var(--accent-color);color:#fff;border:none;font-size:0.65rem;cursor:pointer;opacity:0.85;">调整形象</button>
+                </div>
             </div>
             <span id="drawer-avatar-arrow" style="font-size:0.8rem;opacity:0.3;transition:transform 0.2s;flex-shrink:0;">▾</span>
         </div>
@@ -1499,98 +1745,72 @@
                     <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:0.72rem;color:#aaa;width:12px;">B</span><input type="range" id="nc-b" min="0" max="255" value="51" style="flex:1;height:5px;accent-color:#66f;" oninput="onNameRgbChange()"><span id="nc-b-val" style="font-size:0.72rem;color:#aaa;width:22px;text-align:right;">51</span></div>
                 </div>
             </div>
-            <div class="drawer-section-title" style="padding-top:8px;">头像</div>
-            <div class="drawer-settings-area">
-                <div style="display:flex;gap:5px;margin-bottom:8px;">
-                    <button onclick="document.getElementById('avatar-input').click()" style="flex:1;padding:7px;border-radius:8px;border:1px dashed rgba(0,0,0,0.15);background:transparent;color:#aaa;font-size:0.82rem;cursor:pointer;">更换头像</button>
-                    <input type="file" id="avatar-input" style="display:none" accept="image/*" onchange="changeAvatar(this)">
-                </div>
-                <div id="history-avatars" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;"></div>
-                <div class="drawer-row">
-                    <label>缩放</label>
-                    <div id="lockable-avatarscale" style="display:flex;flex:1;gap:6px;align-items:center;">
-                        <input type="range" id="setting-avatar-scale" min="0.5" max="3" step="0.1" value="1" style="flex:1;height:5px;" onchange="updateSettings()">
-                    </div>
-                    <button class="lock-btn" id="lock-avatarscale" onclick="toggleLock('avatarscale')">🔓</button>
-                </div>
-                <div class="drawer-row">
-                    <label>X偏移</label>
-                    <div id="lockable-avataroffset-x" style="flex:1;">
-                        <input type="number" id="setting-avatar-x" class="drawer-input" placeholder="0" style="width:100%;" onchange="updateSettings()">
-                    </div>
-                    <button class="lock-btn" id="lock-avataroffset-x" onclick="toggleLock('avataroffset-x')">🔓</button>
-                </div>
-                <div class="drawer-row">
-                    <label>Y偏移</label>
-                    <div id="lockable-avataroffset-y" style="flex:1;">
-                        <input type="number" id="setting-avatar-y" class="drawer-input" placeholder="0" style="width:100%;" onchange="updateSettings()">
-                    </div>
-                    <button class="lock-btn" id="lock-avataroffset-y" onclick="toggleLock('avataroffset-y')">🔓</button>
-                </div>
-            </div>
-            <div class="drawer-section-title" style="padding-top:8px;">头像框</div>
-            <div class="drawer-settings-area">
-                <div class="frame-preset-list" id="frame-preset-list" style="margin-bottom:6px;"></div>
-                <div style="display:flex;gap:5px;margin-bottom:8px;">
-                    <button onclick="document.getElementById('frame-preset-input').click()" style="flex:1;padding:7px;border-radius:8px;border:1px dashed rgba(0,0,0,0.15);background:transparent;color:#aaa;font-size:0.82rem;cursor:pointer;">＋ 上传头像框</button>
-                    <input type="file" id="frame-preset-input" style="display:none" accept="image/*" onchange="addFramePresetFromFile(this)">
-                </div>
-                <div class="drawer-row">
-                    <label>框大小</label>
-                    <div id="lockable-framescale" style="display:flex;flex:1;gap:6px;align-items:center;">
-                        <input type="range" id="setting-frame-scale" min="0.5" max="2" step="0.05" value="1" style="flex:1;height:5px;" onchange="updateSettings()">
-                    </div>
-                    <button class="lock-btn" id="lock-framescale" onclick="toggleLock('framescale')">🔓</button>
-                </div>
-            </div>
-            <div class="drawer-section-title" style="padding-top:8px;">挂件</div>
-            <div class="drawer-settings-area" style="padding-bottom:12px;">
-                <div class="drawer-row">
-                    <label>启用</label>
-                    <input type="checkbox" id="setting-charm-toggle" style="width:auto;margin:0;" onchange="updateSettings()">
-                </div>
-                <div style="display:flex;gap:5px;margin-bottom:8px;">
-                    <button onclick="document.getElementById('charm-input').click()" style="flex:1;padding:7px;border-radius:8px;border:1px dashed rgba(0,0,0,0.15);background:transparent;color:#aaa;font-size:0.82rem;cursor:pointer;">更换挂件</button>
-                    <input type="file" id="charm-input" style="display:none" accept="image/*" onchange="changeCharm(this)">
-                </div>
-                <div class="drawer-row"><label>X坐标</label><input type="number" id="setting-charm-x" class="drawer-input" placeholder="距右侧px" onchange="updateSettings()"></div>
-                <div class="drawer-row"><label>Y坐标</label><input type="number" id="setting-charm-y" class="drawer-input" placeholder="距顶部px" onchange="updateSettings()"></div>
-                <div class="drawer-row">
-                    <label>大小</label>
-                    <div id="lockable-charmsize" style="display:flex;flex:1;gap:6px;align-items:center;">
-                        <input type="range" id="setting-charm-size" min="20" max="150" style="flex:1;height:5px;" onchange="updateSettings()">
-                    </div>
-                    <button class="lock-btn" id="lock-charmsize" onclick="toggleLock('charmsize')">🔓</button>
-                </div>
-                <div class="drawer-row">
-                    <label>摇晃幅度</label>
-                    <div id="lockable-charmswing" style="display:flex;flex:1;gap:6px;align-items:center;">
-                        <input type="range" id="setting-charm-swing" min="0" max="45" style="flex:1;height:5px;" onchange="updateSettings()">
-                    </div>
-                    <button class="lock-btn" id="lock-charmswing" onclick="toggleLock('charmswing')">🔓</button>
-                </div>
-            </div>
+            <!-- 头像/头像框/挂件 调整已移至「调整形象」浮层 -->
+            <!-- 保留隐藏 input 供其他地方调用 -->
+            <input type="file" id="avatar-input" style="display:none" accept="image/*" onchange="changeAvatar(this)">
+            <input type="file" id="frame-preset-input" style="display:none" accept="image/*" onchange="addFramePresetFromFile(this)">
+            <input type="file" id="charm-input" style="display:none" accept="image/*" onchange="changeCharm(this)">
+            <!-- 保留隐藏的同步 input（供 applySettings 读写） -->
+            <input type="range" id="setting-avatar-scale" style="display:none" min="0.5" max="3" step="0.1" value="1" onchange="updateSettings()">
+            <input type="number" id="setting-avatar-x" style="display:none" onchange="updateSettings()">
+            <input type="number" id="setting-avatar-y" style="display:none" onchange="updateSettings()">
+            <input type="range" id="setting-frame-scale" style="display:none" min="0.5" max="2" step="0.05" value="1" onchange="updateSettings()">
+            <input type="checkbox" id="setting-charm-toggle" style="display:none" onchange="updateSettings()">
+            <input type="number" id="setting-charm-x" style="display:none" onchange="updateSettings()">
+            <input type="number" id="setting-charm-y" style="display:none" onchange="updateSettings()">
+            <input type="range" id="setting-charm-size" style="display:none" min="20" max="150" onchange="updateSettings()">
+            <input type="range" id="setting-charm-swing" style="display:none" min="0" max="45" onchange="updateSettings()">
+            <div id="history-avatars" style="display:none;"></div>
+            <div id="frame-preset-list" style="display:none;"></div>
             <div style="padding:0 20px 12px;">
                 <button class="drawer-standby-btn" onclick="closeDrawer(); setTimeout(enterStandby,300);" style="width:100%;">⏾ 进入待机</button>
             </div>
         </div>
 
-            <!-- 日历 -->
-            <div class="drawer-section-title">✧𝓓𝓪𝓲𝓵𝔂</div>
-            <div class="drawer-cal-area">
-                <div class="cal-header" style="padding:0 4px 8px;">
-                    <button class="cal-nav" onclick="calChangeMonth(-1)">‹</button>
-                    <span class="cal-month-label" id="cal-month-label"></span>
-                    <button class="cal-nav" onclick="calChangeMonth(1)">›</button>
+            <!-- ── Daily ── -->
+            <div class="drawer-section-title dst-daily">✧𝓓𝓪𝓲𝓵𝔂</div>
+            <!-- tab 切换 -->
+            <div class="drawer-cal-tabs">
+                <div class="drawer-cal-tab active" id="dct-cal" onclick="switchDrawerCalTab('cal')">𝓓𝓪𝓲𝓵𝔂</div>
+                <div class="drawer-cal-tab" id="dct-special" onclick="switchDrawerCalTab('special')">✦𝓼𝓹𝓮𝓬𝓲𝓪𝓵</div>
+            </div>
+            <!-- 日历面板 -->
+            <div id="drawer-tab-cal">
+                <div class="drawer-cal-area">
+                    <div class="cal-header" style="padding:0 4px 8px;">
+                        <button class="cal-nav" onclick="calChangeMonth(-1)">‹</button>
+                        <span class="cal-month-label" id="cal-month-label"></span>
+                        <button class="cal-nav" onclick="calChangeMonth(1)">›</button>
+                    </div>
+                    <div class="cal-grid" id="cal-grid"></div>
+                    <button class="cal-clear-btn" id="drawer-cal-clear" style="display:none;" onclick="calClearFilter()">× 清除日期筛选</button>
                 </div>
-                <div class="cal-grid" id="cal-grid"></div>
-                <button class="cal-clear-btn" id="drawer-cal-clear" style="display:none;" onclick="calClearFilter()">× 清除日期筛选</button>
+            </div>
+            <!-- 特别的日子面板 -->
+            <div id="drawer-tab-special" style="display:none;">
+                <div class="drawer-special-area">
+                    <div id="drawer-special-list"></div>
+                    <button class="drawer-special-add-btn" onclick="toggleDrawerSpecialForm()">＋ 新增特别的日子</button>
+                    <div class="drawer-special-form" id="drawer-special-form">
+                        <input type="text" id="dsf-emoji" placeholder="emoji（留空则无）" maxlength="4">
+                        <input type="text" id="dsf-name" placeholder="名称">
+                        <input type="date" id="dsf-date">
+                        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+                            <input type="checkbox" id="dsf-annual" style="width:auto;margin:0;">
+                            <label for="dsf-annual" style="font-size:0.8rem;color:#888;">每年重复</label>
+                        </div>
+                        <div class="drawer-special-form-row">
+                            <button onclick="toggleDrawerSpecialForm()" style="background:rgba(0,0,0,0.06);color:#666;">取消</button>
+                            <button onclick="saveDrawerSpecialDay()" style="background:var(--accent-color);color:var(--accent-text);">保存</button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="drawer-divider"></div>
 
-            <!-- 统计 -->
-            <div class="drawer-section-title">统计</div>
+            <!-- ── 统计 & 标签 ── -->
+            <div class="drawer-section-title dst-stats">统计 & 标签</div>
             <div class="drawer-stats-area">
                 <div class="stats-total" id="stats-total" style="margin-bottom:8px;"></div>
                 <div class="stats-grid">
@@ -1600,34 +1820,74 @@
                     <div class="stats-cell" onclick="statsFlip('day')" id="stats-day"><div class="stats-label">日</div><div class="stats-val" id="sv-day">-</div><div class="stats-sub" id="ss-day"></div></div>
                 </div>
             </div>
-
-            <div class="drawer-divider"></div>
-
-            <!-- 标签列表（统计下面） -->
-            <div class="drawer-section-title">标签</div>
+            <div style="height:1px;background:rgba(0,0,0,0.04);margin:6px 16px;"></div>
             <div class="drawer-tag-list" id="drawer-tag-list"></div>
 
             <div class="drawer-divider"></div>
 
-            <!-- 设置 -->
-            <div class="drawer-section-title">基础设置</div>
+            <!-- ── 卡片 ── -->
+            <div class="drawer-section-title dst-card">卡片</div>
+            <div class="drawer-settings-area">
+                <div class="drawer-row">
+                    <label>预览行数</label>
+                    <div id="lockable-previewlines" style="display:flex;flex:1;gap:6px;align-items:center;">
+                        <input type="range" id="setting-preview-lines" min="1" max="10" style="flex:1;height:5px;" onchange="updateSettings()">
+                    </div>
+                    <button class="lock-btn" id="lock-previewlines" onclick="toggleLock('previewlines')">🔓</button>
+                </div>
+                <div class="drawer-row">
+                    <label>卡片透明</label>
+                    <input type="range" id="setting-card-opacity" min="0" max="100" step="1" style="flex:1;height:5px;" onchange="updateCardOpacity(this.value)">
+                    <span id="setting-card-opacity-val" style="font-size:0.72rem;color:#aaa;width:28px;text-align:right;flex-shrink:0;">96</span>
+                </div>
+                <!-- 追评预览：开关 + 折叠子项 -->
+                <div class="drawer-row" style="cursor:pointer;" onclick="toggleCommentPreviewPanel()">
+                    <label>追评预览</label>
+                    <input type="checkbox" id="setting-comment-preview-enabled" style="width:auto;margin:0;" onclick="event.stopPropagation();updateSettings()">
+                    <span id="comment-preview-arrow" style="font-size:0.7rem;color:#bbb;margin-left:auto;transition:transform 0.2s;">▾</span>
+                </div>
+                <div id="comment-preview-panel" style="display:none;">
+                    <div class="drawer-row" style="padding-left:24px;">
+                        <label>名称</label>
+                        <input type="text" id="setting-comment-preview-name" class="drawer-input" placeholder="如 宛宛" oninput="updateSettings()">
+                    </div>
+                    <div class="drawer-row" style="padding-left:24px;">
+                        <label>后缀</label>
+                        <input type="text" id="setting-comment-preview-suffix" class="drawer-input" placeholder="如 说：" oninput="updateSettings()">
+                    </div>
+                    <div class="drawer-row" style="padding-left:24px;">
+                        <label>同步昵称</label>
+                        <input type="checkbox" id="setting-preview-sync-name" style="width:auto;margin:0;" onchange="updateSettings()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="drawer-divider"></div>
+
+            <!-- ── 外观 ── -->
+            <div class="drawer-section-title dst-appearance">外观</div>
             <div class="drawer-settings-area">
                 <div class="drawer-row">
                     <label>主题色</label>
                     <input type="color" id="setting-color" style="width:60px;height:28px;padding:0;border:none;background:none;cursor:pointer;" onchange="updateSettings()">
                 </div>
-                <div class="drawer-row">
-                    <label>字体颜色</label>
-                    <div style="flex:1;">
+                <div class="drawer-row" style="align-items:flex-start;">
+                    <label style="margin-top:2px;">字体颜色</label>
+                    <div id="lockable-textcolor" style="flex:1;">
                         <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;"><span style="font-size:0.72rem;color:#aaa;width:12px;">R</span><input type="range" id="tc-r" min="0" max="255" value="51" style="flex:1;height:5px;accent-color:#f66;" oninput="onRgbSliderChange()"><span id="tc-r-val" style="font-size:0.72rem;color:#aaa;width:22px;text-align:right;">51</span></div>
                         <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;"><span style="font-size:0.72rem;color:#aaa;width:12px;">G</span><input type="range" id="tc-g" min="0" max="255" value="51" style="flex:1;height:5px;accent-color:#4c4;" oninput="onRgbSliderChange()"><span id="tc-g-val" style="font-size:0.72rem;color:#aaa;width:22px;text-align:right;">51</span></div>
                         <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:0.72rem;color:#aaa;width:12px;">B</span><input type="range" id="tc-b" min="0" max="255" value="51" style="flex:1;height:5px;accent-color:#66f;" oninput="onRgbSliderChange()"><span id="tc-b-val" style="font-size:0.72rem;color:#aaa;width:22px;text-align:right;">51</span></div>
                         <div style="display:flex;align-items:center;gap:6px;margin-top:4px;"><div id="text-color-preview" style="width:24px;height:18px;border-radius:4px;border:1px solid #ddd;"></div><span id="text-color-hex" style="font-size:0.72rem;color:#aaa;">#333333</span></div>
                     </div>
+                    <button class="lock-btn" id="lock-textcolor" onclick="toggleLock('textcolor')" style="margin-top:2px;">🔓</button>
                 </div>
                 <div class="drawer-row">
                     <label>深色模式</label>
                     <input type="checkbox" id="setting-dark-mode" style="width:auto;margin:0;" onchange="toggleDarkMode(this.checked)">
+                </div>
+                <div class="drawer-row">
+                    <label>实色风格</label>
+                    <input type="checkbox" id="setting-ui-style" style="width:auto;margin:0;" onchange="toggleUIStyle(this.checked)">
                 </div>
                 <div class="drawer-row">
                     <label>毛玻璃</label>
@@ -1641,46 +1901,20 @@
                     </div>
                     <button class="lock-btn" id="lock-fontsize" onclick="toggleLock('fontsize')">🔓</button>
                 </div>
-                <div class="drawer-row">
-                    <label>预览行数</label>
-                    <div id="lockable-previewlines" style="display:flex;flex:1;gap:6px;align-items:center;">
-                        <input type="range" id="setting-preview-lines" min="1" max="10" style="flex:1;height:5px;" onchange="updateSettings()">
-                    </div>
-                    <button class="lock-btn" id="lock-previewlines" onclick="toggleLock('previewlines')">🔓</button>
+                <div class="drawer-row" style="padding-bottom:4px;">
+                    <label>字体</label>
+                </div>
+                <div style="padding:0 0 8px;">
+                    <div class="preset-list" id="font-preset-list" style="margin-bottom:6px;"></div>
+                    <button onclick="document.getElementById('font-input').click()" style="width:100%;padding:7px;border-radius:8px;border:1px dashed rgba(0,0,0,0.15);background:transparent;color:#aaa;font-size:0.82rem;cursor:pointer;">＋ 上传字体</button>
+                    <input type="file" id="font-input" style="display:none" accept=".ttf,.otf,.woff,.woff2" onchange="addFontPreset(this)">
                 </div>
             </div>
 
             <div class="drawer-divider"></div>
-            <div class="drawer-section-title">追评预览</div>
-            <div class="drawer-settings-area">
-                <div class="drawer-row">
-                    <label>显示追评</label>
-                    <input type="checkbox" id="setting-comment-preview-enabled" style="width:auto;margin:0;" onchange="updateSettings()">
-                </div>
-                <div class="drawer-row">
-                    <label>预览名称</label>
-                    <input type="text" id="setting-comment-preview-name" class="drawer-input" placeholder="如 宛宛" oninput="updateSettings()">
-                </div>
-                <div class="drawer-row">
-                    <label>名称后缀</label>
-                    <input type="text" id="setting-comment-preview-suffix" class="drawer-input" placeholder="如 说：" oninput="updateSettings()">
-                </div>
-                <div class="drawer-row">
-                    <label>同步昵称</label>
-                    <input type="checkbox" id="setting-preview-sync-name" style="width:auto;margin:0;" onchange="updateSettings()">
-                </div>
-            </div>
 
-            <div class="drawer-divider"></div>
-            <div class="drawer-section-title">字体</div>
-            <div class="drawer-settings-area">
-                <div class="preset-list" id="font-preset-list" style="margin-bottom:6px;"></div>
-                <button onclick="document.getElementById('font-input').click()" style="width:100%;padding:7px;border-radius:8px;border:1px dashed rgba(0,0,0,0.15);background:transparent;color:#aaa;font-size:0.82rem;cursor:pointer;">＋ 上传字体</button>
-                <input type="file" id="font-input" style="display:none" accept=".ttf,.otf,.woff,.woff2" onchange="addFontPreset(this)">
-            </div>
-
-            <div class="drawer-divider"></div>
-            <div class="drawer-section-title">背景</div>
+            <!-- ── 背景 ── -->
+            <div class="drawer-section-title dst-bg">背景</div>
             <div class="drawer-settings-area">
                 <button onclick="document.getElementById('bg-input').click()" style="width:100%;padding:7px;border-radius:8px;border:1px dashed rgba(0,0,0,0.15);background:transparent;color:#aaa;font-size:0.82rem;cursor:pointer;margin-bottom:8px;">全局背景</button>
                 <input type="file" id="bg-input" accept="image/*" style="display:none" onchange="changeBg(this)">
@@ -1697,14 +1931,16 @@
             </div>
 
             <div class="drawer-divider"></div>
-            <div class="drawer-section-title">待机模式</div>
-            <div class="drawer-settings-area">
-                <div class="drawer-row"><label>显示待办</label><input type="checkbox" id="sb-show-todo" style="width:auto;margin:0;" onchange="updateSbSettings()"></div>
-                <div class="drawer-row"><label>显示纪念日</label><input type="checkbox" id="sb-show-special" style="width:auto;margin:0;" onchange="updateSbSettings()"></div>
-            </div>
 
-            <div class="drawer-divider"></div>
-            <div class="drawer-section-title">数据备份</div>
+            <!-- ── 其他 ── -->
+            <div class="drawer-section-title dst-other">其他</div>
+            <div class="drawer-settings-area">
+                <div class="drawer-row"><label>待机 · 显示待办</label><input type="checkbox" id="sb-show-todo" style="width:auto;margin:0;" onchange="updateSbSettings()"></div>
+                <div class="drawer-row"><label>待机 · 纪念日</label><input type="checkbox" id="sb-show-special" style="width:auto;margin:0;" onchange="updateSbSettings()"></div>
+            </div>
+            <div style="padding:0 20px 10px;">
+                <button class="drawer-standby-btn" onclick="closeDrawer(); setTimeout(enterStandby,300);" style="width:100%;">⏾ 进入待机</button>
+            </div>
             <div class="drawer-settings-area" style="padding-bottom:16px;">
                 <div style="display:flex;gap:8px;">
                     <button onclick="exportDataToZip()" style="flex:1;padding:8px;border-radius:8px;background:rgba(220,150,160,0.15);color:#8b3a45;border:1px solid rgba(220,150,160,0.4);font-weight:bold;font-size:0.82rem;cursor:pointer;">⬆ 导出</button>
@@ -1738,14 +1974,14 @@
                     </span>
                 </div>
                 <div class="user-name" id="display-name">宛宛</div>
-                <div class="user-signature" id="display-signature" onclick="openDrawer()" style="cursor:pointer;min-height:1.2em;"></div>
+                <div class="user-signature" id="display-signature" style="min-height:1.2em;"></div>
             </div>
-            <button class="cal-btn" id="special-days-btn" onclick="openSpecialModal()" title="特别的日子"><span>✦</span></button>
+            <button class="cal-btn" id="special-days-btn" onclick="openDrawer();setTimeout(()=>switchDrawerCalTab('special'),200);" title="特别的日子"><span>ଳ</span></button>
         </div>
 
         <div class="content-wrapper">
             <!-- 纪念日置顶条（三种模式都显示） -->
-            <div class="special-pin" id="special-pin" onclick="openSpecialPanel()">
+            <div class="special-pin" id="special-pin" onclick="openDrawer();setTimeout(()=>switchDrawerCalTab('special'),200);">
                 <span class="special-pin-emoji" id="pin-emoji">✦</span>
                 <span class="special-pin-name" id="pin-name"></span>
                 <span class="special-pin-days" id="pin-days"></span>
@@ -1899,7 +2135,7 @@
                 signature: '',
                 nameColor: '#333333',
                 textColorR: 51, textColorG: 51, textColorB: 51,
-                themeColor: '#ff9a9e',
+                themeColor: '#d4929a',
                 fontSize: 14,
                 previewLines: 3,
                 showCharm: true,
@@ -1923,7 +2159,8 @@
                 currentFrame: 'st',
                 framePresets: [],
                 bgNote: '', bgTodo: '', bgPomodoro: '',
-                lastMode: 'note'
+                lastMode: 'note',
+                uiStyle: 'solid'
             },
             tempImages: [], filterTag: null, blockedTags: [], searchQuery: '',
             editingId: null, filterDateFrom: null, filterDateTo: null,
@@ -2021,22 +2258,6 @@
             setInterval(updateClock, 1000);
             initBattery();
             renderSpecialPin();
-
-            // 启动遮罩淡出
-            const splash = document.getElementById('splash-screen');
-            if (splash) {
-                splash.classList.add('fade-out');
-                setTimeout(() => splash.remove(), 600);
-            }
-
-            // 加载完成后淡出遮罩
-            setTimeout(() => {
-                const overlay = document.getElementById('launch-overlay');
-                if (overlay) {
-                    overlay.classList.add('fade-out');
-                    setTimeout(() => overlay.remove(), 650);
-                }
-            }, 600);
         };
 
         function openSettings() {
@@ -2395,8 +2616,9 @@
                 }
 
                 card.innerHTML = `
+                    <div class="pin-bar">∅</div>
                     <div class="note-header">
-                        <span class="note-time">${pinIcon}${item.timestamp}</span>
+                        <span class="note-time">${item.timestamp}</span>
                         <div class="note-actions">
                             ${timerHtml}
                             <span class="edit-btn" onclick="openEditor(${item.id})">📝</span>
@@ -2493,9 +2715,9 @@
                 return;
             }
             container.innerHTML = comments.map((c, i) => `
-                <div class="comment-item" data-note-id="${note.id}" data-idx="${i}" style="position:relative; overflow:hidden; border-radius:8px; margin-bottom:8px;">
+                <div class="comment-item" data-note-id="${note.id}" data-idx="${i}" style="position:relative; overflow:hidden; border-radius:8px; margin-bottom:2px;">
                     <div class="comment-delete-bg" style="position:absolute; top:0; right:0; bottom:0; width:60px; background:transparent; display:flex; align-items:center; justify-content:center; font-size:1.4rem; cursor:pointer; opacity:0; transition:opacity 0.3s;" onclick="deleteComment(${note.id},${i})">🗑️</div>
-                    <div class="comment-inner" style="display:flex; align-items:flex-start; gap:10px; padding:14px 6px; background:transparent; position:relative; z-index:2; transition:transform 0.3s ease; will-change:transform;">
+                    <div class="comment-inner" style="display:flex; align-items:flex-start; gap:8px; padding:10px 4px; background:transparent; position:relative; z-index:2; transition:transform 0.3s ease; will-change:transform;">
                         <img src="${state.settings.currentAvatar}" style="width:26px; height:26px; border-radius:50%; object-fit:cover; flex-shrink:0; margin-top:2px;">
                         <div style="flex:1;">
                             <div style="font-size:0.78rem; color:#bbb; margin-bottom:3px;">${c.time}</div>
@@ -2848,6 +3070,19 @@
             const blurVal = document.getElementById('setting-glass-blur-val');
             if (blurSlider) blurSlider.value = blur;
             if (blurVal) blurVal.textContent = blur;
+
+            // 卡片透明度
+            const cardOp = state.settings.cardOpacity ?? 96;
+            document.documentElement.style.setProperty('--card-opacity', (cardOp / 100).toFixed(2));
+            const cardOpSlider = document.getElementById('setting-card-opacity');
+            const cardOpVal = document.getElementById('setting-card-opacity-val');
+            if (cardOpSlider) cardOpSlider.value = cardOp;
+            if (cardOpVal) cardOpVal.textContent = cardOp;
+
+            // 界面风格
+            applyUIStyle(state.settings.uiStyle || 'solid');
+            const uiStyleEl = document.getElementById('setting-ui-style');
+            if (uiStyleEl) uiStyleEl.checked = (state.settings.uiStyle === 'solid');
         }
 
         function toggleDarkMode(on) {
@@ -2863,6 +3098,298 @@
             const valEl = document.getElementById('setting-glass-blur-val');
             if (valEl) valEl.textContent = v;
             saveData();
+        }
+
+
+        // ══════════════════════════════════════
+        //  形象调整浮层
+        // ══════════════════════════════════════
+        function openPortrait() {
+            closeDrawer();
+            syncPortraitFromState();
+            document.getElementById('portrait-overlay').classList.add('active');
+            history.pushState({ portrait: true }, '');
+        }
+        function closePortrait() {
+            document.getElementById('portrait-overlay').classList.remove('active');
+        }
+        function onPortraitBackdropClick(e) {
+            if (e.target === document.getElementById('portrait-overlay') ||
+                e.target.classList.contains('portrait-backdrop')) {
+                closePortrait();
+            }
+        }
+        function switchPortraitTab(tab) {
+            ['avatar','frame','charm'].forEach(t => {
+                document.getElementById('pt-' + t).classList.toggle('active', t === tab);
+                document.getElementById('pp-' + t).classList.toggle('active', t === tab);
+            });
+            if (tab === 'frame') renderPortraitFramePresets();
+            if (tab === 'avatar') renderPortraitHistoryAvatars();
+        }
+        function syncPortraitFromState() {
+            const s = state.settings;
+            // 头像
+            const avScale = parseFloat(s.avatarScale) || 1;
+            const pAvScale = document.getElementById('p-avatar-scale');
+            if (pAvScale) { pAvScale.value = avScale; document.getElementById('p-avatar-scale-val').textContent = avScale.toFixed(1); }
+            const pAvX = document.getElementById('p-avatar-x');
+            if (pAvX) pAvX.value = s.avatarOffsetX || 0;
+            const pAvY = document.getElementById('p-avatar-y');
+            if (pAvY) pAvY.value = s.avatarOffsetY || 0;
+            // 头像框
+            const fScale = parseFloat(s.frameScale) || 1;
+            const pFScale = document.getElementById('p-frame-scale');
+            if (pFScale) { pFScale.value = fScale; document.getElementById('p-frame-scale-val').textContent = fScale.toFixed(1); }
+            // 挂件
+            const pCToggle = document.getElementById('p-charm-toggle');
+            if (pCToggle) pCToggle.checked = !!s.showCharm;
+            const cSize = parseInt(s.charmSize) || 50;
+            const pCSize = document.getElementById('p-charm-size');
+            if (pCSize) { pCSize.value = cSize; document.getElementById('p-charm-size-val').textContent = cSize; }
+            const cSwing = parseInt(s.charmSwing) || 5;
+            const pCSwing = document.getElementById('p-charm-swing');
+            if (pCSwing) { pCSwing.value = cSwing; document.getElementById('p-charm-swing-val').textContent = cSwing + '°'; }
+            const pCX = document.getElementById('p-charm-x');
+            if (pCX) pCX.value = s.charmX ?? 20;
+            const pCY = document.getElementById('p-charm-y');
+            if (pCY) pCY.value = s.charmY ?? 0;
+            renderPortraitHistoryAvatars();
+            renderPortraitFramePresets();
+        }
+        function renderPortraitHistoryAvatars() {
+            const container = document.getElementById('portrait-history-avatars');
+            if (!container) return;
+            const list = state.settings.historyAvatars || [];
+            container.innerHTML = list.map((src, i) =>
+                `<img src="${src}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;border:2px solid ${src===state.settings.currentAvatar?'var(--accent-color)':'transparent'};" onclick="selectHistoryAvatar('${src}')">`
+            ).join('');
+        }
+        function selectHistoryAvatar(src) {
+            state.settings.currentAvatar = src;
+            document.getElementById('current-avatar').src = src;
+            document.getElementById('drawer-avatar-img').src = src;
+            saveData();
+            renderPortraitHistoryAvatars();
+        }
+        function renderPortraitFramePresets() {
+            const container = document.getElementById('portrait-frame-presets');
+            if (!container) return;
+            const presets = state.settings.framePresets || [];
+            container.innerHTML = presets.map(p => {
+                const isActive = (state.settings.currentFrame || 'st') === p.id;
+                return `<div onclick="selectFrameFromPortrait('${p.id}')" style="
+                    padding:5px 12px; border-radius:8px; font-size:0.75rem; cursor:pointer;
+                    background:${isActive?'var(--accent-color)':'rgba(0,0,0,0.06)'};
+                    color:${isActive?'#fff':'var(--text-color)'}; border:none;">
+                    ${p.name || p.label || p.id}
+                </div>`;
+            }).join('');
+        }
+        function selectFrameFromPortrait(id) {
+            // 同步到 setting-frame 相关逻辑
+            state.settings.currentFrame = id;
+            applySettings();
+            saveData();
+            renderPortraitFramePresets();
+        }
+        function onPortraitAvatarScale(val) {
+            const v = parseFloat(val);
+            state.settings.avatarScale = v;
+            document.documentElement.style.setProperty('--avatar-scale', v);
+            document.getElementById('p-avatar-scale-val').textContent = v.toFixed(1);
+            const hidden = document.getElementById('setting-avatar-scale');
+            if (hidden) hidden.value = v;
+            saveData();
+        }
+        function onPortraitAvatarX(val) {
+            state.settings.avatarOffsetX = parseFloat(val) || 0;
+            document.documentElement.style.setProperty('--avatar-offset-x', (parseFloat(val)||0) + 'px');
+            const hidden = document.getElementById('setting-avatar-x');
+            if (hidden) hidden.value = val;
+            saveData();
+        }
+        function onPortraitAvatarY(val) {
+            state.settings.avatarOffsetY = parseFloat(val) || 0;
+            document.documentElement.style.setProperty('--avatar-offset-y', (parseFloat(val)||0) + 'px');
+            const hidden = document.getElementById('setting-avatar-y');
+            if (hidden) hidden.value = val;
+            saveData();
+        }
+        function onPortraitFrameScale(val) {
+            const v = parseFloat(val);
+            state.settings.frameScale = v;
+            document.documentElement.style.setProperty('--frame-scale', v);
+            document.getElementById('p-frame-scale-val').textContent = v.toFixed(1);
+            const hidden = document.getElementById('setting-frame-scale');
+            if (hidden) hidden.value = v;
+            saveData();
+        }
+        function onPortraitCharmToggle(checked) {
+            state.settings.showCharm = checked;
+            const charm = document.getElementById('charm-display');
+            if (charm) charm.classList.toggle('hidden', !checked);
+            const hidden = document.getElementById('setting-charm-toggle');
+            if (hidden) hidden.checked = checked;
+            saveData();
+        }
+        function onPortraitCharmSize(val) {
+            const v = parseInt(val);
+            state.settings.charmSize = v;
+            document.documentElement.style.setProperty('--charm-size', v + 'px');
+            document.getElementById('p-charm-size-val').textContent = v;
+            const hidden = document.getElementById('setting-charm-size');
+            if (hidden) hidden.value = v;
+            saveData();
+        }
+        function onPortraitCharmSwing(val) {
+            const v = parseInt(val);
+            state.settings.charmSwing = v;
+            document.documentElement.style.setProperty('--charm-deg', v + 'deg');
+            document.getElementById('p-charm-swing-val').textContent = v + '°';
+            const hidden = document.getElementById('setting-charm-swing');
+            if (hidden) hidden.value = v;
+            saveData();
+        }
+        function onPortraitCharmX(val) {
+            const v = parseFloat(val) || 0;
+            state.settings.charmX = v;
+            document.documentElement.style.setProperty('--charm-x', v + 'px');
+            const hidden = document.getElementById('setting-charm-x');
+            if (hidden) hidden.value = v;
+            saveData();
+        }
+        function onPortraitCharmY(val) {
+            const v = parseFloat(val) || 0;
+            state.settings.charmY = v;
+            document.documentElement.style.setProperty('--charm-y', v + 'px');
+            const hidden = document.getElementById('setting-charm-y');
+            if (hidden) hidden.value = v;
+            saveData();
+        }
+
+        function snapCharmY30() {
+            const img = document.querySelector('.charm-container img');
+            const h = img ? img.naturalHeight || img.offsetHeight || 100 : 100;
+            const snapSize = parseInt(state.settings.charmSize) || 50;
+            // 30% of charm size (since we use charmSize to scale)
+            const val = Math.round(snapSize * 0.3);
+            setCharmY(val);
+        }
+        function setCharmX(val) {
+            const input = document.getElementById('setting-charm-x');
+            if (input) { input.value = val; }
+            state.settings.charmX = val;
+            document.documentElement.style.setProperty('--charm-x', val + 'px');
+            saveData();
+        }
+        function setCharmY(val) {
+            const input = document.getElementById('setting-charm-y');
+            if (input) { input.value = val; }
+            state.settings.charmY = val;
+            document.documentElement.style.setProperty('--charm-y', val + 'px');
+            saveData();
+        }
+
+        function applyUIStyle(style) {
+            if (style === 'solid') {
+                document.body.classList.add('ui-solid');
+            } else {
+                document.body.classList.remove('ui-solid');
+            }
+        }
+        function toggleUIStyle(isSolid) {
+            state.settings.uiStyle = isSolid ? 'solid' : 'glass';
+            applyUIStyle(state.settings.uiStyle);
+            saveData();
+        }
+
+        function updateCardOpacity(val) {
+            const v = Math.min(100, Math.max(0, parseInt(val) ?? 96));
+            state.settings.cardOpacity = v;
+            document.documentElement.style.setProperty('--card-opacity', (v / 100).toFixed(2));
+            const valEl = document.getElementById('setting-card-opacity-val');
+            if (valEl) valEl.textContent = v;
+            saveData();
+        }
+
+        // ── 抽屉日历 tab 切换 ──
+        function switchDrawerCalTab(tab) {
+            const calPanel = document.getElementById('drawer-tab-cal');
+            const spPanel  = document.getElementById('drawer-tab-special');
+            const calTab   = document.getElementById('dct-cal');
+            const spTab    = document.getElementById('dct-special');
+            if (!calPanel || !spPanel) return;
+            if (tab === 'cal') {
+                calPanel.style.display = ''; spPanel.style.display = 'none';
+                if (calTab) calTab.classList.add('active');
+                if (spTab)  spTab.classList.remove('active');
+            } else {
+                calPanel.style.display = 'none'; spPanel.style.display = '';
+                if (calTab) calTab.classList.remove('active');
+                if (spTab)  spTab.classList.add('active');
+                renderDrawerSpecialDays();
+            }
+        }
+
+        function renderDrawerSpecialDays() {
+            const container = document.getElementById('drawer-special-list');
+            if (!container) return;
+            const days = state.specialDays || [];
+            if (days.length === 0) {
+                container.innerHTML = '<div style="text-align:center;color:#ccc;font-size:0.82rem;padding:16px 0;">还没有特别的日子</div>';
+                return;
+            }
+            container.innerHTML = days.map((d, i) => {
+                const diff = calcDays(d.date, d.annual);
+                const fmt  = formatDays(diff, d.date, d.annual);
+                const isPinned = state.specialPinnedId === d.id;
+                return `<div class="drawer-special-item${isPinned?' pinned':''}" onclick="toggleSpecialPin(${i});renderDrawerSpecialDays();renderSpecialPin();">
+                    <div class="drawer-special-info">
+                        <div class="drawer-special-name">${d.emoji ? d.emoji+' ' : ''}${d.name}</div>
+                        <div class="drawer-special-date">${d.date}${d.annual?' · 每年':''}</div>
+                    </div>
+                    <div class="drawer-special-days">${fmt.num}<span>${fmt.sub}</span></div>
+                    <button class="drawer-special-del" onclick="event.stopPropagation();deleteSpecialDay(${i});renderDrawerSpecialDays();">×</button>
+                </div>`;
+            }).join('');
+        }
+
+        let _drawerSpecialFormOpen = false;
+        function toggleDrawerSpecialForm() {
+            _drawerSpecialFormOpen = !_drawerSpecialFormOpen;
+            const form = document.getElementById('drawer-special-form');
+            if (!form) return;
+            form.classList.toggle('open', _drawerSpecialFormOpen);
+            if (_drawerSpecialFormOpen) {
+                document.getElementById('dsf-emoji').value = '';
+                document.getElementById('dsf-name').value = '';
+                document.getElementById('dsf-date').value = new Date().toISOString().slice(0,10);
+                document.getElementById('dsf-annual').checked = false;
+            }
+        }
+
+        function saveDrawerSpecialDay() {
+            const emoji  = document.getElementById('dsf-emoji').value.trim() || '✦';
+            const name   = document.getElementById('dsf-name').value.trim();
+            const date   = document.getElementById('dsf-date').value;
+            const annual = document.getElementById('dsf-annual').checked;
+            if (!name || !date) { alert('请填写名称和日期'); return; }
+            if (!state.specialDays) state.specialDays = [];
+            state.specialDays.push({ id: Date.now(), emoji, name, date, annual });
+            saveData();
+            toggleDrawerSpecialForm();
+            renderDrawerSpecialDays();
+            renderSpecialPin();
+        }
+
+        let _commentPreviewPanelOpen = false;
+        function toggleCommentPreviewPanel() {
+            _commentPreviewPanelOpen = !_commentPreviewPanelOpen;
+            const panel = document.getElementById('comment-preview-panel');
+            const arrow = document.getElementById('comment-preview-arrow');
+            if (panel) panel.style.display = _commentPreviewPanelOpen ? 'block' : 'none';
+            if (arrow) arrow.style.transform = _commentPreviewPanelOpen ? 'rotate(180deg)' : '';
         }
 
         // ===================== 锁定控件 =====================
@@ -3267,6 +3794,16 @@
                 items.push({ label: state._pinnedTags?.includes(tag) ? '取消置顶' : '置顶', fn: () => { togglePinTag(tag); } });
                 items.push({ label: '编辑名称', fn: () => { renameTag(tag); } });
             }
+            const isBlocked = state.blockedTags.includes(tag);
+            items.push({ label: isBlocked ? '取消屏蔽' : '屏蔽', fn: () => {
+                if (isBlocked) {
+                    state.blockedTags = state.blockedTags.filter(t => t !== tag);
+                } else {
+                    if (!state.blockedTags.includes(tag)) state.blockedTags.push(tag);
+                    if (state.filterTag === tag) { state.filterTag = null; state.filterTagIsParent = false; }
+                }
+                renderList(); renderTags();
+            }});
             items.push({ label: '仅移除标签', fn: () => { removeTagFromNotes(tag); }, danger: false });
             items.push({ label: '删除标签和笔记', fn: () => { deleteTagAndNotes(tag); }, danger: true });
 
@@ -4156,6 +4693,90 @@
 
     </script>
     <!-- 待机模式 overlay -->
+
+    <!-- 形象调整浮层 -->
+    <div id="portrait-overlay" onclick="onPortraitBackdropClick(event)">
+        <div class="portrait-backdrop"></div>
+        <div class="portrait-panel" id="portrait-panel">
+            <div class="portrait-drag-bar"></div>
+            <div class="portrait-panel-header">
+                <span class="portrait-panel-title">形象调整</span>
+                <button class="portrait-panel-close" onclick="closePortrait()">×</button>
+            </div>
+            <div class="portrait-tabs">
+                <div class="portrait-tab active" id="pt-avatar" onclick="switchPortraitTab('avatar')">头像</div>
+                <div class="portrait-tab" id="pt-frame" onclick="switchPortraitTab('frame')">头像框</div>
+                <div class="portrait-tab" id="pt-charm" onclick="switchPortraitTab('charm')">挂件</div>
+            </div>
+            <div class="portrait-content">
+
+                <!-- 头像 tab -->
+                <div class="portrait-tab-panel active" id="pp-avatar">
+                    <button class="portrait-upload-btn" onclick="document.getElementById('avatar-input-p').click()">＋ 更换头像</button>
+                    <input type="file" id="avatar-input-p" style="display:none" accept="image/*" onchange="changeAvatar(this)">
+                    <div id="portrait-history-avatars" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;"></div>
+                    <div class="portrait-row">
+                        <label>缩放</label>
+                        <input type="range" id="p-avatar-scale" min="0.5" max="3" step="0.05" oninput="onPortraitAvatarScale(this.value)">
+                        <span class="portrait-val" id="p-avatar-scale-val">1.0</span>
+                    </div>
+                    <div class="portrait-row">
+                        <label>X 偏移</label>
+                        <input type="number" id="p-avatar-x" placeholder="0" oninput="onPortraitAvatarX(this.value)">
+                    </div>
+                    <div class="portrait-row">
+                        <label>Y 偏移</label>
+                        <input type="number" id="p-avatar-y" placeholder="0" oninput="onPortraitAvatarY(this.value)">
+                    </div>
+                </div>
+
+                <!-- 头像框 tab -->
+                <div class="portrait-tab-panel" id="pp-frame">
+                    <button class="portrait-upload-btn" onclick="document.getElementById('frame-input-p').click()">＋ 上传头像框</button>
+                    <input type="file" id="frame-input-p" style="display:none" accept="image/*" onchange="addFramePresetFromFile(this)">
+                    <div class="portrait-presets" id="portrait-frame-presets"></div>
+                    <div class="portrait-row">
+                        <label>框大小</label>
+                        <input type="range" id="p-frame-scale" min="0.5" max="2" step="0.05" oninput="onPortraitFrameScale(this.value)">
+                        <span class="portrait-val" id="p-frame-scale-val">1.0</span>
+                    </div>
+                </div>
+
+                <!-- 挂件 tab -->
+                <div class="portrait-tab-panel" id="pp-charm">
+                    <div class="portrait-row" style="padding-top:4px;">
+                        <label>启用</label>
+                        <input type="checkbox" id="p-charm-toggle" style="width:auto;margin:0;" onchange="onPortraitCharmToggle(this.checked)">
+                    </div>
+                    <button class="portrait-upload-btn" onclick="document.getElementById('charm-input-p').click()" style="margin-top:8px;">＋ 更换挂件</button>
+                    <input type="file" id="charm-input-p" style="display:none" accept="image/*" onchange="changeCharm(this)">
+                    <div class="portrait-row">
+                        <label>大小</label>
+                        <input type="range" id="p-charm-size" min="20" max="150" oninput="onPortraitCharmSize(this.value)">
+                        <span class="portrait-val" id="p-charm-size-val">50</span>
+                    </div>
+                    <div class="portrait-row">
+                        <label>摇晃</label>
+                        <input type="range" id="p-charm-swing" min="0" max="45" oninput="onPortraitCharmSwing(this.value)">
+                        <span class="portrait-val" id="p-charm-swing-val">5°</span>
+                    </div>
+                    <div class="portrait-row">
+                        <label>X 坐标</label>
+                        <input type="number" id="p-charm-x" placeholder="距右侧px" oninput="onPortraitCharmX(this.value)">
+                        <button class="portrait-snap-btn" onclick="setCharmX(20);syncPortraitFromState()">贴右</button>
+                    </div>
+                    <div class="portrait-row">
+                        <label>Y 坐标</label>
+                        <input type="number" id="p-charm-y" placeholder="距顶部px" oninput="onPortraitCharmY(this.value)">
+                        <button class="portrait-snap-btn" onclick="setCharmY(0);syncPortraitFromState()">顶</button>
+                        <button class="portrait-snap-btn" onclick="snapCharmY30();syncPortraitFromState()">30%</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
     <div id="standby-overlay" onclick="exitStandbyOnTap(event)">
         <!-- 竖屏 -->
         <div class="sb-portrait">
@@ -4216,15 +4837,20 @@
         async function enterStandby() {
             _sbActive = true;
             updateStandbyDisplay();
-            _sbTimer = setInterval(updateStandbyDisplay, 1000); // 每秒刷新（显示秒）
+            _sbTimer = setInterval(updateStandbyDisplay, 1000);
             document.getElementById('standby-overlay').classList.add('active');
+            // 请求全屏
+            try {
+                const el = document.documentElement;
+                if (el.requestFullscreen) await el.requestFullscreen();
+                else if (el.webkitRequestFullscreen) await el.webkitRequestFullscreen();
+            } catch(e) {}
             // WakeLock 保持屏幕常亮
             try {
                 if ('wakeLock' in navigator) {
                     _sbWakeLock = await navigator.wakeLock.request('screen');
                 }
             } catch(e) {}
-            // 防止系统返回键关闭app
             history.pushState({ standby: true }, '');
         }
 
@@ -4235,6 +4861,12 @@
             _sbTimer = null;
             document.getElementById('standby-overlay').classList.remove('active');
             if (_sbWakeLock) { _sbWakeLock.release().catch(()=>{}); _sbWakeLock = null; }
+            try {
+                if (document.fullscreenElement || document.webkitFullscreenElement) {
+                    if (document.exitFullscreen) document.exitFullscreen();
+                    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+                }
+            } catch(e) {}
         }
 
         // 需要点击两次才退出（防误触）
@@ -4781,6 +5413,8 @@
                 _pomoRunning = false;
                 if (btn) btn.textContent = '继续';
                 if (label) label.textContent = '已暂停';
+                const avatarBox = document.getElementById('avatar-box');
+                if (avatarBox) avatarBox.style.pointerEvents = '';
             } else {
                 // 退出调节模式
                 _pomoAdjusting = false;
@@ -4791,6 +5425,9 @@
                     const wrap = document.getElementById('pomo-reason-wrap');
                     if (wrap) wrap.style.display = 'none';
                 }
+                // 锁定模式切换
+                const avatarBox = document.getElementById('avatar-box');
+                if (avatarBox) avatarBox.style.pointerEvents = 'none';
                 // 秒数显示激活
                 if (clock) clock.classList.add('running');
                 renderPomoTimer();
@@ -4804,6 +5441,8 @@
         function pomoReset() {
             clearInterval(_pomoInterval); _pomoInterval = null;
             _pomoRunning = false;
+            const avatarBox = document.getElementById('avatar-box');
+            if (avatarBox) avatarBox.style.pointerEvents = '';
             _pomoAdjusting = false;
             _pomoSeconds = _pomoDuration;
             renderPomoTimer();
