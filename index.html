@@ -1306,63 +1306,34 @@
         #standby-overlay.active { display: flex; }
 
         .sb-portrait {
-            display: flex;
-            flex-direction: column;
-            width: 100%; height: 100%;
-            padding: 0;
-            overflow: hidden;
-        }
-        .sb-portrait .sb-top-row {
-            font-size: 3.5vw;
-            font-weight: 300;
-            opacity: 0.6;
-            letter-spacing: 0.06em;
-            display: flex;
-            align-items: center;
-            gap: 0.6em;
-            flex-shrink: 0;
-            padding: 4vw 5vw 0;
-        }
-        .sb-portrait .sb-time-block {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            min-height: 0;
-            overflow: hidden;
-        }
-        .sb-portrait .sb-big-hour,
-        .sb-portrait .sb-big-min {
-            font-size: 49vw;
-            font-weight: 700;
-            line-height: 1;
-            letter-spacing: -0.04em;
-            display: flex;
-            align-items: center;
-            flex: 1;
-            min-height: 0;
-            overflow: hidden;
-            padding: 0 3vw;
-        }
-        .sb-portrait .sb-min-row {
-            position: relative;
-            flex: 1;
-            min-height: 0;
-            display: flex;
-            align-items: center;
-            overflow: hidden;
-        }
-        .sb-portrait .sb-sec {
             position: absolute;
-            right: 3vw;
-            bottom: 0.1em;
+            inset: 0;
+            overflow: hidden;
+        }
+        #sb-canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+        /* 顶部文字信息叠在 canvas 上 */
+        .sb-portrait .sb-top-row { display: none; }
+        .sb-top-date {
             font-size: 6.5vw;
-            font-weight: 400;
-            opacity: 0.45;
-            letter-spacing: 0;
-            line-height: 1;
+            font-weight: 300;
+            letter-spacing: 0.04em;
+        }
+        .sb-top-sub {
+            font-size: 5vw;
+            font-weight: 300;
+            letter-spacing: 0.04em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .sb-portrait .sb-bottom-row {
-            flex-shrink: 0;
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
             display: flex;
             flex-direction: column;
             gap: 0.5em;
@@ -1370,6 +1341,8 @@
             font-weight: 300;
             opacity: 0.6;
             padding: 0 5vw 4vw;
+            z-index: 2;
+            color: #fff;
         }
         .sb-portrait .sb-todo-line {
             font-size: 3.5vw;
@@ -1628,7 +1601,6 @@
         .drawer-special-date { font-size: 0.65rem; color: #aaa; margin-top: 2px; }
         .drawer-special-days { font-size: 1rem; font-weight: 700; color: var(--accent-color); flex-shrink: 0; text-align: right; min-width: 36px; }
         .drawer-special-days span { display: block; font-size: 0.55rem; font-weight: normal; color: #aaa; }
-        .drawer-special-del { background: none; border: none; color: #ddd; font-size: 1.1rem; cursor: pointer; padding: 0 2px; flex-shrink: 0; }
         .drawer-special-add-btn {
             width: 100%; padding: 7px;
             border-radius: 8px;
@@ -1811,6 +1783,7 @@
                         </div>
                         <div class="drawer-special-form-row">
                             <button onclick="toggleDrawerSpecialForm()" style="background:rgba(0,0,0,0.06);color:#666;">取消</button>
+                            <button id="dsf-delete-btn" onclick="if(_editingSpecialIdx>=0&&confirm('确认删除？')){deleteSpecialDay(_editingSpecialIdx);_editingSpecialIdx=-1;_drawerSpecialFormOpen=false;document.getElementById('drawer-special-form').classList.remove('open');renderDrawerSpecialDays();}" style="display:none;background:rgba(220,80,80,0.12);color:#c04040;border:none;">删除</button>
                             <button onclick="saveDrawerSpecialDay()" style="background:var(--accent-color);color:var(--accent-text);">保存</button>
                         </div>
                     </div>
@@ -3387,19 +3360,38 @@
                 const diff = calcDays(d.date, d.annual);
                 const fmt  = formatDays(diff, d.date, d.annual);
                 const isPinned = state.specialPinnedId === d.id;
-                return `<div class="drawer-special-item${isPinned?' pinned':''}" onclick="toggleSpecialPin(${i});renderDrawerSpecialDays();renderSpecialPin();">
+                return `<div class="drawer-special-item${isPinned?' pinned':''}"
+                    data-idx="${i}"
+                    onclick="toggleSpecialPin(${i});renderDrawerSpecialDays();renderSpecialPin();">
                     <div class="drawer-special-info">
                         <div class="drawer-special-name">${d.emoji ? d.emoji+' ' : ''}${d.name}</div>
                         <div class="drawer-special-date">${d.date}${d.annual?' · 每年':''}</div>
                     </div>
                     <div class="drawer-special-days">${fmt.num}<span>${fmt.sub}</span></div>
-                    <button class="drawer-special-del" onclick="event.stopPropagation();deleteSpecialDay(${i});renderDrawerSpecialDays();">×</button>
                 </div>`;
             }).join('');
+
+            // 绑定长按编辑
+            container.querySelectorAll('.drawer-special-item').forEach(el => {
+                let timer = null;
+                let moved = false;
+                el.addEventListener('touchstart', () => {
+                    moved = false;
+                    timer = setTimeout(() => {
+                        if (moved) return;
+                        const idx = parseInt(el.dataset.idx);
+                        openEditSpecialDay(idx);
+                    }, 500);
+                }, {passive:true});
+                el.addEventListener('touchend', () => { clearTimeout(timer); });
+                el.addEventListener('touchmove', () => { moved = true; clearTimeout(timer); });
+            });
         }
 
         let _drawerSpecialFormOpen = false;
+        let _editingSpecialIdx = -1;
         function toggleDrawerSpecialForm() {
+            _editingSpecialIdx = -1;
             _drawerSpecialFormOpen = !_drawerSpecialFormOpen;
             const form = document.getElementById('drawer-special-form');
             if (!form) return;
@@ -3409,7 +3401,28 @@
                 document.getElementById('dsf-name').value = '';
                 document.getElementById('dsf-date').value = new Date().toISOString().slice(0,10);
                 document.getElementById('dsf-annual').checked = false;
+                const btn = document.querySelector('#drawer-special-form .drawer-special-form-row button:last-child');
+                if (btn) btn.textContent = '保存';
+                const delBtn = document.getElementById('dsf-delete-btn');
+                if (delBtn) delBtn.style.display = 'none';
             }
+        }
+        function openEditSpecialDay(idx) {
+            const d = state.specialDays[idx];
+            if (!d) return;
+            _editingSpecialIdx = idx;
+            _drawerSpecialFormOpen = true;
+            const form = document.getElementById('drawer-special-form');
+            if (!form) return;
+            form.classList.add('open');
+            document.getElementById('dsf-emoji').value = d.emoji || '';
+            document.getElementById('dsf-name').value = d.name || '';
+            document.getElementById('dsf-date').value = d.date || '';
+            document.getElementById('dsf-annual').checked = !!d.annual;
+            const btn = document.querySelector('#drawer-special-form .drawer-special-form-row button:last-child');
+            if (btn) btn.textContent = '更新';
+            const delBtn = document.getElementById('dsf-delete-btn');
+            if (delBtn) delBtn.style.display = '';
         }
 
         function saveDrawerSpecialDay() {
@@ -3419,9 +3432,18 @@
             const annual = document.getElementById('dsf-annual').checked;
             if (!name || !date) { alert('请填写名称和日期'); return; }
             if (!state.specialDays) state.specialDays = [];
-            state.specialDays.push({ id: Date.now(), emoji, name, date, annual });
+            if (_editingSpecialIdx >= 0 && state.specialDays[_editingSpecialIdx]) {
+                // 编辑模式：更新已有条目
+                const old = state.specialDays[_editingSpecialIdx];
+                state.specialDays[_editingSpecialIdx] = { id: old.id, emoji, name, date, annual };
+            } else {
+                state.specialDays.push({ id: Date.now(), emoji, name, date, annual });
+            }
+            _editingSpecialIdx = -1;
             saveData();
-            toggleDrawerSpecialForm();
+            _drawerSpecialFormOpen = false;
+            const form = document.getElementById('drawer-special-form');
+            if (form) form.classList.remove('open');
             renderDrawerSpecialDays();
             renderSpecialPin();
         }
@@ -4823,16 +4845,12 @@
     <div id="standby-overlay" onclick="exitStandbyOnTap(event)">
         <!-- 竖屏 -->
         <div class="sb-portrait">
+            <canvas id="sb-canvas"></canvas>
             <div class="sb-top-row">
-                <span id="sb-p-date">--年--月--日</span>
-                <span id="sb-p-weekday">星期-</span>
-                <span id="sb-p-battery" style="margin-left:auto;"></span>
-            </div>
-            <div class="sb-time-block">
-                <span class="sb-big-hour" id="sb-p-hour">--</span>
-                <div class="sb-min-row">
-                    <span class="sb-big-min" id="sb-p-min">--</span>
-                    <span class="sb-sec" id="sb-p-sec">00</span>
+                <span class="sb-top-date" id="sb-p-date">--年--月--日</span>
+                <div class="sb-top-sub">
+                    <span id="sb-p-weekday">星期-</span>
+                    <span id="sb-p-battery"></span>
                 </div>
             </div>
             <div class="sb-bottom-row">
@@ -4876,6 +4894,8 @@
                 showBattery: s.sbShowBattery !== false,
             };
         }
+
+
 
         async function enterStandby() {
             _sbActive = true;
@@ -5001,14 +5021,15 @@
             const dateStr = `${yyyy}年${mo}月${dd}日`;
 
             // 竖屏
-            _sbSet('sb-p-hour', hh);
-            _sbSet('sb-p-min', mm);
-            _sbSet('sb-p-sec', ss);
+            // canvas 绘制，由 sbFitDigits 直接读时间
+
+            // sec handled by canvas
             _sbSet('sb-p-date', dateStr);
             _sbSet('sb-p-weekday', wd);
             _sbSetOptional('sb-p-battery', batStr, cfg.showBattery && batStr);
             _sbSetOptional('sb-p-special', specialStr, cfg.showSpecial && specialStr);
             _sbSetOptional('sb-p-todo', todoStr, cfg.showTodo && todoStr);
+            sbFitDigits();
 
             // 横屏
             _sbSet('sb-l-time', hh + ':' + mm);
@@ -5018,6 +5039,99 @@
             _sbSetOptional('sb-l-battery', batStr, cfg.showBattery && batStr);
             _sbSetOptional('sb-l-special', specialStr, cfg.showSpecial && specialStr);
             _sbSetOptional('sb-l-todo', todoStr, cfg.showTodo && todoStr);
+        }
+
+        function sbFitDigits() {
+            const canvas = document.getElementById('sb-canvas');
+            if (!canvas) return;
+            const overlay = document.getElementById('standby-overlay');
+            const W = overlay.clientWidth  || window.innerWidth;
+            const H = overlay.clientHeight || window.innerHeight;
+            canvas.width  = W * devicePixelRatio;
+            canvas.height = H * devicePixelRatio;
+            canvas.style.width  = W + 'px';
+            canvas.style.height = H + 'px';
+            const ctx = canvas.getContext('2d');
+            ctx.scale(devicePixelRatio, devicePixelRatio);
+            ctx.clearRect(0, 0, W, H);
+
+            // 读当前时间
+            const now = new Date();
+            const hh = String(now.getHours()).padStart(2,'0');
+            const mm = String(now.getMinutes()).padStart(2,'0');
+            const ss = String(now.getSeconds()).padStart(2,'0');
+
+            // 顶部日期信息：直接用 canvas 画，不依赖 HTML 元素
+            const dateEl = document.getElementById('sb-p-date');
+            const wdEl   = document.getElementById('sb-p-weekday');
+            const batEl  = document.getElementById('sb-p-battery');
+            const dateStr = dateEl ? dateEl.textContent : '';
+            const wdStr   = wdEl   ? wdEl.textContent   : '';
+            const batStr  = batEl  ? batEl.textContent  : '';
+
+            const pad = W * 0.06;
+            const line1Size = W * 0.072;  // 年月日大字
+            const line2Size = W * 0.055;  // 星期/电量稍小
+            const line1Y = H * 0.045 + line1Size;
+            const line2Y = line1Y + line2Size * 1.4;
+            const topH   = line2Y + line2Size * 0.6; // 数字区从这里开始
+
+            ctx.fillStyle = '#fff';
+            ctx.textBaseline = 'alphabetic';
+
+            // 第一行：日期
+            ctx.font = `300 ${line1Size}px "Arial",sans-serif`;
+            ctx.globalAlpha = 0.85;
+            ctx.fillText(dateStr, pad, line1Y);
+
+            // 第二行：星期（左）+ 电量（右）
+            ctx.font = `300 ${line2Size}px "Arial",sans-serif`;
+            ctx.globalAlpha = 0.6;
+            ctx.fillText(wdStr, pad, line2Y);
+            if (batStr) {
+                const batW = ctx.measureText(batStr).width;
+                ctx.fillText(batStr, W - pad - batW, line2Y);
+            }
+            ctx.globalAlpha = 1;
+
+            // 剩余高度分两行数字
+            const cellH = (H - topH) / 2;
+            const cellW = W / 2;
+
+            // 二分查找合适字体大小，让数字恰好填满格子
+            function fitDigit(digit, x, y, cw, ch) {
+                let lo = 10, hi = ch * 2, fs = hi;
+                ctx.font = `900 ${hi}px "Arial Black",Arial,sans-serif`;
+                for (let i = 0; i < 14; i++) {
+                    const mid = (lo + hi) / 2;
+                    ctx.font = `900 ${mid}px "Arial Black",Arial,sans-serif`;
+                    const m = ctx.measureText(digit);
+                    const tw = m.width;
+                    const th = (m.actualBoundingBoxAscent || mid * 0.78) +
+                               (m.actualBoundingBoxDescent || mid * 0.1);
+                    if (tw < cw * 0.9 && th < ch * 0.9) lo = mid;
+                    else hi = mid;
+                    fs = lo;
+                }
+                ctx.font = `900 ${fs}px "Arial Black",Arial,sans-serif`;
+                const m = ctx.measureText(digit);
+                const th = (m.actualBoundingBoxAscent || fs * 0.78);
+                // 居中绘制
+                const dx = x + cw/2 - m.width/2;
+                const dy = y + ch/2 + th/2;
+                ctx.fillText(digit, dx, dy);
+            }
+
+            fitDigit(hh[0], 0,      topH,          cellW, cellH);
+            fitDigit(hh[1], cellW,  topH,          cellW, cellH);
+            fitDigit(mm[0], 0,      topH + cellH,  cellW, cellH);
+            fitDigit(mm[1], cellW,  topH + cellH,  cellW, cellH);
+
+            // 秒数右下角
+            ctx.font = `300 ${W * 0.08}px "Arial",sans-serif`;
+            ctx.globalAlpha = 0.45;
+            ctx.fillText(ss, W - W*0.06 - ctx.measureText(ss).width, H - H*0.05);
+            ctx.globalAlpha = 1;
         }
 
         function _sbSet(id, val) {
