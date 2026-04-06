@@ -61,6 +61,8 @@
             background: #faf4f0 !important;
             border: none !important;
             box-shadow: 0 2px 12px rgba(120,85,75,0.1);
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
         }
         body.ui-solid .note-card:active {
             background: #f5ede8 !important;
@@ -508,8 +510,8 @@
             background: var(--glass-bg) !important;
             backdrop-filter: blur(15px) !important;
             -webkit-backdrop-filter: blur(15px) !important;
-            color: #333 !important;
-            font-size: 15px !important;
+            color: var(--text-color) !important;
+            font-size: 14px !important;
             outline: none !important;
             box-sizing: border-box !important;
             display: block !important;
@@ -623,8 +625,10 @@
         }
 
         .note-card {
-            background: rgba(252,247,244,var(--card-opacity));
-            border: none;
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--glass-border);
             border-radius: 14px; padding: 13px 14px;
             position: relative; z-index: 2;
             transform: translateZ(0);
@@ -672,7 +676,7 @@
 
         .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 100; display: none; justify-content: center; align-items: center; }
         .modal.open { display: flex; }
-        .modal-content { background: rgba(255,255,255,0.94); backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px); border: 1px solid rgba(255,255,255,0.9); width: 85%; max-height: 80vh; overflow-y: auto; border-radius: 15px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); font-family: var(--custom-font); font-weight: var(--custom-font-weight); }
+        .modal-content { background: rgba(255,255,255,0.94); backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px); border: 1px solid rgba(210,185,178,0.4); width: 85%; max-height: 80vh; overflow-y: auto; border-radius: 15px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); font-family: var(--custom-font); font-weight: var(--custom-font-weight); }
         .modal-content h3 { font-weight: calc(var(--custom-font-weight, 400) + 300); }
 
         .glass-modal-content {
@@ -794,7 +798,7 @@
             box-shadow: 0 -4px 32px rgba(0,0,0,0.18);
         }
         body.dark-mode .portrait-panel { background: #2a201c; }
-        body.ui-solid .portrait-panel { background: #ede4de; }
+        body.ui-solid .portrait-panel { background: #e8ddd6; }
         body.dark-mode.ui-solid .portrait-panel { background: #2a201c; }
 
         /* 面板顶部拖条 + 标题 */
@@ -1029,8 +1033,8 @@
         /* tag操作菜单 */
         .tag-action-menu {
             position: fixed; z-index: 99998;
-            background: rgba(255,255,255,0.97);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
             border-radius: 14px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.18);
             min-width: 160px;
@@ -1474,8 +1478,8 @@
             position: fixed; top: 0; left: 0;
             width: 82vw; max-width: 360px;
             height: 100%; height: 100dvh;
-            background: rgba(255,255,255,0.97);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
             z-index: 8001;
             transform: translateX(-100%);
             transition: transform 0.32s cubic-bezier(0.4,0,0.2,1);
@@ -1492,7 +1496,7 @@
         .drawer-header {
             padding: 48px 20px 16px;
             display: flex; flex-direction: row; align-items: center; gap: 14px;
-            background: linear-gradient(160deg, rgba(187,224,226,0.22) 0%, rgba(255,255,255,0) 100%);
+            background: transparent;
             flex-shrink: 0;
             cursor: pointer; user-select: none;
             transition: opacity 0.15s;
@@ -1588,10 +1592,15 @@
             display: flex; align-items: center; gap: 8px;
             padding: 8px 10px;
             border-radius: 10px;
-            background: rgba(0,0,0,0.03);
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
             margin-bottom: 6px;
             cursor: pointer;
             transition: background 0.15s;
+        }
+        body.ui-solid .drawer-special-item {
+            background: rgba(212,196,190,0.18);
+            border: none;
         }
         body.dark-mode .drawer-special-item { background: rgba(255,255,255,0.04); }
         .drawer-special-item:active { background: rgba(0,0,0,0.07); }
@@ -1744,9 +1753,6 @@
             <input type="range" id="setting-charm-swing" style="display:none" min="0" max="45" onchange="updateSettings()">
             <div id="history-avatars" style="display:none;"></div>
             <div id="frame-preset-list" style="display:none;"></div>
-            <div style="padding:0 20px 12px;">
-                <button class="drawer-standby-btn" onclick="closeDrawer(); setTimeout(enterStandby,300);" style="width:100%;">⏾ 进入待机</button>
-            </div>
         </div>
 
             <!-- ── Daily ── -->
@@ -1920,9 +1926,6 @@
             <div class="drawer-settings-area">
                 <div class="drawer-row"><label>待机 · 显示待办</label><input type="checkbox" id="sb-show-todo" style="width:auto;margin:0;" onchange="updateSbSettings()"></div>
                 <div class="drawer-row"><label>待机 · 纪念日</label><input type="checkbox" id="sb-show-special" style="width:auto;margin:0;" onchange="updateSbSettings()"></div>
-            </div>
-            <div style="padding:0 20px 10px;">
-                <button class="drawer-standby-btn" onclick="closeDrawer(); setTimeout(enterStandby,300);" style="width:100%;">⏾ 进入待机</button>
             </div>
             <div class="drawer-settings-area" style="padding-bottom:16px;">
                 <div style="display:flex;gap:8px;">
@@ -4072,6 +4075,12 @@
             if (tag && state.blockedTags.includes(tag)) return;
             state.filterTag = tag;
             state.filterTagIsParent = !!isParent;
+            // 切换到笔记模式
+            if (_currentMode !== 'note') {
+                _currentMode = 'note';
+                applyModeView('note');
+            }
+            closeDrawer();
             renderList(); renderTags();
         }
         function toggleBlockTag(tag) {
@@ -4897,11 +4906,31 @@
 
 
 
+        let _sbOrientation = 'portrait'; // 'portrait' | 'landscape'
+
+        function _sbHandleOrientation(e) {
+            if (!_sbActive) return;
+            // gamma: 左右倾斜，|gamma| > 45 认为横置
+            const isLandscape = Math.abs(e.gamma || 0) > 45;
+            const newOri = isLandscape ? 'landscape' : 'portrait';
+            if (newOri !== _sbOrientation) {
+                _sbOrientation = newOri;
+                sbFitDigits();
+            }
+        }
+
         async function enterStandby() {
             _sbActive = true;
+            _sbOrientation = 'portrait';
             updateStandbyDisplay();
             _sbTimer = setInterval(updateStandbyDisplay, 1000);
             document.getElementById('standby-overlay').classList.add('active');
+            // iOS 需要请求陀螺仪权限
+            if (typeof DeviceOrientationEvent !== 'undefined' &&
+                typeof DeviceOrientationEvent.requestPermission === 'function') {
+                try { await DeviceOrientationEvent.requestPermission(); } catch(e) {}
+            }
+            window.addEventListener('deviceorientation', _sbHandleOrientation, true);
             // 请求全屏
             try {
                 const el = document.documentElement;
@@ -4923,6 +4952,7 @@
             clearInterval(_sbTimer);
             _sbTimer = null;
             document.getElementById('standby-overlay').classList.remove('active');
+            window.removeEventListener('deviceorientation', _sbHandleOrientation, true);
             if (_sbWakeLock) { _sbWakeLock.release().catch(()=>{}); _sbWakeLock = null; }
             try {
                 if (document.fullscreenElement || document.webkitFullscreenElement) {
@@ -5047,6 +5077,11 @@
             const overlay = document.getElementById('standby-overlay');
             const W = overlay.clientWidth  || window.innerWidth;
             const H = overlay.clientHeight || window.innerHeight;
+            // 横版：数字改为左右两对，一行四个
+            if (_sbOrientation === 'landscape') {
+                sbFitDigitsLandscape(canvas, W, H);
+                return;
+            }
             canvas.width  = W * devicePixelRatio;
             canvas.height = H * devicePixelRatio;
             canvas.style.width  = W + 'px';
@@ -5095,7 +5130,8 @@
             ctx.globalAlpha = 1;
 
             // 剩余高度分两行数字
-            const cellH = (H - topH) / 2;
+            const botPad = H * 0.10;  // 底部留白（给秒数和底部信息）
+            const cellH = (H - topH - botPad) / 2;
             const cellW = W / 2;
 
             // 二分查找合适字体大小，让数字恰好填满格子
@@ -5122,18 +5158,98 @@
                 ctx.fillText(digit, dx, dy);
             }
 
-            fitDigit(hh[0], 0,      topH,          cellW, cellH);
-            fitDigit(hh[1], cellW,  topH,          cellW, cellH);
-            fitDigit(mm[0], 0,      topH + cellH,  cellW, cellH);
-            fitDigit(mm[1], cellW,  topH + cellH,  cellW, cellH);
+            // 数字区留出底部空间
+            const botH = H * 0.08;
+            const digitAreaH = H - topH - botH;
+            const dCellH = digitAreaH / 2;
+            fitDigit(hh[0], 0,      topH,              cellW, dCellH);
+            fitDigit(hh[1], cellW,  topH,              cellW, dCellH);
+            fitDigit(mm[0], 0,      topH + dCellH,     cellW, dCellH);
+            fitDigit(mm[1], cellW,  topH + dCellH,     cellW, dCellH);
 
             // 秒数右下角
             ctx.font = `300 ${W * 0.08}px "Arial",sans-serif`;
             ctx.globalAlpha = 0.45;
-            ctx.fillText(ss, W - W*0.06 - ctx.measureText(ss).width, H - H*0.05);
+            ctx.fillText(ss, W - W*0.06 - ctx.measureText(ss).width, H - H*0.04);
             ctx.globalAlpha = 1;
         }
 
+
+        function sbFitDigitsLandscape(canvas, W, H) {
+            canvas.width  = W * devicePixelRatio;
+            canvas.height = H * devicePixelRatio;
+            canvas.style.width  = W + 'px';
+            canvas.style.height = H + 'px';
+            const ctx = canvas.getContext('2d');
+            ctx.scale(devicePixelRatio, devicePixelRatio);
+            ctx.clearRect(0, 0, W, H);
+
+            const now = new Date();
+            const hh = String(now.getHours()).padStart(2,'0');
+            const mm = String(now.getMinutes()).padStart(2,'0');
+            const ss = String(now.getSeconds()).padStart(2,'0');
+
+            // 横版：四个数字一排，左半小时右半分钟，中间冒号
+            const pad = H * 0.08;
+            const topH = H * 0.18;
+            const cellW = W / 4;
+            const cellH = H - topH - H * 0.1;
+
+            ctx.fillStyle = '#fff';
+            ctx.textBaseline = 'alphabetic';
+
+            // 顶部信息
+            const dateEl = document.getElementById('sb-p-date');
+            const wdEl   = document.getElementById('sb-p-weekday');
+            const batEl  = document.getElementById('sb-p-battery');
+            const line1Size = H * 0.08;
+            ctx.font = `300 ${line1Size}px "Arial",sans-serif`;
+            ctx.globalAlpha = 0.75;
+            ctx.fillText(dateEl ? dateEl.textContent : '', pad, topH * 0.55);
+            ctx.font = `300 ${H * 0.065}px "Arial",sans-serif`;
+            ctx.globalAlpha = 0.55;
+            const wdStr = wdEl ? wdEl.textContent : '';
+            ctx.fillText(wdStr, pad, topH * 0.55 + line1Size * 1.3);
+            if (batEl && batEl.textContent) {
+                const batW = ctx.measureText(batEl.textContent).width;
+                ctx.fillText(batEl.textContent, W - pad - batW, topH * 0.55 + line1Size * 1.3);
+            }
+            ctx.globalAlpha = 1;
+
+            function fitDigitH(digit, x, y, cw, ch) {
+                let lo = 10, hi = ch * 2;
+                for (let i = 0; i < 14; i++) {
+                    const mid = (lo + hi) / 2;
+                    ctx.font = `900 ${mid}px "Arial Black",Arial,sans-serif`;
+                    const m = ctx.measureText(digit);
+                    const th = (m.actualBoundingBoxAscent || mid * 0.78) + (m.actualBoundingBoxDescent || mid * 0.1);
+                    if (m.width < cw * 0.88 && th < ch * 0.88) lo = mid; else hi = mid;
+                }
+                ctx.font = `900 ${lo}px "Arial Black",Arial,sans-serif`;
+                const m = ctx.measureText(digit);
+                const th = m.actualBoundingBoxAscent || lo * 0.78;
+                ctx.fillStyle = '#fff';
+                ctx.fillText(digit, x + cw/2 - m.width/2, y + ch/2 + th/2);
+            }
+
+            fitDigitH(hh[0], 0,          topH, cellW, cellH);
+            fitDigitH(hh[1], cellW,       topH, cellW, cellH);
+            fitDigitH(mm[0], cellW*2,     topH, cellW, cellH);
+            fitDigitH(mm[1], cellW*3,     topH, cellW, cellH);
+
+            // 冒号
+            ctx.font = `300 ${cellH * 0.25}px "Arial",sans-serif`;
+            ctx.globalAlpha = 0.5;
+            ctx.fillStyle = '#fff';
+            ctx.fillText(':', W/2 - ctx.measureText(':').width/2, topH + cellH * 0.6);
+            ctx.globalAlpha = 1;
+
+            // 秒数
+            ctx.font = `300 ${H * 0.07}px "Arial",sans-serif`;
+            ctx.globalAlpha = 0.4;
+            ctx.fillText(ss, W - pad - ctx.measureText(ss).width, H - H * 0.05);
+            ctx.globalAlpha = 1;
+        }
         function _sbSet(id, val) {
             const el = document.getElementById(id);
             if (el) el.textContent = val;
