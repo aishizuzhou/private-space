@@ -19,8 +19,8 @@
 
         :root {
             --bg-image: none;
-            --glass-bg: rgba(242, 234, 230, 0.55);
-            --glass-border: rgba(210, 185, 178, 0.5);
+            --glass-bg: rgba(255, 255, 255, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.35);
             --text-color: #4a3c38;
             --name-color: #4a3c38;
             --accent-text: #fff;
@@ -42,124 +42,20 @@
             --glass-blur: 15px;
             --card-opacity: 0.96;
         }
-
-
-        /* ══════════════════════════════════════
-           实色主题 — body.ui-solid
-        ══════════════════════════════════════ */
-        body.ui-solid {
-            background-color: #c4b0a6;
-        }
-        body.ui-solid #app-container {
-            background: #e8ddd6;
-            backdrop-filter: none;
-            -webkit-backdrop-filter: none;
-            border: none;
-            box-shadow: none;
-        }
-        body.ui-solid .note-card {
-            background: #faf4f0 !important;
-            border: none !important;
-            box-shadow: 0 2px 12px rgba(120,85,75,0.1);
-            backdrop-filter: none !important;
-            -webkit-backdrop-filter: none !important;
-        }
-        body.ui-solid .note-card:active {
-            background: #f5ede8 !important;
-            box-shadow: 0 1px 4px rgba(140,100,90,0.07) !important;
-        }
-        body.ui-solid .note-card.is-pinned {
-            background: rgba(200,148,158,0.1) !important;
-        }
-        body.ui-solid .filter-tag {
-            background: #e0d4ce;
-            color: var(--text-color);
-            border: none;
-            border-radius: 8px;
-        }
-        body.ui-solid .filter-tag:hover,
-        body.ui-solid .filter-tag:active {
-            background: #ddd0ca;
-            box-shadow: none;
-            transform: none;
-        }
-        body.ui-solid .filter-tag.active {
-            background: var(--accent-color);
-            color: #fff;
-            box-shadow: none;
-        }
-        body.ui-solid .search-bar {
-            background: #faf4f0 !important;
-            backdrop-filter: none !important;
-            -webkit-backdrop-filter: none !important;
-            border: none !important;
-            border-radius: 10px !important;
-            box-shadow: 0 2px 10px rgba(120,85,75,0.08) !important;
-        }
-        body.ui-solid #drawer {
-            background: #e8ddd8;
-            border-right: none;
-        }
-        body.ui-solid .drawer-header {
-            background: #ddd0c8;
-        }
-
-        body.ui-solid .stats-cell {
-            background: rgba(200,178,170,0.12);
-        }
-        body.ui-solid .modal-content {
-            background: #fdf9f7 !important;
-        }
-        body.ui-solid .glass-modal-content,
-        body.ui-solid .full-note-modal-wrap {
-            background: #fdf9f7 !important;
-        }
-        body.ui-solid .full-note-comment-bar {
-            background: #f2ebe6 !important;
-        }
-        body.ui-solid .drawer-cal-tab.active {
-            background: #faf6f3;
-        }
-        body.ui-solid .drawer-cal-tabs {
-            background: rgba(200,178,170,0.15);
-        }
         /* dark + solid */
-        body.dark-mode.ui-solid {
-            background-color: #1e1714;
-        }
-        body.dark-mode.ui-solid #app-container {
-            background: #251e1a;
-            backdrop-filter: none;
-            -webkit-backdrop-filter: none;
-            border-color: rgba(80,60,50,0.4);
-            box-shadow: none;
-        }
-        body.dark-mode.ui-solid .note-card {
-            background: #332620 !important;
-            border: none !important;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.25);
-        }
-        body.dark-mode.ui-solid .modal-content,
-        body.dark-mode.ui-solid .glass-modal-content,
-        body.dark-mode.ui-solid .full-note-modal-wrap {
-            background: #2a201c !important;
-        }
-        body.dark-mode.ui-solid #drawer {
-            background: #251e1a;
-        }
 
         body.dark-mode {
-            --glass-bg: rgba(32, 24, 20, 0.62);
-            --glass-border: rgba(200, 165, 155, 0.15);
+            --glass-bg: rgba(0, 0, 0, 0.35);
+            --glass-border: rgba(255, 255, 255, 0.1);
             --text-color: #e8ddd8;
             --name-color: #e8ddd8;
         }
         body.dark-mode #app-container { background: rgba(28, 22, 18, 0.78); }
         body.dark-mode .note-card { background: rgba(42, 34, 30, 0.98) !important; border-color: rgba(255,255,255,0.07) !important; }
         body.dark-mode .note-card:hover, body.dark-mode .note-card:active { background: rgba(60, 46, 40, 0.75); }
-        body.dark-mode .modal-content:not(#editor-modal .modal-content) { background: rgba(28, 22, 18, 0.97) !important; border-color: rgba(255,255,255,0.08); color: #e0d8e8; }
+        body.dark-mode .modal-content { background: rgba(28, 22, 18, 0.97) !important; border-color: rgba(255,255,255,0.08); color: #e0d8e8; }
         body.dark-mode .modal-content h3, body.dark-mode .modal-content label, body.dark-mode .settings-title { color: #c8bcd8; }
-        body.dark-mode .modal-content input:not(#editor-modal input), body.dark-mode .modal-content textarea:not(#editor-modal textarea), body.dark-mode .modal-content select { background: rgba(255,255,255,0.06); color: #e0d8e8; border-color: rgba(255,255,255,0.1); }
+        body.dark-mode .modal-content input, body.dark-mode .modal-content textarea, body.dark-mode .modal-content select { background: rgba(255,255,255,0.06); color: #e0d8e8; border-color: rgba(255,255,255,0.1); }
         body.dark-mode .cal-panel { background: rgba(28, 22, 18, 0.97) !important; border: 1px solid rgba(255,255,255,0.08); color: #e0d8e8; }
         body.dark-mode .cal-cell { color: #c8bcd8; }
         body.dark-mode .cal-cell.other-month { color: #555; }
@@ -183,7 +79,7 @@
 
         body {
             margin: 0; padding: 0;
-            background-color: #c8b0a8;
+            background-color: #8fbcb8;
             background-image: var(--bg-image);
             background-size: cover; background-position: center; background-attachment: fixed;
             font-family: var(--custom-font); font-weight: var(--custom-font-weight); color: var(--text-color);
@@ -381,7 +277,7 @@
         }
         .cal-input-row input {
             flex:1; min-width:0; padding:6px 8px; border:1px solid #eee; border-radius:8px;
-            font-size:0.78rem; background:var(--glass-bg); margin:0;
+            font-size:0.78rem; background:#fafafa; margin:0;
         }
         .cal-input-row button {
             padding:6px 10px; border-radius:8px; font-size:0.82rem; flex-shrink:0;
@@ -533,7 +429,7 @@
 
         .filter-tag {
             padding: 6px 14px;
-            background: var(--glass-bg); backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));;
+            background: rgba(255,255,255,0.4);
             border-radius: 8px;
             font-size: 0.78rem;
             white-space: nowrap;
@@ -545,7 +441,7 @@
         }
         .filter-tag:hover, .filter-tag:active {
             transform: none;
-            background: var(--glass-bg); backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));;
+            background: rgba(255, 255, 255, 0.55);
             box-shadow: none;
         }
         .filter-tag.active {
@@ -577,7 +473,7 @@
             display: flex; align-items: center; justify-content: center;
             gap: 2px; padding: 0 12px;
             z-index: 3;
-            background: var(--glass-bg); backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));;
+            background: #f0e8e4;
             border-radius: 12px;
             overflow: hidden;
             transform: translateX(100%);
@@ -593,7 +489,7 @@
         .note-action-btn:active { opacity: 0.6; }
         .note-action-icon {
             width: 44px; height: 44px; border-radius: 50%;
-            background: var(--glass-bg); backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));;
+            background: #e8ddd8;
             display: flex; align-items: center; justify-content: center;
             flex-shrink: 0;
         }
@@ -639,7 +535,7 @@
         }
 
         .note-card:active {
-            background: var(--glass-bg); backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));;
+            background: rgba(245,236,230,0.88);
         }
 
         .note-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; margin-bottom: 8px; }
@@ -676,7 +572,7 @@
 
         .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 100; display: none; justify-content: center; align-items: center; }
         .modal.open { display: flex; }
-        .modal-content { background: var(--glass-bg); backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px); border: 1px solid rgba(210,185,178,0.4); width: 85%; max-height: 80vh; overflow-y: auto; border-radius: 15px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); font-family: var(--custom-font); font-weight: var(--custom-font-weight); }
+        .modal-content { background: rgba(255,255,255,0.94); backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px); border: 1px solid rgba(210,185,178,0.4); width: 85%; max-height: 80vh; overflow-y: auto; border-radius: 15px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); font-family: var(--custom-font); font-weight: var(--custom-font-weight); }
         .modal-content h3 { font-weight: calc(var(--custom-font-weight, 400) + 300); }
 
         /* ── editor bottom sheet ── */
@@ -721,7 +617,6 @@
         }
         .editor-todo-area { display: none; padding: 0 16px 4px; }
         .editor-todo-area.show { display: block; }
-        /* 工具栏 */
         .editor-actions {
             display: flex; align-items: center; gap: 2px;
             padding: 8px 12px 16px;
@@ -736,7 +631,7 @@
             transition: background 0.15s; white-space: nowrap;
         }
         .ea-btn:active, .ea-btn.active { background: rgba(0,0,0,0.07); color: var(--accent-color); }
-        .ea-sep { width:1px; height:20px; background:rgba(0,0,0,0.1); margin:0 4px; flex-shrink:0; }
+        .ea-btn img { display: block; }
         .ea-save-btn {
             margin-left: auto;
             width: 44px; height: 36px; border-radius: 18px;
@@ -745,14 +640,14 @@
             display: flex; align-items: center; justify-content: center;
             box-shadow: 0 2px 8px rgba(0,0,0,0.18); flex-shrink: 0;
         }
-        /* popover — 小方块浮在按钮上方 */
+        /* popover */
         .ea-popover {
             position: absolute;
             bottom: calc(100% + 8px);
             left: 8px;
             min-width: 160px;
             max-width: 260px;
-            background: var(--glass-bg);
+            background: rgba(255,255,255,0.97);
             backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(210,185,178,0.25);
             border-radius: 14px;
@@ -763,54 +658,42 @@
         }
         @keyframes popoverIn {
             from { transform: translateY(6px) scale(0.97); opacity: 0; }
-            to   { transform: translateY(0) scale(1);     opacity: 1; }
+            to   { transform: translateY(0) scale(1); opacity: 1; }
         }
-        /* 标签 popover */
-        #eapop-tag-list {
-            max-height: 220px; overflow-y: auto;
-            padding: 6px 0;
-        }
+        #eapop-tag-list { max-height: 220px; overflow-y: auto; padding: 6px 0; }
         .eapop-tag-row {
             display: flex; align-items: center; justify-content: space-between;
-            padding: 10px 16px;
-            font-size: 0.88rem; cursor: pointer;
-            transition: background 0.12s;
-            border: none; background: transparent; width: 100%;
-            text-align: left; font-family: var(--custom-font);
+            padding: 10px 16px; font-size: 0.88rem; cursor: pointer;
+            transition: background 0.12s; border: none; background: transparent;
+            width: 100%; text-align: left; font-family: var(--custom-font); color: inherit;
         }
         .eapop-tag-row:active { background: rgba(0,0,0,0.05); }
         .eapop-tag-row .eapop-check { color: var(--accent-color); font-size: 0.9rem; opacity: 0; }
         .eapop-tag-row.active .eapop-check { opacity: 1; }
         .eapop-tag-new {
             display: flex; align-items: center; gap: 8px;
-            padding: 10px 16px 12px;
-            cursor: text;
+            padding: 10px 16px 12px; cursor: text;
             border-top: 1px solid rgba(0,0,0,0.06);
         }
         .eapop-tag-new input {
-            flex: 1; border: none; outline: none;
-            background: transparent; font-size: 0.88rem;
-            font-family: var(--custom-font); color: inherit;
+            flex: 1; border: none; outline: none; background: transparent;
+            font-size: 0.88rem; font-family: var(--custom-font); color: inherit;
             padding: 0; margin: 0; min-width: 0;
-            -webkit-appearance: none; appearance: none;
-            box-shadow: none;
+            -webkit-appearance: none; appearance: none; box-shadow: none;
         }
-        /* 图片/倒计时 rows — 无分割线 */
         .eapop-row {
             display: flex; align-items: center; gap: 10px;
-            width: 100%; padding: 11px 16px;
-            border: none; background: transparent; cursor: pointer;
+            width: 100%; padding: 11px 16px; border: none;
+            background: transparent; cursor: pointer;
             font-size: 0.88rem; text-align: left; font-family: var(--custom-font);
             transition: background 0.12s; color: inherit;
         }
         .eapop-row:active { background: rgba(0,0,0,0.05); }
-        /* 倒计时 popover */
         #eapop-timer { padding: 12px 16px 14px; }
         #eapop-timer input { margin: 0; }
-        /* dark */
-        body.dark-mode #editor-modal .modal-content { background: var(--glass-bg); }
+        body.dark-mode #editor-modal .modal-content { background: rgba(32,25,20,0.97); }
         body.dark-mode .editor-body textarea { color: #e0d8e8; }
-        .ea-btn img { display: block; }
+        body.dark-mode .ea-btn { color: #ccc; }
         body.dark-mode .ea-btn img { filter: invert(1); }
         body.dark-mode .editor-actions { border-top-color: rgba(255,255,255,0.08); }
         body.dark-mode .ea-popover { background: rgba(36,28,24,0.99); border-color: rgba(255,255,255,0.08); }
@@ -818,11 +701,9 @@
         body.dark-mode .eapop-tag-new input { color: #e0d8e8; }
         body.dark-mode .eapop-row { color: #e0d8e8; }
         body.dark-mode #eapop-timer input { color: #e0d8e8; background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.1); }
-        body.ui-solid #editor-modal .modal-content { background: #fff !important; }
-        body.ui-solid.dark-mode #editor-modal .modal-content { background: #1e1612 !important; }
 
         .glass-modal-content {
-            background: var(--glass-bg);
+            background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             position: relative;
             padding: 30px 20px 20px;
@@ -855,7 +736,7 @@
         .preset-item {
             position: relative;
             padding: 6px 12px;
-            background: var(--glass-bg); backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));;
+            background: rgba(255,255,255,0.5);
             border: 1px solid #ddd;
             border-radius: 20px;
             font-size: 0.8rem;
@@ -909,56 +790,25 @@
         /* ══════════════════════════════════════
            形象调整浮层
         ══════════════════════════════════════ */
-        /* ── 圆形裁切 modal ── */
+        /* ── 圆形头像裁切 ── */
         #avatar-crop-modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            z-index: 99999;
-            background: rgba(0,0,0,0.88);
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            display: none; position: fixed; inset: 0; z-index: 99999;
+            background: rgba(0,0,0,0.88); flex-direction: column;
+            align-items: center; justify-content: center;
         }
         #avatar-crop-modal.active { display: flex; }
         #avatar-crop-wrap {
-            position: relative;
-            width: 280px;
-            height: 280px;
-            flex-shrink: 0;
+            position: relative; width: 280px; height: 280px; flex-shrink: 0;
         }
         #avatar-crop-img {
-            position: absolute;
-            transform-origin: 0 0;
-            touch-action: none;
-            user-select: none;
-            -webkit-user-select: none;
-            cursor: grab;
+            position: absolute; transform-origin: 0 0;
+            touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab;
         }
         #avatar-crop-img.dragging { cursor: grabbing; }
-        #avatar-crop-ring {
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-        }
-        .avatar-crop-hint {
-            color: rgba(255,255,255,0.5);
-            font-size: 0.8rem;
-            margin-top: 16px;
-            text-align: center;
-        }
-        .avatar-crop-actions {
-            display: flex;
-            gap: 16px;
-            margin-top: 24px;
-        }
-        .avatar-crop-btn {
-            padding: 10px 32px;
-            border-radius: 24px;
-            border: none;
-            font-size: 0.95rem;
-            cursor: pointer;
-        }
+        #avatar-crop-ring { position: absolute; inset: 0; pointer-events: none; }
+        .avatar-crop-hint { color: rgba(255,255,255,0.5); font-size: 0.8rem; margin-top: 16px; text-align: center; }
+        .avatar-crop-actions { display: flex; gap: 16px; margin-top: 24px; }
+        .avatar-crop-btn { padding: 10px 32px; border-radius: 24px; border: none; font-size: 0.95rem; cursor: pointer; }
         .avatar-crop-btn.cancel { background: rgba(255,255,255,0.12); color: #fff; }
         .avatar-crop-btn.confirm { background: var(--accent-color); color: var(--accent-text); }
 
@@ -993,8 +843,6 @@
             box-shadow: 0 -4px 32px rgba(0,0,0,0.18);
         }
         body.dark-mode .portrait-panel { background: #2a201c; }
-        body.ui-solid .portrait-panel { background: #e8ddd6; }
-        body.dark-mode.ui-solid .portrait-panel { background: #2a201c; }
 
         /* 面板顶部拖条 + 标题 */
         .portrait-panel-header {
@@ -1047,11 +895,10 @@
             user-select: none;
         }
         .portrait-tab.active {
-            background: var(--glass-bg); backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));; opacity: 1;
+            background: #fff; opacity: 1;
             box-shadow: 0 1px 4px rgba(0,0,0,0.1);
         }
         body.dark-mode .portrait-tab.active { background: rgba(255,255,255,0.14); }
-        body.ui-solid .portrait-tab.active { background: #faf4f0; }
 
         /* 各 tab 内容 */
         .portrait-content {
@@ -1079,7 +926,7 @@
         .portrait-row input[type=number] {
             flex: 1; padding: 5px 10px; border-radius: 8px;
             border: 1px solid rgba(0,0,0,0.1);
-            background: var(--glass-bg); backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));;
+            background: rgba(255,255,255,0.6);
             font-size: 0.82rem; color: var(--text-color); outline: none;
         }
         body.dark-mode .portrait-row input[type=number] {
@@ -1112,71 +959,33 @@
         .portrait-presets {
             display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;
         }
-
-
-        /* ══ 实色主题补全 ══ */
-        body.ui-solid .tag-action-menu {
-            background: #f0e8e3;
-            backdrop-filter: none; -webkit-backdrop-filter: none;
-            border: 1px solid rgba(200,178,170,0.2);
-        }
-        body.dark-mode.ui-solid .tag-action-menu {
-            background: #2e2420;
-        }
-        body.ui-solid .todo-add-bar input {
-            background: #faf4f0;
-            border-color: rgba(200,178,170,0.25);
-        }
-        body.ui-solid .drawer-special-form {
-            background: rgba(200,178,170,0.1);
-        }
-        body.ui-solid .drawer-special-form input {
-            background: #faf4f0;
-            border-color: rgba(200,178,170,0.25);
-        }
-        body.ui-solid .pomo-reason-wrap {
-            border-bottom-color: rgba(160,130,120,0.2);
-        }
-        body.ui-solid .pomo-ctrl-btn.pomo-reset {
-            background: #f0e8e3;
-            border-color: rgba(200,178,170,0.3);
-        }
-        body.ui-solid .tag {
-            background: rgba(200,178,170,0.18);
-        }
-        body.ui-solid .filter-tag.blocked {
-            background: rgba(200,80,80,0.7) !important;
-        }
-        body.ui-solid #full-note-body {
-            background: #f8f3ef;
-        }
         /* ══ 毛玻璃主题补全 ══ */
-        body:not(.ui-solid) .todo-add-bar input {
+        .todo-add-bar input {
             background: var(--glass-bg);
             border-color: var(--glass-border);
             backdrop-filter: blur(var(--glass-blur));
             -webkit-backdrop-filter: blur(var(--glass-blur));
         }
-        body:not(.ui-solid) .drawer-special-form {
+        .drawer-special-form {
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
             backdrop-filter: blur(var(--glass-blur));
             -webkit-backdrop-filter: blur(var(--glass-blur));
         }
-        body:not(.ui-solid) .drawer-special-form input {
+        .drawer-special-form input {
             background: rgba(255,255,255,0.3);
             border-color: var(--glass-border);
         }
-        body:not(.ui-solid) .stats-cell {
+        .stats-cell {
             background: var(--glass-bg);
             backdrop-filter: blur(var(--glass-blur));
             -webkit-backdrop-filter: blur(var(--glass-blur));
         }
-        body:not(.ui-solid) .tag {
+        .tag {
             background: rgba(255,255,255,0.25);
             border: 1px solid rgba(255,255,255,0.4);
         }
-        body.dark-mode:not(.ui-solid) .tag {
+        body.dark-mode .tag {
             background: rgba(255,255,255,0.1);
             border-color: rgba(255,255,255,0.12);
         }
@@ -1203,7 +1012,7 @@
             align-items: center; gap:8px;
             padding: 6px 12px;
             margin-bottom: 8px;
-            background: var(--glass-bg); backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));;
+            background: rgba(255,255,255,0.35);
             border-radius: 999px;
             border: 1px solid rgba(255,255,255,0.6);
             cursor: pointer;
@@ -1257,7 +1066,7 @@
         .special-form.open { display:block; }
         .special-form input[type=text], .special-form input[type=date] {
             width:100%; padding:7px 10px; border:1px solid #eee;
-            border-radius:8px; font-size:0.85rem; background: var(--glass-bg); backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));;
+            border-radius:8px; font-size:0.85rem; background:#fafafa;
             margin-bottom:6px; box-sizing:border-box;
         }
         .special-form-row { display:flex; gap:6px; }
@@ -1364,7 +1173,7 @@
             gap: 12px;
             padding: 13px 16px;
             border-radius: 16px;
-            background: var(--glass-bg);
+            background: rgba(255,255,255,0.55);
             border: 1px solid rgba(0,0,0,0.06);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
@@ -1414,7 +1223,7 @@
             padding: 10px 14px;
             border-radius: 14px;
             border: 1px solid rgba(0,0,0,0.08);
-            background: var(--glass-bg); backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));;
+            background: rgba(255,255,255,0.5);
             font-size: 0.88rem;
             color: var(--text-color);
             outline: none;
@@ -1495,24 +1304,48 @@
         }
         .pomo-adjust-hint.visible { opacity: 0.4; }
         .pomo-reason-wrap {
-            width: 100%;
-            border-bottom: 1.5px solid rgba(0,0,0,0.12);
-            margin-bottom: 36px;
+            width: 100%; margin-bottom: 28px; text-align: center; min-height: 36px;
         }
-        body.dark-mode .pomo-reason-wrap { border-bottom-color: rgba(255,255,255,0.15); }
         .pomo-reason-input {
-            width: 100%;
-            border: none;
-            background: transparent;
-            font-size: 0.95rem;
-            color: var(--text-color);
-            text-align: center;
-            outline: none;
-            padding: 6px 0 8px;
-            font-family: var(--custom-font);
-            opacity: 0.65;
+            width: 100%; border: none;
+            border-bottom: 1.5px solid rgba(0,0,0,0.12);
+            background: transparent; font-size: 0.95rem; color: var(--text-color);
+            text-align: center; outline: none; padding: 6px 0 8px;
+            font-family: var(--custom-font); opacity: 0.65;
+            transition: border-color 0.3s, opacity 0.3s;
         }
+        .pomo-reason-input.running { border-bottom-color: transparent; font-size: 1.05rem; opacity: 0.55; pointer-events: none; }
+        body.dark-mode .pomo-reason-input { border-bottom-color: rgba(255,255,255,0.15); }
+        body.dark-mode .pomo-reason-input.running { border-bottom-color: transparent; }
         .pomo-reason-input::placeholder { opacity: 0.45; }
+        .pomo-stats { margin-top: 32px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+        .pomo-stat-item {
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+            padding: 12px 18px; border-radius: 14px;
+            background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.25); min-width: 80px;
+        }
+        body.dark-mode .pomo-stat-item { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.1); }
+        .pomo-stat-val { font-size: 1.3rem; font-weight: 700; color: var(--accent-color); line-height: 1; }
+        .pomo-stat-label { font-size: 0.7rem; opacity: 0.5; white-space: nowrap; }
+        .pomo-done-card {
+            position: fixed; inset: 0; z-index: 9999;
+            background: rgba(0,0,0,0.45); display: flex;
+            align-items: center; justify-content: center;
+            animation: fadeIn 0.25s ease;
+        }
+        .pomo-done-inner {
+            background: rgba(255,255,255,0.95); backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
+            border: 1px solid rgba(210,185,178,0.3); border-radius: 22px;
+            padding: 36px 40px 28px; text-align: center;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.18); min-width: 220px;
+        }
+        body.dark-mode .pomo-done-inner { background: rgba(32,25,20,0.97); border-color: rgba(255,255,255,0.1); }
+        .pomo-done-emoji { font-size: 2.8rem; margin-bottom: 12px; }
+        .pomo-done-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; }
+        .pomo-done-sub { font-size: 0.85rem; opacity: 0.55; margin-bottom: 18px; line-height: 1.6; }
+        .pomo-done-hint { font-size: 0.72rem; opacity: 0.3; }
+        @keyframes fadeIn { from { opacity:0; transform:scale(0.95); } to { opacity:1; transform:scale(1); } }
         .pomo-controls {
             display: flex;
             gap: 14px;
@@ -1854,15 +1687,11 @@
             display: flex; align-items: center; gap: 8px;
             padding: 8px 10px;
             border-radius: 10px;
-            background: var(--glass-bg); backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));;
+            background: var(--glass-bg);
             border: 1px solid var(--glass-border);
             margin-bottom: 6px;
             cursor: pointer;
             transition: background 0.15s;
-        }
-        body.ui-solid .drawer-special-item {
-            background: rgba(212,196,190,0.18);
-            border: none;
         }
         body.dark-mode .drawer-special-item { background: rgba(255,255,255,0.04); }
         .drawer-special-item:active { background: rgba(0,0,0,0.07); }
@@ -1894,7 +1723,7 @@
             width: 100%; margin-bottom: 6px;
             padding: 6px 10px; border-radius: 7px;
             border: 1px solid rgba(0,0,0,0.08);
-            background: var(--glass-bg); backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));;
+            background: rgba(255,255,255,0.8);
             font-size: 0.8rem; color: var(--text-color);
             outline: none;
         }
@@ -1940,7 +1769,6 @@
         }
         body.dark-mode .drawer-input { background: rgba(255,255,255,0.07); color: #e0d8e8; }
         /* ===================== 抽屉 & 模式切换 END ===================== */
-
     </style>
 </head>
 <body>
@@ -2074,6 +1902,10 @@
             </div>
             <div style="height:1px;background:rgba(0,0,0,0.04);margin:6px 16px;"></div>
             <div class="drawer-tag-list" id="drawer-tag-list"></div>
+            <div class="drawer-row" style="padding:8px 16px 12px;">
+                <label>启动默认标签</label>
+                <input type="text" id="setting-default-tag" placeholder="留空则无" style="width:110px;font-size:0.82rem;text-align:right;border:none;border-bottom:1px solid rgba(0,0,0,0.1);background:transparent;outline:none;padding:2px 0;" oninput="updateSettings()">
+            </div>
 
             <div class="drawer-divider"></div>
 
@@ -2137,16 +1969,7 @@
                     <label>深色模式</label>
                     <input type="checkbox" id="setting-dark-mode" style="width:auto;margin:0;" onchange="toggleDarkMode(this.checked)">
                 </div>
-                <div class="drawer-row">
-                    <label>实色风格</label>
-                    <input type="checkbox" id="setting-ui-style" style="width:auto;margin:0;" onchange="toggleUIStyle(this.checked)">
-                </div>
-                <div class="drawer-row">
-                    <label>毛玻璃</label>
-                    <input type="range" id="setting-glass-blur" min="0" max="100" step="1" style="flex:1;height:5px;" onchange="updateGlassBlur(this.value)">
-                    <span id="setting-glass-blur-val" style="font-size:0.72rem;color:#aaa;width:28px;text-align:right;flex-shrink:0;">15</span>
-                </div>
-                <div class="drawer-row">
+<div class="drawer-row">
                     <label>字体大小</label>
                     <div id="lockable-fontsize" style="display:flex;flex:1;gap:6px;align-items:center;">
                         <input type="range" id="setting-fontsize" min="12" max="20" style="flex:1;height:5px;" onchange="updateSettings()">
@@ -2259,16 +2082,12 @@
             <div id="page-pomodoro" class="mode-page" style="display:none;">
                 <div class="pomo-page">
                     <div class="pomo-title">专注时间</div>
-
-                    <!-- 大字时钟：未开始时点击可调节 -->
                     <div class="pomo-clock-wrap" id="pomo-clock-wrap">
                         <div class="pomo-big-clock" id="pomo-timer" onclick="pomoClockTap()">
                             <span id="pomo-display-min">25</span><span class="pomo-colon">:</span><span id="pomo-display-sec">00</span>
                         </div>
-                        <!-- 调节提示 -->
                         <div class="pomo-adjust-hint" id="pomo-adjust-hint">↑ 上下滑动调节分钟 ↓</div>
                     </div>
-
                     <div class="pomo-reason-wrap" id="pomo-reason-wrap">
                         <input type="text" id="pomo-reason" class="pomo-reason-input" placeholder="为何专注">
                     </div>
@@ -2277,6 +2096,15 @@
                         <button class="pomo-ctrl-btn pomo-reset" onclick="pomoReset()">重置</button>
                     </div>
                     <div class="pomo-status" id="pomo-label"></div>
+                    <div class="pomo-stats" id="pomo-stats"></div>
+                </div>
+            </div>
+            <div class="pomo-done-card" id="pomo-done-card" style="display:none;" onclick="document.getElementById('pomo-done-card').style.display='none'">
+                <div class="pomo-done-inner">
+                    <div class="pomo-done-emoji">🌿</div>
+                    <div class="pomo-done-title" id="pomo-done-title"></div>
+                    <div class="pomo-done-sub" id="pomo-done-sub"></div>
+                    <div class="pomo-done-hint">点击任意处关闭</div>
                 </div>
             </div>
         </div>
@@ -2309,64 +2137,38 @@
         </div>
     </div>
 
-    <div class="modal" id="editor-modal" onclick="if(event.target===this)closeEditorModal()">
-        <div class="modal-content" id="editor-sheet">
+    <div class="modal" id="editor-modal" onclick="if(event.target===this)closeModal('editor-modal')">
+        <div class="modal-content">
             <div class="editor-handle"></div>
-
-            <!-- todo area -->
             <div id="todo-editor-area" class="editor-todo-area">
                 <div id="todo-items-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px;"></div>
                 <button onclick="addTodoItem()" style="width:100%;padding:7px;border-radius:8px;border:1px dashed rgba(0,0,0,0.15);background:transparent;color:#aaa;font-size:0.82rem;cursor:pointer;">+ 添加待办项</button>
             </div>
-
-            <!-- main input -->
             <div class="editor-body">
-                <textarea id="edit-content" rows="1" placeholder="おかえりなさい♡"
-                    oninput="editorAutoResize(this)"></textarea>
+                <textarea id="edit-content" rows="1" placeholder="おかえりなさい♡" oninput="editorAutoResize(this)"></textarea>
             </div>
-
-            <!-- image preview -->
             <div id="image-preview-area" style="display:flex;gap:5px;overflow-x:auto;padding:0 16px 6px;"></div>
-
-            <!-- 工具栏 -->
+            <div class="editor-more-panel" id="editor-more-panel" style="display:none;padding:8px 16px 4px;border-top:1px solid rgba(0,0,0,0.07);">
+                <input type="number" id="edit-timer" value="0" min="0" placeholder="一忘皆空（分钟，0永久）" style="margin-bottom:6px;font-size:0.85rem;">
+            </div>
             <div class="editor-actions">
-                <!-- 隐藏的 file input -->
                 <input type="file" id="file-input" style="display:none" multiple accept="image/*" onchange="handleImageUpload(this)">
-
-                <button class="ea-btn" id="ea-tag-btn" onclick="editorPopover('tag')" title="标签">#</button>
-                <button class="ea-btn" id="ea-img-btn" onclick="editorPopover('img')" title="图片"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 100" width="17" height="15" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
-  <!-- 圆角框：左边+底+右边下部，顶边只到约x=70 -->
-  <path d="M70,7 L18,7 Q7,7 7,18 L7,82 Q7,93 18,93 L92,93 Q103,93 103,82 L103,36"/>
-  <!-- 山形波浪（填充在线内） -->
-  <polyline points="7,74 28,52 46,66 65,44 103,74" stroke-width="7"/>
-  <!-- 右侧箭头竖线 -->
-  <line x1="103" y1="36" x2="103" y2="10"/>
-  <!-- 箭头头部 -->
-  <polyline points="91,22 103,10 115,22" stroke-width="7"/>
-</svg></button>
-                <button class="ea-btn" id="ea-timer-btn" onclick="editorPopover('timer')" title="定时销毁"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAOCAYAAAAbvf3sAAABF0lEQVR4nG3RTytEURzG8c+dGUNsZpTU+JNSbEjZKgtlrSRvwc7KyivwZyuvwMpSZiEWbCy9ASkWSCGRDJkZC79TVzmL2z3Pfc7z+z7nwgU+8IxXNPGIT7zjCW+4xigM4hztMKxgAou4Df0OkyiItYwW1vxd86Fvx74kTvXHh/kQu1DGUEyYCV9RemADdWQpCVs4iPfkk+U2+1hFJzZxhkqkZwmnHTiF6FLBEaqYw0uEtfPl0oRdHGIECzhGd35C3ryOk1xIhh3s/dehF1+BkG6piOFAmU5dU4fZMI7h2+9fbgZaK/DaCauK0xDesIRahFyFfoOBhFPHVKSWouA9+tCBBnrwgKUsrrERh1uRWA60hFHDOC5/AGEXQeGyVC4PAAAAAElFTkSuQmCC" width="12" height="14" style="display:block;"></button>
+                <button class="ea-btn" id="ea-tag-btn" onclick="editorPopover('tag')">#</button>
+                <button class="ea-btn" id="ea-img-btn" onclick="editorPopover('img')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="18" height="18"><g stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M 55 15 L 25 15 A 10 10 0 0 0 15 25 L 15 75 A 10 10 0 0 0 25 85 L 75 85 A 10 10 0 0 0 85 75 L 85 45"/><path d="M 15 65 L 35 40 L 55 55 L 70 42 L 85 58"/><path d="M 75 40 L 75 10 M 62 22 L 75 10 L 88 22"/></g></svg></button>
+                <button class="ea-btn" id="ea-timer-btn" onclick="editorPopover('timer')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="14" height="14"><defs><mask id="ribbon-gap"><rect width="200" height="200" fill="white"/><path d="M 145 25 C 145 95, 55 105, 55 175" fill="none" stroke="black" stroke-width="44" stroke-linecap="butt"/></mask></defs><g fill="currentColor"><polygon points="25,12 175,12 162,38 38,38"/><polygon points="25,188 175,188 162,162 38,162"/></g><path d="M 55 25 C 55 95, 145 105, 145 175" fill="none" stroke="currentColor" stroke-width="26" stroke-linecap="butt" mask="url(#ribbon-gap)"/><path d="M 145 25 C 145 95, 55 105, 55 175" fill="none" stroke="currentColor" stroke-width="26" stroke-linecap="butt"/></svg></button>
                 <button class="ea-save-btn" onclick="saveItem()">↑</button>
             </div>
-
-            <!-- popover 容器（绝对定位在 sheet 内） -->
             <div class="ea-popover" id="ea-popover" style="display:none;">
-                <!-- 标签 popover -->
                 <div id="eapop-tag" style="display:none;">
                     <div id="eapop-tag-list"></div>
                     <div class="eapop-tag-new" onclick="document.getElementById('edit-tags').focus()">
                         <span style="opacity:0.35;font-size:0.9rem;flex-shrink:0;">#</span>
-                        <input type="text" id="edit-tags" placeholder="新标签"
-                            style="caret-color:var(--accent-color);"
-                            onkeydown="if(event.key==='Enter'){editorAddNewTags();event.preventDefault();}">
+                        <input type="text" id="edit-tags" placeholder="新标签" style="caret-color:var(--accent-color);" onkeydown="if(event.key==='Enter'){editorAddNewTags();event.preventDefault();}">
                     </div>
                 </div>
-                <!-- 图片 popover -->
                 <div id="eapop-img" style="display:none;">
-                    <button class="eapop-row" onclick="document.getElementById('file-input').click();editorClosePopover()">
-                        <span>📷</span><span>拍摄 / 选择图片</span>
-                    </button>
+                    <button class="eapop-row" onclick="document.getElementById('file-input').click();editorClosePopover()"><span>📷</span><span>拍摄 / 选择图片</span></button>
                 </div>
-                <!-- 倒计时 popover -->
                 <div id="eapop-timer" style="display:none;">
                     <div style="font-size:0.78rem;color:#aaa;margin-bottom:8px;">⋄ 一忘皆空 · 0 为永久保留 ⋄</div>
                     <div style="display:flex;align-items:center;gap:8px;">
@@ -2455,7 +2257,9 @@
                 framePresets: [],
                 bgNote: '', bgTodo: '', bgPomodoro: '',
                 lastMode: 'note',
-                uiStyle: 'solid'
+                uiStyle: 'glass',
+                defaultFilterTag: '',
+                pinnedTags: []
             },
             tempImages: [], filterTag: null, blockedTags: [], searchQuery: '',
             editingId: null, filterDateFrom: null, filterDateTo: null,
@@ -2592,40 +2396,28 @@
             saveData();
         }
 
-        // ── editor bottom sheet ──
+        // ── editor bottom sheet helpers ──
         function editorAutoResize(ta) {
             ta.style.height = 'auto';
             ta.style.height = ta.scrollHeight + 'px';
         }
-
-        function closeEditorModal() {
-            editorClosePopover();
-            closeModal('editor-modal');
-        }
-
         function editorClosePopover() {
             document.getElementById('ea-popover').style.display = 'none';
             document.querySelectorAll('.ea-btn').forEach(b => b.classList.remove('active'));
         }
-
         function editorPopover(type) {
             const pop = document.getElementById('ea-popover');
             const btnMap = { tag: 'ea-tag-btn', img: 'ea-img-btn', timer: 'ea-timer-btn' };
             const panelMap = { tag: 'eapop-tag', img: 'eapop-img', timer: 'eapop-timer' };
             const btn = document.getElementById(btnMap[type]);
-            // 如果已经打开同一个，关闭
-            if (pop.style.display !== 'none' && btn.classList.contains('active')) {
-                editorClosePopover(); return;
-            }
+            if (pop.style.display !== 'none' && btn.classList.contains('active')) { editorClosePopover(); return; }
             editorClosePopover();
-            // 显示对应面板
             Object.values(panelMap).forEach(id => document.getElementById(id).style.display = 'none');
             document.getElementById(panelMap[type]).style.display = '';
             btn.classList.add('active');
             pop.style.display = '';
             if (type === 'tag') renderEditorTagPopover();
         }
-
         function renderEditorTagPopover() {
             const list = document.getElementById('eapop-tag-list');
             const allTags = new Set();
@@ -2647,61 +2439,44 @@
                 list.appendChild(row);
             });
         }
-
-        function editorAddNewTags() {
-            const inp = document.getElementById('edit-tags');
-            // 触发重新渲染（已有标签 chip 更新选中状态）
-            renderEditorTagPopover();
-        }
+        function editorAddNewTags() { renderEditorTagPopover(); }
 
         function openEditor(id = null) {
             state.editingId = id;
             const contentInput = document.getElementById('edit-content');
             const tagsInput = document.getElementById('edit-tags');
             const timerInput = document.getElementById('edit-timer');
-            _undoStack = []; _redoStack = [];
 
             if (id) {
                 const note = state.notes.find(n => n.id === id);
                 contentInput.value = note.content;
                 tagsInput.value = note.tags.join(' ');
-
                 if (note.destructTime) {
                     const remainingMs = note.destructTime - Date.now();
                     timerInput.value = remainingMs > 0 ? Math.ceil(remainingMs / 60000) : 0;
-                } else {
-                    timerInput.value = 0;
-                }
+                } else { timerInput.value = 0; }
                 state.tempImages = [...note.images];
             } else {
                 contentInput.value = '';
-                // 若当前选中了某个非"全部"的tag，自动带入
                 tagsInput.value = (state.filterTag && !state.blockedTags.includes(state.filterTag)) ? state.filterTag : '';
-                // ⏳tag下默认3分钟倒计时
                 timerInput.value = (state.filterTag === '⏳') ? '3' : '0';
                 state.tempImages = [];
             }
-            // close panels on open
-            editorClosePopover();
-            // reset textarea height
-            const ta = document.getElementById('edit-content');
-            ta.style.height = 'auto';
 
-            // Todo 模式初始化：新建时跟随当前模式，编辑时跟随笔记本身
-            const isTodo = id
-                ? !!((state.notes.find(n => n.id === id) || {}).isTodo)
-                : (_currentMode === 'todo');
+            const isTodo = id ? !!((state.notes.find(n => n.id === id) || {}).isTodo) : (_currentMode === 'todo');
             _todoMode = isTodo;
             _todoItems = id && isTodo ? [...(state.notes.find(n => n.id === id).todoItems || [])] : [];
             applyTodoModeUI();
 
-            // 笔记模式下隐藏待办切换按钮
             const todoModeBtn = document.getElementById('todo-mode-btn');
             if (todoModeBtn) todoModeBtn.style.display = _currentMode === 'note' ? 'none' : '';
 
+            editorClosePopover();
+            const ta = document.getElementById('edit-content');
+            ta.style.height = 'auto';
+
             renderTempImages();
             openModal('editor-modal');
-            // resize textarea after open
             requestAnimationFrame(() => editorAutoResize(document.getElementById('edit-content')));
         }
 
@@ -3234,7 +3009,6 @@
                 reader.readAsDataURL(file);
             });
         }
-
         function compressImage(dataUrl, maxSide, quality, cb) {
             const img = new Image();
             img.onload = () => {
@@ -3500,9 +3274,8 @@
             if (cardOpVal) cardOpVal.textContent = cardOp;
 
             // 界面风格
-            applyUIStyle(state.settings.uiStyle || 'solid');
-            const uiStyleEl = document.getElementById('setting-ui-style');
-            if (uiStyleEl) uiStyleEl.checked = (state.settings.uiStyle === 'solid');
+            const defTagEl = document.getElementById('setting-default-tag');
+            if (defTagEl) defTagEl.value = s.defaultFilterTag || '';
         }
 
         function toggleDarkMode(on) {
@@ -3711,18 +3484,8 @@
             saveData();
         }
 
-        function applyUIStyle(style) {
-            if (style === 'solid') {
-                document.body.classList.add('ui-solid');
-            } else {
-                document.body.classList.remove('ui-solid');
-            }
-        }
-        function toggleUIStyle(isSolid) {
-            state.settings.uiStyle = isSolid ? 'solid' : 'glass';
-            applyUIStyle(state.settings.uiStyle);
-            saveData();
-        }
+        function applyUIStyle() {}
+        function toggleUIStyle() {}
 
         function updateCardOpacity(val) {
             const v = Math.min(100, Math.max(0, parseInt(val) ?? 96));
@@ -3989,6 +3752,9 @@
             }
             state.commentPreviewSuffix = document.getElementById('setting-comment-preview-suffix').value;
 
+            const defTagEl = document.getElementById('setting-default-tag');
+            if (defTagEl) s.defaultFilterTag = defTagEl.value.trim();
+
             saveData(); applySettings();
             renderTags();
         }
@@ -4057,19 +3823,28 @@
 
         // ── 圆形头像裁切 ──
         let _cropCallback = null;
-        let _cropState = { x: 0, y: 0, scale: 1, imgW: 0, imgH: 0 };
+        let _cropState = { x:0, y:0, scale:1, imgW:0, imgH:0 };
         const CROP_SIZE = 280, CROP_R = 136;
 
         function changeAvatar(input) {
             if (!input.files[0]) return;
+            const file = input.files[0];
             const r = new FileReader();
-            r.onload = e => openCropModal(e.target.result, url => {
-                addToHistoryAvatars(state.settings.currentAvatar);
-                state.settings.currentAvatar = url;
-                saveData(); applySettings(); renderHistoryAvatars();
-            });
-            r.readAsDataURL(input.files[0]);
-            // reset input so same file can be re-selected
+            r.onload = e => {
+                // GIF 跳过裁切直接存（canvas 会破坏动画）
+                if (file.type === 'image/gif') {
+                    addToHistoryAvatars(state.settings.currentAvatar);
+                    state.settings.currentAvatar = e.target.result;
+                    saveData(); applySettings(); renderHistoryAvatars();
+                } else {
+                    openCropModal(e.target.result, url => {
+                        addToHistoryAvatars(state.settings.currentAvatar);
+                        state.settings.currentAvatar = url;
+                        saveData(); applySettings(); renderHistoryAvatars();
+                    });
+                }
+            };
+            r.readAsDataURL(file);
             input.value = '';
         }
 
@@ -4079,110 +3854,56 @@
             const img = document.getElementById('avatar-crop-img');
             img.onload = () => {
                 const iw = img.naturalWidth, ih = img.naturalHeight;
-                // 初始缩放：让图片最短边 = CROP_SIZE（填满圆）
-                const s = Math.max(CROP_SIZE / iw, CROP_SIZE / ih);
-                _cropState = {
-                    x: (CROP_SIZE - iw * s) / 2,
-                    y: (CROP_SIZE - ih * s) / 2,
-                    scale: s, imgW: iw, imgH: ih
-                };
-                applyImgTransform();
+                const s = Math.max(CROP_SIZE/iw, CROP_SIZE/ih);
+                _cropState = { x:(CROP_SIZE-iw*s)/2, y:(CROP_SIZE-ih*s)/2, scale:s, imgW:iw, imgH:ih };
+                applyCropTransform();
             };
             img.src = src;
             modal.classList.add('active');
             initCropDrag();
         }
-
         function closeCropModal() {
             document.getElementById('avatar-crop-modal').classList.remove('active');
             _cropCallback = null;
         }
-
-        function applyImgTransform() {
-            const img = document.getElementById('avatar-crop-img');
-            const s = _cropState;
-            img.style.width = (s.imgW * s.scale) + 'px';
-            img.style.height = (s.imgH * s.scale) + 'px';
-            img.style.left = s.x + 'px';
-            img.style.top = s.y + 'px';
+        function applyCropTransform() {
+            const img = document.getElementById('avatar-crop-img'), s = _cropState;
+            img.style.width = (s.imgW*s.scale)+'px'; img.style.height = (s.imgH*s.scale)+'px';
+            img.style.left = s.x+'px'; img.style.top = s.y+'px';
         }
-
         function clampCrop() {
-            // 确保圆形区域始终被图片覆盖
-            const s = _cropState;
-            const iw = s.imgW * s.scale, ih = s.imgH * s.scale;
-            // 图片右边不能进入圆左边(0)；图片左边不能超过圆右边(CROP_SIZE)
-            s.x = Math.min(s.x, 0);
-            s.y = Math.min(s.y, 0);
-            s.x = Math.max(s.x, CROP_SIZE - iw);
-            s.y = Math.max(s.y, CROP_SIZE - ih);
+            const s = _cropState, iw=s.imgW*s.scale, ih=s.imgH*s.scale;
+            s.x = Math.min(s.x, 0); s.y = Math.min(s.y, 0);
+            s.x = Math.max(s.x, CROP_SIZE-iw); s.y = Math.max(s.y, CROP_SIZE-ih);
         }
-
         function initCropDrag() {
             const wrap = document.getElementById('avatar-crop-wrap');
             const img = document.getElementById('avatar-crop-img');
             let last = null;
-
-            function onStart(e) {
-                e.preventDefault();
-                const pt = e.touches ? e.touches[0] : e;
-                last = { x: pt.clientX, y: pt.clientY };
-                img.classList.add('dragging');
-            }
-            function onMove(e) {
-                e.preventDefault();
-                if (!last) return;
-                const pt = e.touches ? e.touches[0] : e;
-                const dx = pt.clientX - last.x, dy = pt.clientY - last.y;
-                last = { x: pt.clientX, y: pt.clientY };
-                _cropState.x += dx;
-                _cropState.y += dy;
-                clampCrop();
-                applyImgTransform();
-            }
-            function onEnd() { last = null; img.classList.remove('dragging'); }
-
-            // remove old listeners by cloning
+            function onStart(e) { e.preventDefault(); const pt=e.touches?e.touches[0]:e; last={x:pt.clientX,y:pt.clientY}; img.classList.add('dragging'); }
+            function onMove(e) { e.preventDefault(); if(!last) return; const pt=e.touches?e.touches[0]:e; _cropState.x+=pt.clientX-last.x; _cropState.y+=pt.clientY-last.y; last={x:pt.clientX,y:pt.clientY}; clampCrop(); applyCropTransform(); }
+            function onEnd() { last=null; img.classList.remove('dragging'); }
             const newWrap = wrap.cloneNode(false);
             wrap.parentNode.replaceChild(newWrap, wrap);
-            // re-append children
             newWrap.appendChild(img);
             newWrap.appendChild(document.getElementById('avatar-crop-ring'));
-
             newWrap.addEventListener('mousedown', onStart);
-            newWrap.addEventListener('touchstart', onStart, { passive: false });
+            newWrap.addEventListener('touchstart', onStart, {passive:false});
             window.addEventListener('mousemove', onMove);
-            window.addEventListener('touchmove', onMove, { passive: false });
+            window.addEventListener('touchmove', onMove, {passive:false});
             window.addEventListener('mouseup', onEnd);
             window.addEventListener('touchend', onEnd);
         }
-
         function confirmCrop() {
-            const canvas = document.getElementById('avatar-crop-canvas');
-            const out = 400; // 输出尺寸
+            const canvas = document.getElementById('avatar-crop-canvas'), out = 400;
             canvas.width = out; canvas.height = out;
-            const ctx = canvas.getContext('2d');
-            const s = _cropState;
-
-            // 圆形裁切
-            ctx.beginPath();
-            ctx.arc(out/2, out/2, out/2, 0, Math.PI*2);
-            ctx.clip();
-
-            // 坐标映射：CROP_SIZE -> out
-            const ratio = out / CROP_SIZE;
-            ctx.drawImage(
-                document.getElementById('avatar-crop-img'),
-                s.x * ratio, s.y * ratio,
-                s.imgW * s.scale * ratio, s.imgH * s.scale * ratio
-            );
-
+            const ctx = canvas.getContext('2d'), s = _cropState, ratio = out/CROP_SIZE;
+            ctx.beginPath(); ctx.arc(out/2, out/2, out/2, 0, Math.PI*2); ctx.clip();
+            ctx.drawImage(document.getElementById('avatar-crop-img'), s.x*ratio, s.y*ratio, s.imgW*s.scale*ratio, s.imgH*s.scale*ratio);
             const url = canvas.toDataURL('image/png');
             closeCropModal();
             if (_cropCallback) _cropCallback(url);
         }
-
-
         function changeAvatarUrl(url) {
             if(url) {
                 addToHistoryAvatars(state.settings.currentAvatar);
@@ -4258,7 +3979,7 @@
             });
 
             if (!state._expandedParentTags) state._expandedParentTags = new Set();
-            if (!state._pinnedTags) state._pinnedTags = [];
+            if (!state._pinnedTags) state._pinnedTags = state.settings.pinnedTags || [];
 
             // 排序：置顶的排最前
             const topLevelTags = [...allTags].filter(t => !childSet.has(t));
@@ -4425,6 +4146,8 @@
             const idx = state._pinnedTags.indexOf(tag);
             if (idx >= 0) state._pinnedTags.splice(idx, 1);
             else state._pinnedTags.unshift(tag);
+            state.settings.pinnedTags = [...state._pinnedTags];
+            saveData();
             renderTags();
         }
 
@@ -4475,15 +4198,13 @@
             const textarea = document.getElementById('edit-content');
             if (_todoMode) {
                 if (btn) { btn.style.background = 'var(--accent-color)'; btn.style.color = 'var(--accent-text)'; btn.innerText = '☑ 待办'; }
-                todoArea.classList.add('show');
-                todoArea.style.display = '';
-                textarea.style.display = 'none';
+                if (todoArea) { todoArea.classList.add('show'); todoArea.style.display = ''; }
+                if (textarea) textarea.style.display = 'none';
                 renderTodoEditorItems();
             } else {
-                if (btn) { btn.style.background = 'transparent'; btn.style.color = 'var(--accent-color)'; btn.innerText = '☐'; }
-                todoArea.classList.remove('show');
-                todoArea.style.display = '';
-                textarea.style.display = '';
+                if (btn) { btn.style.background = 'transparent'; btn.style.color = 'var(--accent-color)'; btn.innerText = '☐ 待办'; }
+                if (todoArea) { todoArea.classList.remove('show'); todoArea.style.display = ''; }
+                if (textarea) textarea.style.display = '';
             }
         }
 
@@ -5028,7 +4749,6 @@
         }
         function openModal(id) { document.getElementById(id).classList.add('open'); }
         function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-        // 大图单独存，settings 里只存 key
         function _imgKey(prefix, data) {
             let h = 0;
             for (let i = 0; i < Math.min(data.length, 300); i++) h = (h * 31 + data.charCodeAt(i)) | 0;
@@ -5045,19 +4765,17 @@
             if (val.startsWith('data:') || val.startsWith('http') || val.startsWith('blob:')) return val;
             return localStorage.getItem(val) || val;
         }
-
         function saveData() {
             const s = state.settings;
             const slim = Object.assign({}, s);
-            slim.currentAvatar  = _storeImg('ww_av',     s.currentAvatar);
-            slim.bgImage        = _storeImg('ww_bg',      s.bgImage);
-            slim.bgNote         = _storeImg('ww_bgnote',  s.bgNote);
-            slim.bgTodo         = _storeImg('ww_bgtodo',  s.bgTodo);
-            slim.bgPomo         = _storeImg('ww_bgpomo',  s.bgPomo);
-            slim.customFrameImg = _storeImg('ww_frame',   s.customFrameImg);
+            slim.currentAvatar  = _storeImg('ww_av',    s.currentAvatar);
+            slim.bgImage        = _storeImg('ww_bg',     s.bgImage);
+            slim.bgNote         = _storeImg('ww_bgnote', s.bgNote);
+            slim.bgTodo         = _storeImg('ww_bgtodo', s.bgTodo);
+            slim.bgPomo         = _storeImg('ww_bgpomo', s.bgPomo);
+            slim.customFrameImg = _storeImg('ww_frame',  s.customFrameImg);
             slim.historyAvatars = (s.historyAvatars||[]).map(u => _storeImg('ww_av', u));
             slim.historyBgs     = (s.historyBgs||[]).map(u => _storeImg('ww_bg', u));
-
             localStorage.setItem('wanwan_notes_v3', JSON.stringify(state.notes));
             localStorage.setItem('wanwan_settings_v3', JSON.stringify(slim));
             localStorage.setItem('wanwan_comment_preview', JSON.stringify({
@@ -5625,12 +5343,10 @@
                 sbFitDigitsLandscape(canvas, W, H);
                 return;
             }
-            // 只在尺寸变化时才重设 canvas（避免每秒闪烁）
             const pw = Math.round(W * devicePixelRatio);
             const ph = Math.round(H * devicePixelRatio);
             if (canvas.width !== pw || canvas.height !== ph) {
-                canvas.width  = pw;
-                canvas.height = ph;
+                canvas.width = pw; canvas.height = ph;
             }
             canvas.style.width  = W + 'px';
             canvas.style.height = H + 'px';
@@ -5727,8 +5443,7 @@
             const pw = Math.round(W * devicePixelRatio);
             const ph = Math.round(H * devicePixelRatio);
             if (canvas.width !== pw || canvas.height !== ph) {
-                canvas.width  = pw;
-                canvas.height = ph;
+                canvas.width = pw; canvas.height = ph;
             }
             canvas.style.width  = W + 'px';
             canvas.style.height = H + 'px';
@@ -5909,7 +5624,6 @@
             // 清除筛选按钮初始隐藏
             const clearBtn = document.getElementById('drawer-cal-clear');
             if (clearBtn) clearBtn.style.display = 'none';
-            // 默认显示日历 tab
             switchDrawerCalTab('cal');
             // 统计
             renderStats();
@@ -6046,6 +5760,8 @@
                 renderList();
             } else if (mode === 'todo') {
                 renderTodoPage();
+            } else if (mode === 'pomodoro') {
+                renderPomoStats();
             }
         }
 
@@ -6217,9 +5933,44 @@
             document.addEventListener('touchend', () => { dragging = false; }, {passive: true});
         })();
 
+        // ── 番茄统计 ──
+        function _pomoLoadLog() { try { return JSON.parse(localStorage.getItem('wanwan_pomo_log') || '[]'); } catch(e) { return []; } }
+        function _pomoSaveLog(log) { log = log.filter(r => r.ts > Date.now() - 365*86400000); localStorage.setItem('wanwan_pomo_log', JSON.stringify(log)); }
+        function _pomoRecord(min, reason) { const log = _pomoLoadLog(); log.push({ ts: Date.now(), min, reason: reason||'' }); _pomoSaveLog(log); }
+        function _pomoStats() {
+            const log = _pomoLoadLog(), now = new Date();
+            const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+            const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+            let todayMin=0, todayCount=0, monthMin=0, totalMin=0;
+            log.forEach(r => { totalMin+=r.min; if(r.ts>=monthStart) monthMin+=r.min; if(r.ts>=todayStart){todayMin+=r.min;todayCount++;} });
+            return { todayMin, todayCount, monthMin, totalMin, totalCount: log.length };
+        }
+        function fmtMin(min) { if(min<60) return min+'分钟'; const h=Math.floor(min/60),m=min%60; return h+'小时'+(m?m+'分':''); }
+        function renderPomoStats() {
+            const el = document.getElementById('pomo-stats'); if(!el) return;
+            const s = _pomoStats();
+            el.innerHTML = `
+                <div class="pomo-stat-item"><span class="pomo-stat-val">${s.todayCount}</span><span class="pomo-stat-label">今日次数</span></div>
+                <div class="pomo-stat-item"><span class="pomo-stat-val">${fmtMin(s.todayMin)}</span><span class="pomo-stat-label">今日专注</span></div>
+                <div class="pomo-stat-item"><span class="pomo-stat-val">${fmtMin(s.monthMin)}</span><span class="pomo-stat-label">本月专注</span></div>
+                <div class="pomo-stat-item"><span class="pomo-stat-val">${fmtMin(s.totalMin)}</span><span class="pomo-stat-label">累计专注</span></div>`;
+        }
+        function showPomoDoneCard(durationMin, reason) {
+            const s = _pomoStats();
+            const emojis = ['🌿','✨','🌸','🍃','💫','🌙','⭐'];
+            document.getElementById('pomo-done-emoji').textContent = emojis[Math.floor(Math.random()*emojis.length)];
+            document.getElementById('pomo-done-title').textContent = '完成了 '+fmtMin(durationMin)+'的专注'+(reason?' · '+reason:'');
+            document.getElementById('pomo-done-sub').innerHTML = '今天第 '+s.todayCount+' 次 &nbsp;·&nbsp; 今日 '+fmtMin(s.todayMin)+'<br>本月累计 '+fmtMin(s.monthMin);
+            document.getElementById('pomo-done-card').style.display = 'flex';
+        }
+
         function pomoTick() {
             if (_pomoSeconds <= 0) {
+                const durationMin = Math.round(_pomoDuration / 60);
+                const reason = (document.getElementById('pomo-reason')||{}).value || '';
+                _pomoRecord(durationMin, reason);
                 pomoReset();
+                showPomoDoneCard(durationMin, reason);
                 const label = document.getElementById('pomo-label');
                 if (label) label.textContent = '完成！';
                 return;
@@ -6247,11 +5998,12 @@
                 _pomoAdjusting = false;
                 if (clock) clock.classList.remove('adjusting');
                 if (hint) hint.classList.remove('visible');
-                // 首次开始：隐藏原因输入框
+                // 首次开始：锁定目标
                 if (_pomoSeconds === _pomoDuration) {
-                    const wrap = document.getElementById('pomo-reason-wrap');
-                    if (wrap) wrap.style.display = 'none';
+                    const inp = document.getElementById('pomo-reason');
+                    if (inp) { inp.readOnly = true; inp.classList.add('running'); }
                 }
+                renderPomoStats();
                 // 锁定模式切换
                 const avatarBox = document.getElementById('avatar-box');
                 if (avatarBox) avatarBox.style.pointerEvents = 'none';
@@ -6280,9 +6032,7 @@
             const hint = document.getElementById('pomo-adjust-hint');
             if (btn) btn.textContent = '开始';
             if (label) label.textContent = '';
-            if (reason) reason.readOnly = false;
-            const wrap = document.getElementById('pomo-reason-wrap');
-            if (wrap) wrap.style.display = '';
+            if (reason) { reason.readOnly = false; reason.classList.remove('running'); }
             if (clock) { clock.classList.remove('adjusting'); clock.classList.remove('running'); }
             if (hint) hint.classList.remove('visible');
         }
@@ -6309,17 +6059,14 @@
                     .catch(err => console.log('SW failed:', err));
             });
         }
+    </script>
+
     <!-- 圆形头像裁切 -->
     <div id="avatar-crop-modal">
         <div id="avatar-crop-wrap">
             <img id="avatar-crop-img" draggable="false">
             <svg id="avatar-crop-ring" viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <mask id="circle-mask">
-                        <rect width="280" height="280" fill="white"/>
-                        <circle cx="140" cy="140" r="136" fill="black"/>
-                    </mask>
-                </defs>
+                <defs><mask id="circle-mask"><rect width="280" height="280" fill="white"/><circle cx="140" cy="140" r="136" fill="black"/></mask></defs>
                 <rect width="280" height="280" fill="rgba(0,0,0,0.55)" mask="url(#circle-mask)"/>
                 <circle cx="140" cy="140" r="136" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="2"/>
             </svg>
