@@ -5560,17 +5560,21 @@
             const overlay = document.getElementById('standby-overlay');
             const W = overlay.clientWidth  || window.innerWidth;
             const H = overlay.clientHeight || window.innerHeight;
-            // 横版：数字改为左右两对，一行四个
             if (_sbOrientation === 'landscape') {
                 sbFitDigitsLandscape(canvas, W, H);
                 return;
             }
-            canvas.width  = W * devicePixelRatio;
-            canvas.height = H * devicePixelRatio;
+            // 只在尺寸变化时才重设 canvas（避免每秒闪烁）
+            const pw = Math.round(W * devicePixelRatio);
+            const ph = Math.round(H * devicePixelRatio);
+            if (canvas.width !== pw || canvas.height !== ph) {
+                canvas.width  = pw;
+                canvas.height = ph;
+            }
             canvas.style.width  = W + 'px';
             canvas.style.height = H + 'px';
             const ctx = canvas.getContext('2d');
-            ctx.scale(devicePixelRatio, devicePixelRatio);
+            ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
             ctx.clearRect(0, 0, W, H);
 
             // 读当前时间
@@ -5659,12 +5663,16 @@
 
 
         function sbFitDigitsLandscape(canvas, W, H) {
-            canvas.width  = W * devicePixelRatio;
-            canvas.height = H * devicePixelRatio;
+            const pw = Math.round(W * devicePixelRatio);
+            const ph = Math.round(H * devicePixelRatio);
+            if (canvas.width !== pw || canvas.height !== ph) {
+                canvas.width  = pw;
+                canvas.height = ph;
+            }
             canvas.style.width  = W + 'px';
             canvas.style.height = H + 'px';
             const ctx = canvas.getContext('2d');
-            ctx.scale(devicePixelRatio, devicePixelRatio);
+            ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
             ctx.clearRect(0, 0, W, H);
 
             const now = new Date();
@@ -5840,6 +5848,8 @@
             // 清除筛选按钮初始隐藏
             const clearBtn = document.getElementById('drawer-cal-clear');
             if (clearBtn) clearBtn.style.display = 'none';
+            // 默认显示日历 tab
+            switchDrawerCalTab('cal');
             // 统计
             renderStats();
             // 设置同步
