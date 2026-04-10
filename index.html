@@ -638,8 +638,8 @@
         }
         /* popover */
         .ea-popover {
-            position: absolute;
-            bottom: calc(100% + 8px);
+            position: fixed;
+            bottom: 80px; /* 默认，JS 会动态更新 */
             left: 8px;
             min-width: 160px;
             max-width: 260px;
@@ -648,7 +648,7 @@
             border: 1px solid rgba(210,185,178,0.25);
             border-radius: 14px;
             box-shadow: 0 4px 24px rgba(0,0,0,0.14);
-            z-index: 10;
+            z-index: 9000;
             overflow: hidden;
             animation: popoverIn 0.18s cubic-bezier(0.32,0.72,0,1);
         }
@@ -1597,14 +1597,6 @@
         .drawer-avatar-wrap { position: relative; width: 56px; height: 56px; flex-shrink: 0; }
         .drawer-avatar-wrap img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
         .drawer-name { font-size: 1rem; font-weight: 600; color: var(--text-color); }
-        .drawer-standby-btn {
-            margin-top: 2px; padding: 5px 16px;
-            border: 1px solid rgba(0,0,0,0.1); border-radius: 20px;
-            background: transparent; font-size: 0.78rem;
-            color: var(--text-color); cursor: pointer; opacity: 0.6;
-        }
-        body.dark-mode .drawer-standby-btn { border-color: rgba(255,255,255,0.15); }
-
         .drawer-section-title {
             padding: 14px 16px 4px;
             font-size: 0.65rem; font-weight: 700;
@@ -1839,7 +1831,7 @@
             <input type="number" id="setting-charm-y" style="display:none" onchange="updateSettings()">
             <input type="range" id="setting-charm-size" style="display:none" min="20" max="150" onchange="updateSettings()">
             <input type="range" id="setting-charm-swing" style="display:none" min="0" max="45" onchange="updateSettings()">
-            <div id="history-avatars" style="display:none;"></div>
+            <div id="history-avatars" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;"></div>
             <div id="frame-preset-list" style="display:none;"></div>
         </div>
 
@@ -2161,7 +2153,9 @@
                     </div>
                 </div>
                 <div id="eapop-img" style="display:none;">
-                    <button class="eapop-row" onclick="document.getElementById('file-input').click();editorClosePopover()"><span>📷</span><span>拍摄 / 选择图片</span></button>
+                    <input type="file" id="file-input-camera" style="display:none" accept="image/*" capture="environment" onchange="handleImageUpload(this)">
+                    <button class="eapop-row" onclick="document.getElementById('file-input-camera').click();editorClosePopover()"><span>📸</span><span>拍照</span></button>
+                    <button class="eapop-row" onclick="document.getElementById('file-input').click();editorClosePopover()"><span>🖼️</span><span>从相册选择</span></button>
                 </div>
                 <div id="eapop-timer" style="display:none;">
                     <div style="font-size:0.78rem;color:#aaa;margin-bottom:8px;">⋄ 一忘皆空 · 0 为永久保留 ⋄</div>
@@ -2180,6 +2174,7 @@
             <input type="text" id="img-remark-text" placeholder="给这张图片加个备注...">
             <div class="btn-group">
                 <button onclick="closeModal('img-remark-modal')">关闭</button>
+                <button onclick="_downloadCurrentRemark()">⬇ 下载</button>
                 <button class="btn-primary" onclick="saveImageRemark()">保存备注</button>
             </div>
         </div>
@@ -2212,11 +2207,6 @@
 
     <script>
 
-        // ── 图标 base64 ──
-        const _ICON_HEART_BLACK = 'data:image/png;base64,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';
-        const _ICON_HEART_WHITE = 'data:image/png;base64,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';
-        const _ICON_PEN_BLACK   = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAABQCAYAAABxs9dPAAAC80lEQVR42u2YTYhOYRTHf/fOh2nIxxTZSGJFJNmIt5QsLDSapMSGhY2dslJTlmp2ko0okZVSdrOxsPFRr5gMQhZYoXyk0XjvvTbn1On0vrf3vvM+dyY9/3p67sfTPf/nfD3nXIiIiIiIiIiIiIiIWCpIZCwqUmCwzfPBxSA34O7XyPCEayWzEbgEPAO+yGgCF4F1HYgHI3ME+AYUHcYn4EBoTSmZBtASwfNA5sa8vJsDdofSlEbRKPBOBLbcbK//yvwcGAqhJY2m005g3sZcuSM33q2WqrAuZJ6Q60QEJ8BNYIeY5555pwQnjJb7Zi7d4RunoRm3dhj44NY87ZZQ2oPZRpzGmobIkDj0rFsz6u4XTEg/NA/8dLttiMCWjDFglzErwI8QGhoQIbOGYAZsAqaMz1wF1su9buZFiNAfcE7tQ/4gcLzDu/2hcpEepk+MwFzGd+CXuVcy0yGztX50u2ThVkkeysR3NovvBD8+zjqz5G0S4om6DljN2ndLjo4bbm3wEz8BtkgqyJ2Wfkv5kdZVE6kJbpdo6HLd9dDJNmR0ZDIfCk1KS5CVwGcTTZ6QknwlR0qwBkAd9FSJdjypw1W0VNXh9MgYN4LL1lpCSZUdd2uuTHa61SW73JBLjYkSYJs59/pKSLECWOV2nZbUUGNyXZi5bybTneZGMwDvgWPAGTkurDnzOlrmGdNx2PAGuCDP/sj8oMrm0x5yUGEIFSXf1PfNkKe9+txRo6Fc2qK1wD6pKDMT9ntDJkeNnBHgrTNbA5g0DWIBPKxaevSSh1Lxj3PmuRZkc2ZNDpx3tXXfCWFy0X3gjulKEzMPA1eAR7I2Cx1pKniDCfM9RiMfgdVmHSE1pCZKRfB1ozkVPiU1dtpNL9bPH0oJcM1E0YiQvWXaaeoipH7xUjS1TAg15b9R7YRsbpkBlksH21xIl7HQAlz9Yxr4CryW3qyo6jv/PRKXySMiIiIiIiIiIpYAavsFXCv68UdCy9ZJYCfwuJcGUfEPRBMUNTxHaHMAAAAASUVORK5CYII=';
-        const _ICON_PEN_WHITE   = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAABQCAYAAABxs9dPAAADPUlEQVR42u2ZT4iNURjGn/ebGaYhoshOYkUsZMeUkoWFaJISGxY2FkrJQk1ZKjvJRpTISik7GwsbUVdM/oUsZqyYGiaNxr3fz8J7OB13br5xv4s6T53Od79z7jnPed5z3ve890oZGRkZGRkZGRkZGf8EAAPsb5MogP427/t7Tg7oSz4vA5alhHtKBlgNnAUeAe+9NIAzwMp2xOsksxeYZG5MADtqVSoiMww0feJZoJWUWW+bAbbUolQ4RcAQ8NonbCZ1/PzV68fAQNdVCqcJOJJMWLYxV5mQ2/O7KlVhjdcj/mySSq+vStokaYukW1EbXkb8u9Y1c4UVAi8ThcaSvguAt0mfh/E43VJIkvolDSaKNSIiA2Y2K+lZ0mdIksyMrhCKBpqV9CmRfxgYktSU1ASWS9ocmVWSPnZdIaDPiT2LVt6StEbSOTMrvf2ipFW+h4JKT/y5rw4fNDLHkd8JHJijbXtdvqjwwPkgmrD0MgVMR58DmTu1eeswKLDRvXCzgx9qAR+Bte5Qaw8fxxKzlG0c4sFeBdjgtW92CB1X4r61R3w3wzoPpGWi0mdgpe+5oieEvL7eQaHzvb4PHWpDJqDl9a5aSUVXkCXAu+g0pQgkn3tIqScBiDbz4Q7qpKR2V1Gp6oYLIWNPdLXo1BdJu6tcPfqrmMvMWr7S9T5BWFAZkSu8LZQNUdzrHqEIiyUtTVbdTunQttwXQ6i7abKw0jJSRpLeSNov6ahfNWJzlr1ImceijOPH8fb20/7ui9d3qwTXoqoPcsnHOmzqItnUjT+wxm8f+32RQqWnRSuAbcAn903h2G+tzTlGjnEQeJWYbRgYjRJEgHtVrx6VZHRzFWb2RdKJqKn0O/WMm6nwdyf9O1YLISfV8r10W9INSQOR7wn1AkkXzOy+923VRuin9TBJp6IshOiIT0gadVNVOvbzImRmpZtuXNLlyD8F05wzsynvQ+2Ekoz2UpTiDLoi17ytslOcN6GwL8zsqaRxSQudUMPMJr83We8IJYnfmKRFnjI3XJ15jf2nF/CwP+5I+iDphaRpD6Qo49efa/7+b9UZGRkZGRkZGRk/LmlFz/4W/++ur15GgeNBrfmO9w2xkYbGo5uPbAAAAABJRU5ErkJggg==';
         let state = {
             notes: JSON.parse(localStorage.getItem('wanwan_notes_v3')) || [],
             settings: JSON.parse(localStorage.getItem('wanwan_settings_v3')) || {
@@ -2243,6 +2233,7 @@
                 charmImage: '',
                 historyAvatars: [],
                 historyBgs: [],
+                historyCharms: [],
                 currentFont: 'system',
                 fontPresets: [],
                 currentFrame: 'st',
@@ -2261,18 +2252,39 @@
             commentPreviewEnabled: true,
             commentPreviewSyncName: false
         };
-        // 还原 settings 里的图片 key → data URL
+        // 还原 settings 里的图片 key（同步先 localStorage 兜底）
         try {
             const s = state.settings;
-            s.currentAvatar  = _loadImg(s.currentAvatar);
-            s.bgImage        = _loadImg(s.bgImage);
-            s.bgNote         = _loadImg(s.bgNote);
-            s.bgTodo         = _loadImg(s.bgTodo);
-            s.bgPomo         = _loadImg(s.bgPomo);
-            s.customFrameImg = _loadImg(s.customFrameImg);
-            s.historyAvatars = (s.historyAvatars||[]).map(_loadImg);
-            s.historyBgs     = (s.historyBgs||[]).map(_loadImg);
+            s.currentAvatar  = _loadImgSync(s.currentAvatar);
+            s.bgImage        = _loadImgSync(s.bgImage);
+            s.bgNote         = _loadImgSync(s.bgNote);
+            s.bgTodo         = _loadImgSync(s.bgTodo);
+            s.bgPomo         = _loadImgSync(s.bgPomo);
+            s.customFrameImg = _loadImgSync(s.customFrameImg);
+            s.charmImage     = _loadImgSync(s.charmImage);
+            s.historyAvatars = (s.historyAvatars||[]).map(_loadImgSync);
+            s.historyBgs     = (s.historyBgs||[]).map(_loadImgSync);
+            s.historyCharms  = (s.historyCharms||[]).map(_loadImgSync);
         } catch(e) {}
+        // 异步从 IDB 补全图片
+        async function _reloadImgsFromIDB() {
+            const s = state.settings;
+            const ld = _loadImg;
+            s.currentAvatar  = await ld(s.currentAvatar);
+            s.bgImage        = await ld(s.bgImage);
+            s.bgNote         = await ld(s.bgNote);
+            s.bgTodo         = await ld(s.bgTodo);
+            s.bgPomo         = await ld(s.bgPomo);
+            s.customFrameImg = await ld(s.customFrameImg);
+            s.charmImage     = await ld(s.charmImage);
+            s.historyAvatars = await Promise.all((s.historyAvatars||[]).map(ld));
+            s.historyBgs     = await Promise.all((s.historyBgs||[]).map(ld));
+            s.historyCharms  = await Promise.all((s.historyCharms||[]).map(ld));
+            applySettings();
+            renderHistoryAvatars();
+            renderHistoryBgs();
+            renderHistoryCharms();
+        }
 
         // 读取追评预览设置
         try {
@@ -2355,6 +2367,7 @@
             renderTags();
             renderHistoryAvatars();
             renderHistoryBgs();
+            renderHistoryCharms();
             renderFontPresets();
             renderFramePresets();
             setInterval(updateLiveTimers, 1000);
@@ -2362,6 +2375,8 @@
             setInterval(updateClock, 1000);
             initBattery();
             renderSpecialPin();
+            // 异步从 IDB 补全图片（不阻塞首屏）
+            _reloadImgsFromIDB().catch(()=>{});
         };
 
         function openSettings() {
@@ -2395,6 +2410,13 @@
             document.getElementById(panelMap[type]).style.display = '';
             btn.classList.add('active');
             pop.style.display = '';
+            // 定位：固定在 editor-actions 上方
+            const actions = document.querySelector('.editor-actions');
+            if (actions) {
+                const rect = actions.getBoundingClientRect();
+                pop.style.bottom = (window.innerHeight - rect.top + 8) + 'px';
+                pop.style.left = '8px';
+            }
             if (type === 'tag') renderEditorTagPopover();
         }
         function renderEditorTagPopover() {
@@ -2465,7 +2487,9 @@
             state.tempImages.forEach((img, idx) => {
                 const el = document.createElement('img');
                 el.src = img.src;
-                el.style.width = '50px'; el.style.height = '50px'; el.style.objectFit = 'cover';
+                el.style.cssText = 'width:50px;height:50px;object-fit:cover;border-radius:6px;cursor:pointer;flex-shrink:0;';
+                el.title = '长按下载';
+                setupLongPress(el, () => _downloadImg(img.src, 'img_' + idx));
                 area.appendChild(el);
             });
         }
@@ -2606,16 +2630,6 @@
             filtered.forEach(item => {
                 const wrapper = document.createElement('div');
                 wrapper.className = 'note-wrapper';
-
-                const deleteBg = document.createElement('div');
-                deleteBg.className = 'delete-btn-bg';
-                deleteBg.innerHTML = '🗑️';
-                deleteBg.onclick = () => deleteNote(item.id);
-
-                const pinBg = document.createElement('div');
-                pinBg.className = 'pin-btn-bg';
-                pinBg.innerHTML = item.isPinned ? '📌' : '📍';
-                pinBg.onclick = () => togglePin(item.id);
 
                 const card = document.createElement('div');
                 card.className = 'note-card' + (item.isPinned ? ' is-pinned' : '');
@@ -2980,28 +2994,12 @@
             Array.from(input.files).forEach(file => {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    compressImage(e.target.result, 800, 0.72, compressed => {
-                        state.tempImages.push({ src: compressed, remark: '' });
-                        renderTempImages();
-                    });
+                    state.tempImages.push({ src: e.target.result, remark: '' });
+                    renderTempImages();
                 };
                 reader.readAsDataURL(file);
             });
-        }
-        function compressImage(dataUrl, maxSide, quality, cb) {
-            const img = new Image();
-            img.onload = () => {
-                let w = img.width, h = img.height;
-                if (w > maxSide || h > maxSide) {
-                    if (w >= h) { h = Math.round(h * maxSide / w); w = maxSide; }
-                    else        { w = Math.round(w * maxSide / h); h = maxSide; }
-                }
-                const canvas = document.createElement('canvas');
-                canvas.width = w; canvas.height = h;
-                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                cb(canvas.toDataURL('image/jpeg', quality));
-            };
-            img.src = dataUrl;
+            input.value = '';
         }
 
         let currentEditingImg = null;
@@ -3016,6 +3014,10 @@
             const note = state.notes.find(n => n.id === currentEditingImg.noteId);
             note.images[currentEditingImg.imgIndex].remark = document.getElementById('img-remark-text').value;
             saveData(); closeModal('img-remark-modal');
+        }
+        function _downloadCurrentRemark() {
+            const src = document.getElementById('remark-target-img').src;
+            if (src) _downloadImg(src, 'image');
         }
 
         function applySettings() {
@@ -3180,7 +3182,6 @@
 
             const avatarBox = document.getElementById('avatar-box');
             const avatarInner = document.getElementById('avatar-inner-box');
-            const frameScaleSetting = document.getElementById('frame-scale-setting');
 
             avatarBox.className = 'avatar-container';
 
@@ -3192,20 +3193,16 @@
                 avatarInner.classList.add('is-framed');
                 if (frameVal === 'circle') {
                     avatarBox.classList.add('frame-circle');
-                    if (frameScaleSetting) frameScaleSetting.style.display = 'none';
                 } else if (frameVal === 'st') {
                     document.documentElement.style.setProperty('--avatar-st-frame', `url('https://i.postimg.cc/v8xXtvMP/72ce5c0f0m16d8b4f1b050b6a2ebb6b3.gif')`);
                     avatarBox.classList.add('frame-st');
-                    if (frameScaleSetting) frameScaleSetting.style.display = 'block';
                 } else if (activeFrame.dataUrl || activeFrame.url) {
                     const src = activeFrame.dataUrl || activeFrame.url;
                     document.documentElement.style.setProperty('--avatar-st-frame', `url(${src})`);
                     avatarBox.classList.add('frame-st');
-                    if (frameScaleSetting) frameScaleSetting.style.display = 'block';
                 }
             } else {
                 avatarInner.classList.remove('is-framed');
-                if (frameScaleSetting) frameScaleSetting.style.display = 'none';
             }
 
             // 同步旧 frameStyle（兼容旧逻辑，防止 updateSettings 读取时出错）
@@ -3332,10 +3329,16 @@
         function renderPortraitHistoryAvatars() {
             const container = document.getElementById('portrait-history-avatars');
             if (!container) return;
+            container.innerHTML = '';
             const list = state.settings.historyAvatars || [];
-            container.innerHTML = list.map((src, i) =>
-                `<img src="${src}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;border:2px solid ${src===state.settings.currentAvatar?'var(--accent-color)':'transparent'};" onclick="selectHistoryAvatar('${src}')">`
-            ).join('');
+            list.forEach((src, i) => {
+                const img = document.createElement('img');
+                img.src = src;
+                img.style.cssText = `width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;border:2px solid ${src===state.settings.currentAvatar?'var(--accent-color)':'transparent'};flex-shrink:0;`;
+                img.onclick = () => selectHistoryAvatar(src);
+                setupLongPress(img, () => _downloadImg(src, 'avatar_' + i));
+                container.appendChild(img);
+            });
         }
         function selectHistoryAvatar(src) {
             state.settings.currentAvatar = src;
@@ -3740,28 +3743,25 @@
             let list = state.settings.historyAvatars || [];
             list = list.filter(item => item !== url);
             list.unshift(url);
-            if (list.length > 3) list = list.slice(0, 3);
+            if (list.length > 10) list = list.slice(0, 10);
             state.settings.historyAvatars = list;
         }
 
         function renderHistoryAvatars() {
             const container = document.getElementById('history-avatars');
+            if (!container) return;
             container.innerHTML = '';
             const list = state.settings.historyAvatars || [];
-            list.forEach(url => {
+            list.forEach((url, i) => {
                 const img = document.createElement('img');
                 img.src = url;
-                img.style.width = '40px';
-                img.style.height = '40px';
-                img.style.borderRadius = '50%';
-                img.style.objectFit = 'cover';
-                img.style.cursor = 'pointer';
+                img.style.cssText = 'width:40px;height:40px;border-radius:50%;object-fit:cover;cursor:pointer;flex-shrink:0;';
+                img.title = '点击使用 / 长按下载';
                 img.onclick = () => {
                     state.settings.currentAvatar = url;
-                    saveData();
-                    applySettings();
-                    renderHistoryAvatars();
+                    saveData(); applySettings(); renderHistoryAvatars();
                 };
+                setupLongPress(img, () => _downloadImg(url, 'avatar_' + i));
                 container.appendChild(img);
             });
         }
@@ -3771,33 +3771,68 @@
             let list = state.settings.historyBgs || [];
             list = list.filter(item => item !== url);
             list.unshift(url);
-            if (list.length > 3) list = list.slice(0, 3);
+            if (list.length > 10) list = list.slice(0, 10);
             state.settings.historyBgs = list;
         }
 
         function renderHistoryBgs() {
             const container = document.getElementById('history-bgs');
+            if (!container) return;
             container.innerHTML = '';
             const list = state.settings.historyBgs || [];
-            list.forEach(url => {
+            list.forEach((url, i) => {
                 const img = document.createElement('img');
                 img.src = url;
-                img.style.width = '40px';
-                img.style.height = '40px';
-                img.style.borderRadius = '6px';
-                img.style.objectFit = 'cover';
-                img.style.cursor = 'pointer';
+                img.style.cssText = 'width:40px;height:40px;border-radius:6px;object-fit:cover;cursor:pointer;flex-shrink:0;';
+                img.title = '点击使用 / 长按下载';
                 img.onclick = () => {
                     state.settings.bgImage = url;
-                    saveData();
-                    applySettings();
-                    renderHistoryBgs();
+                    saveData(); applySettings(); renderHistoryBgs();
                 };
+                setupLongPress(img, () => _downloadImg(url, 'bg_' + i));
                 container.appendChild(img);
             });
         }
 
-        // ── 圆形头像裁切 ──
+        function addToHistoryCharms(url) {
+            if (!url) return;
+            let list = state.settings.historyCharms || [];
+            list = list.filter(item => item !== url);
+            list.unshift(url);
+            if (list.length > 10) list = list.slice(0, 10);
+            state.settings.historyCharms = list;
+        }
+
+        function renderHistoryCharms() {
+            const container = document.getElementById('history-charms');
+            if (!container) return;
+            container.innerHTML = '';
+            const list = state.settings.historyCharms || [];
+            list.forEach((url, i) => {
+                const img = document.createElement('img');
+                img.src = url;
+                img.style.cssText = 'width:40px;height:40px;border-radius:6px;object-fit:cover;cursor:pointer;flex-shrink:0;';
+                img.title = '点击使用 / 长按下载';
+                img.onclick = () => {
+                    state.settings.charmImage = url;
+                    const el = document.getElementById('charm-display');
+                    if (el) el.querySelector('img').src = url;
+                    saveData(); applySettings(); renderHistoryCharms();
+                };
+                setupLongPress(img, () => _downloadImg(url, 'charm_' + i));
+                container.appendChild(img);
+            });
+        }
+
+        function _downloadImg(dataUrl, name) {
+            // 判断格式
+            const ext = dataUrl.startsWith('data:image/png') ? 'png'
+                      : dataUrl.startsWith('data:image/gif') ? 'gif' : 'jpg';
+            const a = document.createElement('a');
+            a.href = dataUrl;
+            a.download = name + '.' + ext;
+            a.click();
+        }
         let _cropCallback = null;
         let _cropState = { x:0, y:0, scale:1, imgW:0, imgH:0 };
         const CROP_SIZE = 280, CROP_R = 136;
@@ -3930,8 +3965,9 @@
             if(input.files[0]) {
                 const r = new FileReader();
                 r.onload = e => {
+                    addToHistoryCharms(state.settings.charmImage);
                     state.settings.charmImage = e.target.result;
-                    saveData(); applySettings();
+                    saveData(); applySettings(); renderHistoryCharms();
                 };
                 r.readAsDataURL(input.files[0]);
             }
@@ -4300,16 +4336,6 @@
             closeDrawer();
             renderList(); renderTags();
         }
-        function toggleBlockTag(tag) {
-            if (state.blockedTags.includes(tag)) {
-                state.blockedTags = state.blockedTags.filter(t => t !== tag);
-            } else {
-                state.blockedTags.push(tag);
-                if (state.filterTag === tag) { state.filterTag = null; state.filterTagIsParent = false; }
-            }
-            renderList(); renderTags();
-        }
-
         let _selectedTagsToDelete = new Set();
         function openTagManager() {
             _selectedTagsToDelete = new Set();
@@ -4354,10 +4380,6 @@
         function handleSearch(val) { state.searchQuery = val; renderList(); }
 
         // ===================== Special Days =====================
-
-        function openSpecialPanel() { openSpecialModal(); }
-        function toggleCalPanel()   { openDrawer(); }
-        function switchCalTab()     {} // tab已移除，保留空函数防止旧引用报错
 
         function calcDays(dateStr, annual) {
             const today = new Date(); today.setHours(0,0,0,0);
@@ -4730,33 +4752,76 @@
         }
         function openModal(id) { document.getElementById(id).classList.add('open'); }
         function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+        // ── IndexedDB 图片存储 ──
+        const _IDB_NAME = 'wanwan_imgs', _IDB_STORE = 'imgs', _IDB_VER = 1;
+        let _idb = null;
+        function _openIDB() {
+            if (_idb) return Promise.resolve(_idb);
+            return new Promise((res, rej) => {
+                const req = indexedDB.open(_IDB_NAME, _IDB_VER);
+                req.onupgradeneeded = e => e.target.result.createObjectStore(_IDB_STORE);
+                req.onsuccess = e => { _idb = e.target.result; res(_idb); };
+                req.onerror = () => rej(req.error);
+            });
+        }
+        function _idbSet(key, val) {
+            return _openIDB().then(db => new Promise((res, rej) => {
+                const tx = db.transaction(_IDB_STORE, 'readwrite');
+                tx.objectStore(_IDB_STORE).put(val, key);
+                tx.oncomplete = res; tx.onerror = () => rej(tx.error);
+            }));
+        }
+        function _idbGet(key) {
+            return _openIDB().then(db => new Promise((res, rej) => {
+                const req = db.transaction(_IDB_STORE).objectStore(_IDB_STORE).get(key);
+                req.onsuccess = () => res(req.result); req.onerror = () => rej(req.error);
+            }));
+        }
         function _imgKey(prefix, data) {
             let h = 0;
             for (let i = 0; i < Math.min(data.length, 300); i++) h = (h * 31 + data.charCodeAt(i)) | 0;
             return prefix + '_' + Math.abs(h).toString(36);
         }
-        function _storeImg(prefix, data) {
-            if (!data || !data.startsWith('data:') || data.length < 500) return data;
+        // 存图：优先 IDB，兜底 localStorage
+        async function _storeImg(prefix, data) {
+            if (!data || !data.startsWith('data:') || data.length < 100) return data;
             const key = _imgKey(prefix, data);
-            try { localStorage.setItem(key, data); } catch(e) {}
+            try {
+                await _idbSet(key, data);
+            } catch(e) {
+                try { localStorage.setItem(key, data); } catch(e2) {}
+            }
             return key;
         }
-        function _loadImg(val) {
+        // 读图：先 IDB，再 localStorage
+        async function _loadImg(val) {
+            if (!val) return val;
+            if (val.startsWith('data:') || val.startsWith('http') || val.startsWith('blob:')) return val;
+            try {
+                const v = await _idbGet(val);
+                if (v) return v;
+            } catch(e) {}
+            return localStorage.getItem(val) || val;
+        }
+        // 同步版（兼容旧路径，只查 localStorage）
+        function _loadImgSync(val) {
             if (!val) return val;
             if (val.startsWith('data:') || val.startsWith('http') || val.startsWith('blob:')) return val;
             return localStorage.getItem(val) || val;
         }
-        function saveData() {
+        async function saveData() {
             const s = state.settings;
             const slim = Object.assign({}, s);
-            slim.currentAvatar  = _storeImg('ww_av',    s.currentAvatar);
-            slim.bgImage        = _storeImg('ww_bg',     s.bgImage);
-            slim.bgNote         = _storeImg('ww_bgnote', s.bgNote);
-            slim.bgTodo         = _storeImg('ww_bgtodo', s.bgTodo);
-            slim.bgPomo         = _storeImg('ww_bgpomo', s.bgPomo);
-            slim.customFrameImg = _storeImg('ww_frame',  s.customFrameImg);
-            slim.historyAvatars = (s.historyAvatars||[]).map(u => _storeImg('ww_av', u));
-            slim.historyBgs     = (s.historyBgs||[]).map(u => _storeImg('ww_bg', u));
+            slim.currentAvatar  = await _storeImg('ww_av',    s.currentAvatar);
+            slim.bgImage        = await _storeImg('ww_bg',     s.bgImage);
+            slim.bgNote         = await _storeImg('ww_bgnote', s.bgNote);
+            slim.bgTodo         = await _storeImg('ww_bgtodo', s.bgTodo);
+            slim.bgPomo         = await _storeImg('ww_bgpomo', s.bgPomo);
+            slim.customFrameImg = await _storeImg('ww_frame',  s.customFrameImg);
+            slim.charmImage     = await _storeImg('ww_charm',  s.charmImage);
+            slim.historyAvatars = await Promise.all((s.historyAvatars||[]).map(u => _storeImg('ww_av', u)));
+            slim.historyBgs     = await Promise.all((s.historyBgs||[]).map(u => _storeImg('ww_bg', u)));
+            slim.historyCharms  = await Promise.all((s.historyCharms||[]).map(u => _storeImg('ww_charm', u)));
             localStorage.setItem('wanwan_notes_v3', JSON.stringify(state.notes));
             localStorage.setItem('wanwan_settings_v3', JSON.stringify(slim));
             localStorage.setItem('wanwan_comment_preview', JSON.stringify({
@@ -5067,6 +5132,7 @@
                     </div>
                     <button class="portrait-upload-btn" onclick="document.getElementById('charm-input-p').click()" style="margin-top:8px;">＋ 更换挂件</button>
                     <input type="file" id="charm-input-p" style="display:none" accept="image/*" onchange="changeCharm(this)">
+                    <div id="history-charms" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;"></div>
                     <div class="portrait-row">
                         <label>大小</label>
                         <input type="range" id="p-charm-size" min="20" max="150" oninput="onPortraitCharmSize(this.value)">
