@@ -2139,8 +2139,10 @@
             </div>
             <div class="editor-actions">
                 <input type="file" id="file-input" style="display:none" multiple accept="image/*" onchange="handleImageUpload(this)">
+                <input type="file" id="file-input-camera" style="display:none" accept="image/*" capture="environment" onchange="handleImageUpload(this)">
                 <button class="ea-btn" id="ea-tag-btn" onclick="editorPopover('tag')">#</button>
-                <button class="ea-btn" id="ea-img-btn" onclick="editorPopover('img')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="18" height="18"><g stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M 55 15 L 25 15 A 10 10 0 0 0 15 25 L 15 75 A 10 10 0 0 0 25 85 L 75 85 A 10 10 0 0 0 85 75 L 85 45"/><path d="M 15 65 L 35 40 L 55 55 L 70 42 L 85 58"/><path d="M 75 40 L 75 10 M 62 22 L 75 10 L 88 22"/></g></svg></button>
+                <button class="ea-btn" onclick="document.getElementById('file-input-camera').click()" title="拍照">📸</button>
+                <button class="ea-btn" onclick="document.getElementById('file-input').click()" title="从相册选择"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="18" height="18"><g stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M 55 15 L 25 15 A 10 10 0 0 0 15 25 L 15 75 A 10 10 0 0 0 25 85 L 75 85 A 10 10 0 0 0 85 75 L 85 45"/><path d="M 15 65 L 35 40 L 55 55 L 70 42 L 85 58"/><path d="M 75 40 L 75 10 M 62 22 L 75 10 L 88 22"/></g></svg></button>
                 <button class="ea-btn" id="ea-timer-btn" onclick="editorPopover('timer')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="14" height="14"><defs><mask id="ribbon-gap"><rect width="200" height="200" fill="white"/><path d="M 145 25 C 145 95, 55 105, 55 175" fill="none" stroke="black" stroke-width="44" stroke-linecap="butt"/></mask></defs><g fill="currentColor"><polygon points="25,12 175,12 162,38 38,38"/><polygon points="25,188 175,188 162,162 38,162"/></g><path d="M 55 25 C 55 95, 145 105, 145 175" fill="none" stroke="currentColor" stroke-width="26" stroke-linecap="butt" mask="url(#ribbon-gap)"/><path d="M 145 25 C 145 95, 55 105, 55 175" fill="none" stroke="currentColor" stroke-width="26" stroke-linecap="butt"/></svg></button>
                 <button class="ea-save-btn" onclick="saveItem()">↑</button>
             </div>
@@ -2151,11 +2153,6 @@
                         <span style="opacity:0.35;font-size:0.9rem;flex-shrink:0;">#</span>
                         <input type="text" id="edit-tags" placeholder="新标签" style="caret-color:var(--accent-color);" onkeydown="if(event.key==='Enter'){editorAddNewTags();event.preventDefault();}">
                     </div>
-                </div>
-                <div id="eapop-img" style="display:none;">
-                    <input type="file" id="file-input-camera" style="display:none" accept="image/*" capture="environment" onchange="handleImageUpload(this)">
-                    <button class="eapop-row" onclick="document.getElementById('file-input-camera').click();editorClosePopover()"><span>📸</span><span>拍照</span></button>
-                    <button class="eapop-row" onclick="document.getElementById('file-input').click();editorClosePopover()"><span>🖼️</span><span>从相册选择</span></button>
                 </div>
                 <div id="eapop-timer" style="display:none;">
                     <div style="font-size:0.78rem;color:#aaa;margin-bottom:8px;">⋄ 一忘皆空 · 0 为永久保留 ⋄</div>
@@ -2401,12 +2398,13 @@
         }
         function editorPopover(type) {
             const pop = document.getElementById('ea-popover');
-            const btnMap = { tag: 'ea-tag-btn', img: 'ea-img-btn', timer: 'ea-timer-btn' };
-            const panelMap = { tag: 'eapop-tag', img: 'eapop-img', timer: 'eapop-timer' };
+            const btnMap = { tag: 'ea-tag-btn', timer: 'ea-timer-btn' };
+            const panelMap = { tag: 'eapop-tag', timer: 'eapop-timer' };
             const btn = document.getElementById(btnMap[type]);
+            if (!btn) return;
             if (pop.style.display !== 'none' && btn.classList.contains('active')) { editorClosePopover(); return; }
             editorClosePopover();
-            Object.values(panelMap).forEach(id => document.getElementById(id).style.display = 'none');
+            Object.values(panelMap).forEach(id => { const el = document.getElementById(id); if(el) el.style.display = 'none'; });
             document.getElementById(panelMap[type]).style.display = '';
             btn.classList.add('active');
             pop.style.display = '';
@@ -2711,8 +2709,8 @@
 
                 let imagesHtml = '';
                 if (item.images && item.images.length > 0) {
-                    imagesHtml = `<div class="note-images">
-                        ${item.images.map((img, idx) => `<img src="${img.src}" class="note-thumb" onclick="openImageRemark(${item.id}, ${idx})">`).join('')}
+                    imagesHtml = `<div class="note-images" data-note-id="${item.id}">
+                        ${item.images.map((img, idx) => `<img src="${img.src}" class="note-thumb" data-idx="${idx}">`).join('')}
                     </div>`;
                 }
                 let tagsHtml = item.tags.map(t => `<span class="tag">#${t}</span>`).join('');
@@ -2787,6 +2785,13 @@
                     }
                 }, {passive: true});
 
+                // 绑定笔记图片：点击开备注，长按弹下载菜单
+                card.querySelectorAll('.note-thumb[data-idx]').forEach(thumb => {
+                    const idx = parseInt(thumb.dataset.idx);
+                    thumb.onclick = () => openImageRemark(item.id, idx);
+                    setupLongPress(thumb, () => showImgActionMenu(item.id, idx, thumb));
+                });
+
                 wrapper.appendChild(actionBg);
                 wrapper.appendChild(card);
                 container.appendChild(wrapper);
@@ -2803,10 +2808,10 @@
 
             let imagesHtml = '';
             if (note.images && note.images.length > 0) {
-                imagesHtml = `<div style="display:flex; flex-direction:column; gap:10px; margin-top:15px;">
-                    ${note.images.map(img => `
+                imagesHtml = `<div style="display:flex; flex-direction:column; gap:10px; margin-top:15px;" id="full-note-imgs">
+                    ${note.images.map((img, idx) => `
                         <div>
-                            <img src="${img.src}" style="width:100%; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+                            <img src="${img.src}" data-idx="${idx}" style="width:100%; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1); cursor:pointer;">
                             ${img.remark ? `<div style="font-size:0.85rem; color:#555; margin-top:5px; font-style:italic;">${img.remark}</div>` : ''}
                         </div>
                     `).join('')}
@@ -2846,6 +2851,15 @@
             renderComments(note);
             document.getElementById('comment-input').value = '';
             document.getElementById('comment-input').style.height = 'auto';
+            // 绑定全文查看里的图片长按菜单
+            const fnImgs = document.getElementById('full-note-imgs');
+            if (fnImgs) {
+                fnImgs.querySelectorAll('img[data-idx]').forEach(thumb => {
+                    const idx = parseInt(thumb.dataset.idx);
+                    thumb.onclick = () => openImageRemark(id, idx);
+                    setupLongPress(thumb, () => showImgActionMenu(id, idx, thumb));
+                });
+            }
             openModal('full-note-modal');
         }
 
@@ -3841,17 +3855,17 @@
             if (!input.files[0]) return;
             const file = input.files[0];
             const r = new FileReader();
-            r.onload = e => {
-                input.value = '';  // 清空放到读完之后
+            r.onload = async e => {
+                input.value = '';
                 if (file.type === 'image/gif') {
                     addToHistoryAvatars(state.settings.currentAvatar);
                     state.settings.currentAvatar = e.target.result;
-                    saveData(); applySettings(); renderHistoryAvatars();
+                    await saveData(); applySettings(); renderHistoryAvatars(); renderPortraitHistoryAvatars();
                 } else {
-                    openCropModal(e.target.result, url => {
+                    openCropModal(e.target.result, async url => {
                         addToHistoryAvatars(state.settings.currentAvatar);
                         state.settings.currentAvatar = url;
-                        saveData(); applySettings(); renderHistoryAvatars();
+                        await saveData(); applySettings(); renderHistoryAvatars(); renderPortraitHistoryAvatars();
                     });
                 }
             };
@@ -3862,7 +3876,6 @@
             _cropCallback = callback;
             const modal = document.getElementById('avatar-crop-modal');
             const img = document.getElementById('avatar-crop-img');
-            // 先清空防止 onload 不触发
             img.src = '';
             img.onload = () => {
                 const iw = img.naturalWidth, ih = img.naturalHeight;
@@ -3871,7 +3884,6 @@
                 applyCropTransform();
             };
             img.onerror = () => {
-                // 加载失败时直接用原图
                 closeCropModal();
                 if (_cropCallback) { _cropCallback(src); _cropCallback = null; }
             };
@@ -3893,25 +3905,33 @@
             s.x = Math.min(s.x, 0); s.y = Math.min(s.y, 0);
             s.x = Math.max(s.x, CROP_SIZE-iw); s.y = Math.max(s.y, CROP_SIZE-ih);
         }
+        let _cropDragCleanup = null;
         function initCropDrag() {
+            // 清理旧监听
+            if (_cropDragCleanup) _cropDragCleanup();
             const wrap = document.getElementById('avatar-crop-wrap');
             const img = document.getElementById('avatar-crop-img');
             let last = null;
             function onStart(e) { e.preventDefault(); const pt=e.touches?e.touches[0]:e; last={x:pt.clientX,y:pt.clientY}; img.classList.add('dragging'); }
             function onMove(e) { e.preventDefault(); if(!last) return; const pt=e.touches?e.touches[0]:e; _cropState.x+=pt.clientX-last.x; _cropState.y+=pt.clientY-last.y; last={x:pt.clientX,y:pt.clientY}; clampCrop(); applyCropTransform(); }
             function onEnd() { last=null; img.classList.remove('dragging'); }
-            const newWrap = wrap.cloneNode(false);
-            wrap.parentNode.replaceChild(newWrap, wrap);
-            newWrap.appendChild(img);
-            newWrap.appendChild(document.getElementById('avatar-crop-ring'));
-            newWrap.addEventListener('mousedown', onStart);
-            newWrap.addEventListener('touchstart', onStart, {passive:false});
+            wrap.addEventListener('mousedown', onStart);
+            wrap.addEventListener('touchstart', onStart, {passive:false});
             window.addEventListener('mousemove', onMove);
             window.addEventListener('touchmove', onMove, {passive:false});
             window.addEventListener('mouseup', onEnd);
             window.addEventListener('touchend', onEnd);
+            _cropDragCleanup = () => {
+                wrap.removeEventListener('mousedown', onStart);
+                wrap.removeEventListener('touchstart', onStart);
+                window.removeEventListener('mousemove', onMove);
+                window.removeEventListener('touchmove', onMove);
+                window.removeEventListener('mouseup', onEnd);
+                window.removeEventListener('touchend', onEnd);
+            };
         }
         function confirmCrop() {
+            if (_cropDragCleanup) { _cropDragCleanup(); _cropDragCleanup = null; }
             const canvas = document.getElementById('avatar-crop-canvas'), out = 400;
             canvas.width = out; canvas.height = out;
             const ctx = canvas.getContext('2d'), s = _cropState, ratio = out/CROP_SIZE;
@@ -3951,11 +3971,11 @@
         function changeBg(input) {
             if(input.files[0]) {
                 const r = new FileReader();
-                r.onload = e => {
+                r.onload = async e => {
                     const url = e.target.result;
                     addToHistoryBgs(state.settings.bgImage);
                     state.settings.bgImage = url;
-                    saveData(); applySettings(); renderHistoryBgs();
+                    await saveData(); applySettings(); renderHistoryBgs();
                 };
                 r.readAsDataURL(input.files[0]);
             }
@@ -3964,10 +3984,10 @@
         function changeCharm(input) {
             if(input.files[0]) {
                 const r = new FileReader();
-                r.onload = e => {
+                r.onload = async e => {
                     addToHistoryCharms(state.settings.charmImage);
                     state.settings.charmImage = e.target.result;
-                    saveData(); applySettings(); renderHistoryCharms();
+                    await saveData(); applySettings(); renderHistoryCharms();
                 };
                 r.readAsDataURL(input.files[0]);
             }
@@ -4152,7 +4172,56 @@
             menu.style.minWidth = menuW + 'px';
         }
 
-        function closeTagMenu() {
+        function showImgActionMenu(noteId, imgIdx, anchor) {
+            // 关掉旧的
+            document.getElementById('img-action-menu')?.remove();
+            document.querySelector('.img-action-overlay')?.remove();
+
+            const note = state.notes.find(n => n.id === noteId);
+            if (!note || !note.images[imgIdx]) return;
+            const src = note.images[imgIdx].src;
+
+            const overlay = document.createElement('div');
+            overlay.className = 'img-action-overlay';
+            overlay.style.cssText = 'position:fixed;inset:0;z-index:99997;';
+            overlay.onclick = () => { overlay.remove(); menu.remove(); };
+
+            const menu = document.createElement('div');
+            menu.id = 'img-action-menu';
+            menu.style.cssText = 'position:fixed;z-index:99998;background:var(--glass-bg);backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.18);min-width:160px;overflow:hidden;';
+
+            const items = [
+                { label: '⬇ 下载图片', fn: () => _downloadImg(src, 'note_img_' + imgIdx) },
+                { label: '✎ 编辑备注', fn: () => openImageRemark(noteId, imgIdx) },
+                { label: '🗑 删除图片', fn: () => {
+                    note.images.splice(imgIdx, 1);
+                    saveData(); renderList();
+                }, danger: true }
+            ];
+
+            items.forEach(item => {
+                const el = document.createElement('div');
+                el.style.cssText = `padding:13px 18px;font-size:0.88rem;cursor:pointer;color:${item.danger ? '#e05' : 'var(--text-color)'};border-bottom:1px solid rgba(0,0,0,0.05);transition:background 0.15s;`;
+                el.textContent = item.label;
+                el.onclick = () => { overlay.remove(); menu.remove(); item.fn(); };
+                menu.appendChild(el);
+            });
+            menu.lastChild.style.borderBottom = 'none';
+
+            document.body.appendChild(overlay);
+            document.body.appendChild(menu);
+
+            // 定位：靠近缩略图
+            const rect = anchor.getBoundingClientRect();
+            const menuW = 170, menuH = items.length * 46;
+            let left = rect.left;
+            let top = rect.bottom + 6;
+            if (left + menuW > window.innerWidth - 8) left = window.innerWidth - menuW - 8;
+            if (top + menuH > window.innerHeight - 8) top = rect.top - menuH - 6;
+            menu.style.left = left + 'px';
+            menu.style.top = top + 'px';
+            menu.style.minWidth = menuW + 'px';
+        }
             _tagMenuActive = false;
             document.getElementById('tag-action-menu')?.remove();
             document.querySelector('.tag-action-overlay')?.remove();
