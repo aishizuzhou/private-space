@@ -4222,6 +4222,8 @@
             menu.style.top = top + 'px';
             menu.style.minWidth = menuW + 'px';
         }
+
+        function closeTagMenu() {
             _tagMenuActive = false;
             document.getElementById('tag-action-menu')?.remove();
             document.querySelector('.tag-action-overlay')?.remove();
@@ -4821,16 +4823,20 @@
         }
         function openModal(id) { document.getElementById(id).classList.add('open'); }
         function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-        // ── IndexedDB 图片存储 ──
+        // ── IndexedDB 图片存储（IDB不可用时自动降级到localStorage）──
         const _IDB_NAME = 'wanwan_imgs', _IDB_STORE = 'imgs', _IDB_VER = 1;
         let _idb = null;
+        let _idbAvailable = typeof indexedDB !== 'undefined' && indexedDB !== null;
         function _openIDB() {
+            if (!_idbAvailable) return Promise.reject('IDB unavailable');
             if (_idb) return Promise.resolve(_idb);
             return new Promise((res, rej) => {
-                const req = indexedDB.open(_IDB_NAME, _IDB_VER);
-                req.onupgradeneeded = e => e.target.result.createObjectStore(_IDB_STORE);
-                req.onsuccess = e => { _idb = e.target.result; res(_idb); };
-                req.onerror = () => rej(req.error);
+                try {
+                    const req = indexedDB.open(_IDB_NAME, _IDB_VER);
+                    req.onupgradeneeded = e => e.target.result.createObjectStore(_IDB_STORE);
+                    req.onsuccess = e => { _idb = e.target.result; res(_idb); };
+                    req.onerror = () => { _idbAvailable = false; rej(req.error); };
+                } catch(e) { _idbAvailable = false; rej(e); }
             });
         }
         function _idbSet(key, val) {
@@ -4851,24 +4857,27 @@
             for (let i = 0; i < Math.min(data.length, 300); i++) h = (h * 31 + data.charCodeAt(i)) | 0;
             return prefix + '_' + Math.abs(h).toString(36);
         }
-        // 存图：优先 IDB，兜底 localStorage
+        // 存图：优先 IDB，兜底 localStorage，全部失败静默
         async function _storeImg(prefix, data) {
             if (!data || !data.startsWith('data:') || data.length < 100) return data;
             const key = _imgKey(prefix, data);
             try {
-                await _idbSet(key, data);
+                if (_idbAvailable) await _idbSet(key, data);
+                else throw 'no idb';
             } catch(e) {
-                try { localStorage.setItem(key, data); } catch(e2) {}
+                try { localStorage.setItem(key, data); } catch(e2) { return data; }
             }
             return key;
         }
-        // 读图：先 IDB，再 localStorage
+        // 读图：先 IDB，再 localStorage，找不到返回原值
         async function _loadImg(val) {
             if (!val) return val;
             if (val.startsWith('data:') || val.startsWith('http') || val.startsWith('blob:')) return val;
             try {
-                const v = await _idbGet(val);
-                if (v) return v;
+                if (_idbAvailable) {
+                    const v = await _idbGet(val);
+                    if (v) return v;
+                }
             } catch(e) {}
             return localStorage.getItem(val) || val;
         }
