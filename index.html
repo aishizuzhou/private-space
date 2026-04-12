@@ -1125,7 +1125,36 @@
         /* ===== 抽屉 tag 列表 END ===== */
 
         /* ===== Todo 页面 ===== */
-        .todo-tabs {
+        /* 每日/分区切换 */
+        .todo-mode-switch {
+            display: flex; gap: 6px; padding: 0 2px 10px;
+            flex-shrink: 0;
+        }
+        .todo-mode-btn {
+            padding: 5px 18px; border-radius: 20px; border: none;
+            font-size: 0.8rem; cursor: pointer; font-family: var(--custom-font);
+            background: rgba(0,0,0,0.06); color: var(--text-color); opacity: 0.55;
+            transition: all 0.2s;
+        }
+        .todo-mode-btn.active {
+            background: var(--accent-color); color: var(--accent-text); opacity: 1;
+        }
+        body.dark-mode .todo-mode-btn { background: rgba(255,255,255,0.08); }
+        body.dark-mode .todo-mode-btn.active { background: var(--accent-color); }
+        /* 每日待办头部 */
+        .todo-daily-header {
+            font-size: 0.78rem; opacity: 0.4; letter-spacing: 0.08em;
+            padding: 0 2px 8px; flex-shrink: 0;
+        }
+        /* 待办项截止时间标签 */
+        .todo-due-badge {
+            font-size: 0.65rem; padding: 1px 7px; border-radius: 10px;
+            background: rgba(200,150,150,0.18); color: inherit; opacity: 0.65;
+            white-space: nowrap; flex-shrink: 0;
+        }
+        .todo-due-badge.overdue { background: rgba(220,80,80,0.18); color: #c44; opacity: 1; }
+        .todo-item-meta { font-size: 0.62rem; opacity: 0.35; margin-top: 2px; }
+                .todo-tabs {
             display: flex;
             gap: 6px;
             padding: 0 0 10px;
@@ -1268,6 +1297,10 @@
             user-select: none;
             -webkit-user-select: none;
         }
+        .pomo-setter { display: flex; }
+        .pomo-big-clock { display: none; }
+        .pomo-clock-wrap.running .pomo-setter { display: none; }
+        .pomo-clock-wrap.running .pomo-big-clock { display: flex; }
         .pomo-big-clock {
             font-size: clamp(72px, 22vw, 128px);
             font-weight: 700;
@@ -1276,7 +1309,6 @@
             line-height: 1;
             color: var(--text-color);
             cursor: pointer;
-            display: flex;
             align-items: baseline;
             gap: 0;
             transition: opacity 0.2s;
@@ -1301,21 +1333,73 @@
         }
         .pomo-adjust-hint.visible { opacity: 0.4; }
         .pomo-reason-wrap {
-            width: 100%; margin-bottom: 28px; text-align: center; min-height: 36px;
+            width: 100%; margin-bottom: 24px; text-align: center; min-height: 40px;
+            display: flex; justify-content: center;
         }
         .pomo-reason-input {
-            width: 100%; border: none;
-            border-bottom: 1.5px solid rgba(0,0,0,0.12);
-            background: transparent; font-size: 0.95rem; color: var(--text-color);
-            text-align: center; outline: none; padding: 6px 0 8px;
-            font-family: var(--custom-font); opacity: 0.65;
-            transition: border-color 0.3s, opacity 0.3s;
+            width: auto; max-width: 280px; min-width: 160px;
+            border: 1.5px solid rgba(200,170,200,0.35);
+            background: rgba(230,208,227,0.18);
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            font-size: 0.88rem; color: var(--text-color);
+            text-align: center; outline: none;
+            padding: 7px 20px 7px 14px;
+            border-radius: 20px;
+            font-family: var(--custom-font); opacity: 0.8;
+            transition: border-color 0.3s, opacity 0.3s, background 0.3s;
+            box-shadow: 0 1px 6px rgba(180,140,180,0.08);
         }
-        .pomo-reason-input.running { border-bottom-color: transparent; font-size: 1.05rem; opacity: 0.55; pointer-events: none; }
-        body.dark-mode .pomo-reason-input { border-bottom-color: rgba(255,255,255,0.15); }
-        body.dark-mode .pomo-reason-input.running { border-bottom-color: transparent; }
-        .pomo-reason-input::placeholder { opacity: 0.45; }
-        .pomo-stats { margin-top: 32px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+        .pomo-reason-input:focus {
+            border-color: rgba(200,150,200,0.6);
+            background: rgba(230,208,227,0.28);
+            opacity: 1;
+        }
+        .pomo-reason-input.running {
+            border-color: transparent; background: transparent;
+            font-size: 0.95rem; opacity: 0.5; pointer-events: none;
+            box-shadow: none;
+        }
+        body.dark-mode .pomo-reason-input {
+            border-color: rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.06);
+        }
+        body.dark-mode .pomo-reason-input:focus {
+            border-color: rgba(255,255,255,0.22);
+            background: rgba(255,255,255,0.1);
+        }
+        body.dark-mode .pomo-reason-input.running { border-color: transparent; background: transparent; }
+        .pomo-reason-input::placeholder { opacity: 0.4; letter-spacing: 0.04em; }
+        /* 时分秒设置器 */
+        .pomo-setter {
+            display: flex; align-items: center; gap: 4px;
+            user-select: none; -webkit-user-select: none;
+        }
+        .pomo-col {
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+            cursor: ns-resize; touch-action: none;
+            padding: 8px 10px;
+            border-radius: 16px;
+            transition: background 0.2s;
+            min-width: 64px;
+        }
+        .pomo-col:active, .pomo-col.dragging {
+            background: rgba(200,170,200,0.2);
+        }
+        .pomo-col-val {
+            font-size: clamp(56px, 16vw, 96px);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            font-variant-numeric: tabular-nums;
+            line-height: 1;
+            color: var(--text-color);
+            transition: color 0.2s;
+        }
+        .pomo-col-unit {
+            font-size: 0.72rem;
+            opacity: 0.35;
+            letter-spacing: 0.12em;
+        }
+        .pomo-stats { margin-top: 0; margin-bottom: 20px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
         .pomo-stat-item {
             display: flex; flex-direction: column; align-items: center; gap: 4px;
             padding: 12px 18px; border-radius: 14px;
@@ -1385,6 +1469,14 @@
             flex: 1;
             overflow: hidden;
             min-height: 0;
+        }
+        #page-todo, #page-pomodoro {
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            padding: 16px;
         }
         /* ===================== 待机模式 ===================== */
         #standby-overlay {
@@ -1531,21 +1623,9 @@
         /* ===================== 待机模式 END ===================== */
 
         /* ===================== 抽屉 & 模式切换 ===================== */
-        .mode-dot {
-            position: absolute;
-            top: -3px; right: -3px;
-            width: 14px; height: 14px;
-            border-radius: 50%;
-            border: 2.5px solid #fff;
-            cursor: pointer;
-            z-index: 10;
-            transition: transform 0.18s ease;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.18);
-        }
-        .mode-dot:active { transform: scale(0.85); }
-        .mode-dot[data-mode="note"]     { background: #bbe0e2; }
-        .mode-dot[data-mode="todo"]     { background: #eefbe0; }
-        .mode-dot[data-mode="pomodoro"] { background: #e6d0e3; }
+        .cal-btn[data-mode="note"]     { background: #bbe0e2; }
+        .cal-btn[data-mode="todo"]     { background: #eefbe0; }
+        .cal-btn[data-mode="pomodoro"] { background: #e6d0e3; }
 
         #ink-splash {
             position: fixed; inset: 0;
@@ -2031,8 +2111,7 @@
                 <div class="user-name" id="display-name">宛宛</div>
                 <div class="user-signature" id="display-signature" style="min-height:1.2em;"></div>
             </div>
-            <button class="cal-btn" id="special-days-btn" onclick="cycleMode(event)" title="切换模式" style="position:relative;">
-                <div class="mode-dot" id="mode-dot" data-mode="note" style="pointer-events:none;position:absolute;top:-3px;right:-3px;"></div>
+            <button class="cal-btn" id="special-days-btn" onclick="cycleMode(event)" title="切换模式" data-mode="note" style="position:relative;">
                 <img src="data:image/png;base64,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" class="cal-btn-icon">
             </button>
         </div>
@@ -2053,14 +2132,28 @@
 
             <!-- ===== Todo 页面 ===== -->
             <div id="page-todo" class="mode-page" style="display:none;">
-                <!-- 分区 tab -->
-                <div class="todo-tabs" id="todo-tabs"></div>
-                <!-- 当前分区的 todo 列表 -->
-                <div class="todo-list-area" id="todo-list-area"></div>
-                <!-- 新增 todo 输入 -->
-                <div class="todo-add-bar">
-                    <input type="text" id="todo-new-input" placeholder="添加待办..." onkeydown="if(event.key==='Enter')addTodoToSection()">
-                    <button onclick="addTodoToSection()">＋</button>
+                <!-- 顶部模式切换 -->
+                <div class="todo-mode-switch">
+                    <button class="todo-mode-btn active" id="tmb-section" onclick="switchTodoMode('section')">分区</button>
+                    <button class="todo-mode-btn" id="tmb-daily" onclick="switchTodoMode('daily')">每日</button>
+                </div>
+                <!-- 分区模式 -->
+                <div id="todo-section-view">
+                    <div class="todo-tabs" id="todo-tabs"></div>
+                    <div class="todo-list-area" id="todo-list-area"></div>
+                    <div class="todo-add-bar">
+                        <input type="text" id="todo-new-input" placeholder="添加待办..." onkeydown="if(event.key==='Enter')addTodoToSection()">
+                        <button onclick="addTodoToSection()">＋</button>
+                    </div>
+                </div>
+                <!-- 每日模式 -->
+                <div id="todo-daily-view" style="display:none; flex:1; display:none; flex-direction:column; overflow:hidden; min-height:0;">
+                    <div class="todo-daily-header" id="todo-daily-header"></div>
+                    <div class="todo-list-area" id="daily-list-area" style="flex:1;overflow-y:auto;min-height:0;"></div>
+                    <div class="todo-add-bar">
+                        <input type="text" id="daily-new-input" placeholder="今日待办..." onkeydown="if(event.key==='Enter')addDailyTodo()">
+                        <button onclick="addDailyTodo()">＋</button>
+                    </div>
                 </div>
             </div>
 
@@ -2068,21 +2161,39 @@
             <div id="page-pomodoro" class="mode-page" style="display:none;">
                 <div class="pomo-page">
                     <div class="pomo-title">专注时间</div>
+                    <!-- 设置状态：三列滚轮 -->
                     <div class="pomo-clock-wrap" id="pomo-clock-wrap">
-                        <div class="pomo-big-clock" id="pomo-timer" onclick="pomoClockTap()">
-                            <span id="pomo-display-min">25</span><span class="pomo-colon">:</span><span id="pomo-display-sec">00</span>
+                        <div class="pomo-setter" id="pomo-setter">
+                            <div class="pomo-col" id="pomo-col-h">
+                                <div class="pomo-col-val" id="pomo-val-h">00</div>
+                                <div class="pomo-col-unit">时</div>
+                            </div>
+                            <div class="pomo-col-sep">:</div>
+                            <div class="pomo-col" id="pomo-col-m">
+                                <div class="pomo-col-val" id="pomo-val-m">25</div>
+                                <div class="pomo-col-unit">分</div>
+                            </div>
+                            <div class="pomo-col-sep">:</div>
+                            <div class="pomo-col" id="pomo-col-s">
+                                <div class="pomo-col-val" id="pomo-val-s">00</div>
+                                <div class="pomo-col-unit">秒</div>
+                            </div>
                         </div>
-                        <div class="pomo-adjust-hint" id="pomo-adjust-hint">↑ 上下滑动调节分钟 ↓</div>
+                        <!-- 倒计时状态 -->
+                        <div class="pomo-big-clock" id="pomo-timer">
+                            <span id="pomo-display-h" style="display:none;"></span><span class="pomo-colon pomo-colon-h" style="display:none;">:</span><span id="pomo-display-min">25</span><span class="pomo-colon">:</span><span id="pomo-display-sec">00</span>
+                        </div>
+                        <div class="pomo-adjust-hint" id="pomo-adjust-hint">↑ 上下滑动调节 ↓</div>
                     </div>
                     <div class="pomo-reason-wrap" id="pomo-reason-wrap">
                         <input type="text" id="pomo-reason" class="pomo-reason-input" placeholder="为何专注">
                     </div>
+                    <div class="pomo-stats" id="pomo-stats"></div>
                     <div class="pomo-controls">
                         <button class="pomo-ctrl-btn pomo-start" id="pomo-btn" onclick="pomoToggle()">开始</button>
                         <button class="pomo-ctrl-btn pomo-reset" onclick="pomoReset()">重置</button>
                     </div>
                     <div class="pomo-status" id="pomo-label"></div>
-                    <div class="pomo-stats" id="pomo-stats"></div>
                 </div>
             </div>
             <div class="pomo-done-card" id="pomo-done-card" style="display:none;" onclick="document.getElementById('pomo-done-card').style.display='none'">
@@ -2204,6 +2315,8 @@
 
     <script>
 
+        let _currentMode = 'note';
+
         let state = {
             notes: JSON.parse(localStorage.getItem('wanwan_notes_v3')) || [],
             settings: JSON.parse(localStorage.getItem('wanwan_settings_v3')) || {
@@ -2262,6 +2375,8 @@
             s.historyAvatars = (s.historyAvatars||[]).map(_loadImgSync);
             s.historyBgs     = (s.historyBgs||[]).map(_loadImgSync);
             s.historyCharms  = (s.historyCharms||[]).map(_loadImgSync);
+            s.framePresets   = (s.framePresets||[]).map(f => f.dataUrl ? Object.assign({}, f, { dataUrl: _loadImgSync(f.dataUrl) }) : f);
+            s.fontPresets    = (s.fontPresets||[]).map(f => f.dataUrl ? Object.assign({}, f, { dataUrl: _loadImgSync(f.dataUrl) }) : f);
         } catch(e) {}
         // 异步从 IDB 补全图片
         async function _reloadImgsFromIDB() {
@@ -2277,6 +2392,14 @@
             s.historyAvatars = await Promise.all((s.historyAvatars||[]).map(ld));
             s.historyBgs     = await Promise.all((s.historyBgs||[]).map(ld));
             s.historyCharms  = await Promise.all((s.historyCharms||[]).map(ld));
+            s.framePresets   = await Promise.all((s.framePresets||[]).map(async f => {
+                if (!f.dataUrl) return f;
+                return Object.assign({}, f, { dataUrl: await ld(f.dataUrl) });
+            }));
+            s.fontPresets    = await Promise.all((s.fontPresets||[]).map(async f => {
+                if (!f.dataUrl) return f;
+                return Object.assign({}, f, { dataUrl: await ld(f.dataUrl) });
+            }));
             applySettings();
             renderHistoryAvatars();
             renderHistoryBgs();
@@ -2301,6 +2424,19 @@
                 if (sd.pinnedId !== undefined) state.specialPinnedId = sd.pinnedId;
             }
         } catch(e) {}
+
+        // 清理 localStorage 里残留的图片 key，释放配额
+        (function _cleanupLsImgKeys() {
+            try {
+                const IMG_PREFIXES = ['ww_av_','ww_bg_','ww_bgnote_','ww_bgtodo_','ww_bgpomo_','ww_frame_','ww_charm_','ww_fp_','ww_font_'];
+                for (let i = localStorage.length - 1; i >= 0; i--) {
+                    const k = localStorage.key(i);
+                    if (k && IMG_PREFIXES.some(p => k.startsWith(p))) {
+                        localStorage.removeItem(k);
+                    }
+                }
+            } catch(e) {}
+        })();
 
         window.onload = () => {
             // 内置字体主列表（始终保持最新）
@@ -3350,7 +3486,12 @@
                 img.src = src;
                 img.style.cssText = `width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;border:2px solid ${src===state.settings.currentAvatar?'var(--accent-color)':'transparent'};flex-shrink:0;`;
                 img.onclick = () => selectHistoryAvatar(src);
-                setupLongPress(img, () => _downloadImg(src, 'avatar_' + i));
+                setupLongPress(img, () => {
+                    if (confirm('删除这张历史头像？')) {
+                        state.settings.historyAvatars = (state.settings.historyAvatars||[]).filter((_,idx)=>idx!==i);
+                        saveData(); renderPortraitHistoryAvatars();
+                    }
+                });
                 container.appendChild(img);
             });
         }
@@ -3770,12 +3911,17 @@
                 const img = document.createElement('img');
                 img.src = url;
                 img.style.cssText = 'width:40px;height:40px;border-radius:50%;object-fit:cover;cursor:pointer;flex-shrink:0;';
-                img.title = '点击使用 / 长按下载';
+                img.title = '点击使用 / 长按删除';
                 img.onclick = () => {
                     state.settings.currentAvatar = url;
                     saveData(); applySettings(); renderHistoryAvatars();
                 };
-                setupLongPress(img, () => _downloadImg(url, 'avatar_' + i));
+                setupLongPress(img, () => {
+                    if (confirm('删除这张历史头像？')) {
+                        state.settings.historyAvatars = (state.settings.historyAvatars||[]).filter((_,idx)=>idx!==i);
+                        saveData(); renderHistoryAvatars();
+                    }
+                });
                 container.appendChild(img);
             });
         }
@@ -3798,12 +3944,17 @@
                 const img = document.createElement('img');
                 img.src = url;
                 img.style.cssText = 'width:40px;height:40px;border-radius:6px;object-fit:cover;cursor:pointer;flex-shrink:0;';
-                img.title = '点击使用 / 长按下载';
+                img.title = '点击使用 / 长按删除';
                 img.onclick = () => {
                     state.settings.bgImage = url;
                     saveData(); applySettings(); renderHistoryBgs();
                 };
-                setupLongPress(img, () => _downloadImg(url, 'bg_' + i));
+                setupLongPress(img, () => {
+                    if (confirm('删除这张历史背景？')) {
+                        state.settings.historyBgs = (state.settings.historyBgs||[]).filter((_,idx)=>idx!==i);
+                        saveData(); renderHistoryBgs();
+                    }
+                });
                 container.appendChild(img);
             });
         }
@@ -3826,14 +3977,19 @@
                 const img = document.createElement('img');
                 img.src = url;
                 img.style.cssText = 'width:40px;height:40px;border-radius:6px;object-fit:cover;cursor:pointer;flex-shrink:0;';
-                img.title = '点击使用 / 长按下载';
+                img.title = '点击使用 / 长按删除';
                 img.onclick = () => {
                     state.settings.charmImage = url;
                     const el = document.getElementById('charm-display');
                     if (el) el.querySelector('img').src = url;
                     saveData(); applySettings(); renderHistoryCharms();
                 };
-                setupLongPress(img, () => _downloadImg(url, 'charm_' + i));
+                setupLongPress(img, () => {
+                    if (confirm('删除这个历史挂件？')) {
+                        state.settings.historyCharms = (state.settings.historyCharms||[]).filter((_,idx)=>idx!==i);
+                        saveData(); renderHistoryCharms();
+                    }
+                });
                 container.appendChild(img);
             });
         }
@@ -4854,8 +5010,11 @@
         }
         function _imgKey(prefix, data) {
             let h = 0;
-            for (let i = 0; i < Math.min(data.length, 300); i++) h = (h * 31 + data.charCodeAt(i)) | 0;
-            return prefix + '_' + Math.abs(h).toString(36);
+            const len = data.length;
+            // 取首 200 + 尾 200 + 长度，避免相似 base64 头碰撞
+            const sample = data.slice(0, 200) + data.slice(Math.max(0, len - 200)) + len;
+            for (let i = 0; i < sample.length; i++) h = (Math.imul(h, 31) + sample.charCodeAt(i)) | 0;
+            return prefix + '_' + Math.abs(h).toString(36) + '_' + (len % 99991).toString(36);
         }
         // 存图：优先 IDB，兜底 localStorage，全部失败静默
         async function _storeImg(prefix, data) {
@@ -4900,6 +5059,17 @@
             slim.historyAvatars = await Promise.all((s.historyAvatars||[]).map(u => _storeImg('ww_av', u)));
             slim.historyBgs     = await Promise.all((s.historyBgs||[]).map(u => _storeImg('ww_bg', u)));
             slim.historyCharms  = await Promise.all((s.historyCharms||[]).map(u => _storeImg('ww_charm', u)));
+            // framePresets / fontPresets 的自定义 dataUrl 也走 IDB，避免撑爆 localStorage
+            slim.framePresets = await Promise.all((s.framePresets||[]).map(async f => {
+                if (!f.dataUrl) return f;
+                const key = await _storeImg('ww_fp', f.dataUrl);
+                return Object.assign({}, f, { dataUrl: key });
+            }));
+            slim.fontPresets = await Promise.all((s.fontPresets||[]).map(async f => {
+                if (!f.dataUrl) return f;
+                const key = await _storeImg('ww_font', f.dataUrl);
+                return Object.assign({}, f, { dataUrl: key });
+            }));
             localStorage.setItem('wanwan_notes_v3', JSON.stringify(state.notes));
             localStorage.setItem('wanwan_settings_v3', JSON.stringify(slim));
             localStorage.setItem('wanwan_comment_preview', JSON.stringify({
@@ -5681,11 +5851,11 @@
             closeDrawer();
             // 切换到目标模式，然后打开文件选择
             if (_currentMode !== mode) {
-                const dot = document.getElementById('mode-dot');
                 const idx = MODES.indexOf(mode);
                 if (idx !== -1) {
                     _currentMode = mode;
-                    if (dot) dot.dataset.mode = mode;
+                    const btn = document.getElementById('special-days-btn');
+                    if (btn) btn.dataset.mode = mode;
                     applyModeView(mode);
                 }
             }
@@ -5800,12 +5970,10 @@
         const MODES = ['note', 'todo', 'pomodoro'];
         const MODE_COLORS = { note: '#bbe0e2', todo: '#eefbe0', pomodoro: '#e6d0e3' };
         const MODE_LABELS = { note: '笔记', todo: '待办', pomodoro: '番茄' };
-        let _currentMode = 'note';
-
         function cycleMode(e) {
             e.stopPropagation();
-            const dot = document.getElementById('mode-dot');
-            const rect = dot.getBoundingClientRect();
+            const btn = document.getElementById('special-days-btn');
+            const rect = btn.getBoundingClientRect();
             const cx = rect.left + rect.width / 2;
             const cy = rect.top + rect.height / 2;
 
@@ -5813,8 +5981,8 @@
             _currentMode = MODES[(idx + 1) % MODES.length];
             const color = MODE_COLORS[_currentMode];
 
-            // 更新点颜色
-            dot.dataset.mode = _currentMode;
+            // 更新按钮颜色
+            btn.dataset.mode = _currentMode;
 
             // 墨水扩散
             triggerInkSplash(cx, cy, color, () => {
@@ -5886,7 +6054,7 @@
         }
 
         // ===================== Todo 分区页面 =====================
-        // 数据结构：state.todoSections = [{id, name, items:[{id,text,done}]}]
+        // 数据结构：state.todoSections = [{id, name, items:[{id,text,done,createdAt,dueDate}]}]
         // localStorage key: wanwan_todo_sections
 
         function loadTodoSections() {
@@ -5904,10 +6072,38 @@
         }
         if (!state.todoSections) state.todoSections = loadTodoSections();
         let _currentSectionId = state.todoSections[0]?.id || 'sec_1';
+        let _todoViewMode = 'section'; // 'section' | 'daily'
+
+        // 每日待办 key: wanwan_daily_YYYY-MM-DD
+        function _dailyKey(dateStr) { return 'wanwan_daily_' + dateStr; }
+        function _todayStr() { const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+        function loadDailyTodos(dateStr) {
+            try { return JSON.parse(localStorage.getItem(_dailyKey(dateStr)) || '[]'); } catch(e) { return []; }
+        }
+        function saveDailyTodos(dateStr, items) {
+            localStorage.setItem(_dailyKey(dateStr), JSON.stringify(items));
+        }
+
+        function switchTodoMode(mode) {
+            _todoViewMode = mode;
+            document.getElementById('tmb-section').classList.toggle('active', mode==='section');
+            document.getElementById('tmb-daily').classList.toggle('active', mode==='daily');
+            document.getElementById('todo-section-view').style.display = mode==='section' ? '' : 'none';
+            const dv = document.getElementById('todo-daily-view');
+            dv.style.display = mode==='daily' ? 'flex' : 'none';
+            dv.style.flexDirection = 'column';
+            if (mode==='daily') renderDailyTodo();
+        }
+
+        // ---- 确认弹窗 ----
+        function _confirmDelete(msg, onConfirm) {
+            // 复用现有 modal 或创建简单 confirm
+            if (confirm(msg)) onConfirm();
+        }
 
         function renderTodoPage() {
-            renderTodoTabs();
-            renderTodoList();
+            if (_todoViewMode === 'daily') renderDailyTodo();
+            else { renderTodoTabs(); renderTodoList(); }
         }
 
         function renderTodoTabs() {
@@ -5919,7 +6115,6 @@
                 btn.className = 'todo-tab-btn' + (sec.id === _currentSectionId ? ' active' : '');
                 btn.textContent = sec.name;
                 btn.onclick = () => { _currentSectionId = sec.id; renderTodoPage(); };
-                // 长按重命名
                 setupLongPress(btn, () => {
                     const newName = prompt('分区名称：', sec.name);
                     if (newName && newName.trim()) {
@@ -5930,7 +6125,6 @@
                 });
                 container.appendChild(btn);
             });
-            // 新增分区按钮
             const addBtn = document.createElement('button');
             addBtn.className = 'todo-tab-btn add-section';
             addBtn.textContent = '＋';
@@ -5947,6 +6141,30 @@
             container.appendChild(addBtn);
         }
 
+        function _buildTodoCard(item, onToggle, onDelete, onSetDue) {
+            const card = document.createElement('div');
+            card.className = 'todo-item-card' + (item.done ? ' done' : '');
+
+            const now = Date.now();
+            const isOverdue = item.dueDate && !item.done && new Date(item.dueDate).getTime() < now;
+            const dueFmt = item.dueDate ? (() => {
+                const d = new Date(item.dueDate);
+                return (d.getMonth()+1)+'/'+(d.getDate())+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+            })() : null;
+
+            card.innerHTML = `
+                <div class="todo-check">${item.done ? '✓' : ''}</div>
+                <div class="todo-item-text" style="flex:1">
+                    <div>${item.text}</div>
+                    ${dueFmt ? `<div class="todo-item-meta">截止 ${dueFmt}</div>` : ''}
+                </div>
+                ${dueFmt ? `<span class="todo-due-badge${isOverdue?' overdue':''}">${isOverdue?'已过期':'截止'}</span>` : ''}
+            `;
+            card.onclick = (e) => { if(e.target.closest('.todo-due-badge')) return; onToggle(); };
+            setupLongPress(card, () => _confirmDelete('删除这条待办？', onDelete));
+            return card;
+        }
+
         function renderTodoList() {
             const container = document.getElementById('todo-list-area');
             if (!container) return;
@@ -5957,26 +6175,39 @@
                 container.innerHTML = '<div style="text-align:center;opacity:0.3;font-size:0.85rem;padding:40px 0;">还没有待办</div>';
                 return;
             }
-            // 未完成的在前
-            const sorted = [...sec.items].sort((a,b) => (a.done ? 1 : 0) - (b.done ? 1 : 0));
+            const sorted = [...sec.items].sort((a,b) => (a.done?1:0)-(b.done?1:0));
             sorted.forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'todo-item-card' + (item.done ? ' done' : '');
-                card.innerHTML = `
-                    <div class="todo-check">${item.done ? '✓' : ''}</div>
-                    <div class="todo-item-text">${item.text}</div>
-                `;
-                card.onclick = () => {
-                    item.done = !item.done;
-                    saveTodoSections();
-                    renderTodoList();
-                };
-                // 长按删除
-                setupLongPress(card, () => {
-                    sec.items = sec.items.filter(i => i.id !== item.id);
-                    saveTodoSections();
-                    renderTodoList();
-                });
+                const card = _buildTodoCard(
+                    item,
+                    () => { item.done=!item.done; saveTodoSections(); renderTodoList(); },
+                    () => { sec.items=sec.items.filter(i=>i.id!==item.id); saveTodoSections(); renderTodoList(); }
+                );
+                container.appendChild(card);
+            });
+        }
+
+        function renderDailyTodo() {
+            const today = _todayStr();
+            const hdr = document.getElementById('todo-daily-header');
+            if (hdr) {
+                const d = new Date(); const weeks = ['日','一','二','三','四','五','六'];
+                hdr.textContent = `${d.getMonth()+1}月${d.getDate()}日  星期${weeks[d.getDay()]}`;
+            }
+            const container = document.getElementById('daily-list-area');
+            if (!container) return;
+            container.innerHTML = '';
+            const items = loadDailyTodos(today);
+            if (items.length === 0) {
+                container.innerHTML = '<div style="text-align:center;opacity:0.3;font-size:0.85rem;padding:40px 0;">今天还没有待办</div>';
+                return;
+            }
+            const sorted = [...items].sort((a,b)=>(a.done?1:0)-(b.done?1:0));
+            sorted.forEach(item => {
+                const card = _buildTodoCard(
+                    item,
+                    () => { item.done=!item.done; saveDailyTodos(today,items); renderDailyTodo(); },
+                    () => { const updated=items.filter(i=>i.id!==item.id); saveDailyTodos(today,updated); renderDailyTodo(); }
+                );
                 container.appendChild(card);
             });
         }
@@ -5988,10 +6219,23 @@
             if (!text) return;
             const sec = state.todoSections.find(s => s.id === _currentSectionId);
             if (!sec) return;
-            sec.items.push({ id: Date.now(), text, done: false });
+            sec.items.push({ id: Date.now(), text, done: false, createdAt: Date.now() });
             saveTodoSections();
             input.value = '';
             renderTodoList();
+        }
+
+        function addDailyTodo() {
+            const input = document.getElementById('daily-new-input');
+            if (!input) return;
+            const text = input.value.trim();
+            if (!text) return;
+            const today = _todayStr();
+            const items = loadDailyTodos(today);
+            items.push({ id: Date.now(), text, done: false, createdAt: Date.now() });
+            saveDailyTodos(today, items);
+            input.value = '';
+            renderDailyTodo();
         }
         // ===================== Todo 分区页面 END =====================
 
@@ -6000,97 +6244,127 @@
         let _pomoSeconds = 25 * 60;
         let _pomoInterval = null;
         let _pomoDuration = 25 * 60;
-        let _pomoAdjusting = false; // 是否处于调节模式
+        let _pomoAdjusting = false;
+        let _pomoSetH = 0, _pomoSetM = 25, _pomoSetS = 0;
 
-        // 更新大字显示
-        function renderPomoTimer() {
-            const m = String(Math.floor(_pomoSeconds / 60)).padStart(2, '0');
-            const s = String(_pomoSeconds % 60).padStart(2, '0');
-            const minEl = document.getElementById('pomo-display-min');
-            const secEl = document.getElementById('pomo-display-sec');
-            if (minEl) minEl.textContent = m;
-            if (secEl) secEl.textContent = s;
-        }
-
-        // 点击大字时钟：未开始时进入/退出调节模式
-        function pomoClockTap() {
-            if (_pomoRunning) return;
-            _pomoAdjusting = !_pomoAdjusting;
-            const clock = document.getElementById('pomo-timer');
-            const hint = document.getElementById('pomo-adjust-hint');
-            if (_pomoAdjusting) {
-                clock.classList.add('adjusting');
-                hint.classList.add('visible');
-            } else {
-                clock.classList.remove('adjusting');
-                hint.classList.remove('visible');
-            }
-        }
-
-        // 调节分钟数
-        function _pomoSetMinutes(mins) {
-            mins = Math.max(1, Math.min(99, mins));
-            _pomoDuration = mins * 60;
+        function _pomoApplySet() {
+            _pomoDuration = _pomoSetH * 3600 + _pomoSetM * 60 + _pomoSetS;
+            if (_pomoDuration < 1) { _pomoSetS = 5; _pomoDuration = 5; }
             _pomoSeconds = _pomoDuration;
-            renderPomoTimer();
+        }
+        function _pomoUpdateSetUI() {
+            const vh = document.getElementById('pomo-val-h');
+            const vm = document.getElementById('pomo-val-m');
+            const vs = document.getElementById('pomo-val-s');
+            if (vh) vh.textContent = String(_pomoSetH).padStart(2,'0');
+            if (vm) vm.textContent = String(_pomoSetM).padStart(2,'0');
+            if (vs) vs.textContent = String(_pomoSetS).padStart(2,'0');
         }
 
-        // 大字时钟上下滑动调节
-        (function initPomoSwipe() {
-            let startY = 0, lastMins = 25, dragging = false;
-            document.addEventListener('touchstart', e => {
-                if (!_pomoAdjusting) return;
-                startY = e.touches[0].clientY;
-                lastMins = Math.round(_pomoDuration / 60);
-                dragging = true;
-            }, {passive: true});
-            document.addEventListener('touchmove', e => {
-                if (!_pomoAdjusting || !dragging) return;
-                const dy = startY - e.touches[0].clientY; // 上滑为正
-                const delta = Math.round(dy / 12); // 每12px = 1分钟
-                _pomoSetMinutes(lastMins + delta);
-            }, {passive: true});
-            document.addEventListener('touchend', () => { dragging = false; }, {passive: true});
+        // 更新倒计时显示
+        function renderPomoTimer() {
+            const totalSec = _pomoSeconds;
+            const h = Math.floor(totalSec / 3600);
+            const m = Math.floor((totalSec % 3600) / 60);
+            const s = totalSec % 60;
+            const minEl  = document.getElementById('pomo-display-min');
+            const secEl  = document.getElementById('pomo-display-sec');
+            const hEl    = document.getElementById('pomo-display-h');
+            const hColon = document.querySelector('.pomo-colon-h');
+            if (h > 0) {
+                if (hEl) { hEl.textContent = String(h).padStart(2,'0'); hEl.style.display=''; }
+                if (hColon) hColon.style.display='';
+            } else {
+                if (hEl) hEl.style.display='none';
+                if (hColon) hColon.style.display='none';
+            }
+            if (minEl) minEl.textContent = String(m).padStart(2,'0');
+            if (secEl) secEl.textContent = String(s).padStart(2,'0');
+        }
+
+        function pomoClockTap() {}
+        function _pomoSetMinutes(mins) {
+            _pomoSetM = Math.max(0, Math.min(59, mins));
+            _pomoSetH = 0; _pomoSetS = 0;
+            _pomoUpdateSetUI(); _pomoApplySet();
+        }
+
+        // 三列滚轮
+        (function initPomoColSwipe() {
+            const cols = [
+                { id: 'pomo-col-h', get: ()=>_pomoSetH, set: v=>{ _pomoSetH=Math.max(0,Math.min(23,v)); } },
+                { id: 'pomo-col-m', get: ()=>_pomoSetM, set: v=>{ _pomoSetM=Math.max(0,Math.min(59,v)); } },
+                { id: 'pomo-col-s', get: ()=>_pomoSetS, set: v=>{ _pomoSetS=Math.max(0,Math.min(59,v)); } },
+            ];
+            cols.forEach(col => {
+                const el = document.getElementById(col.id);
+                if (!el) return;
+                let startY=0, startVal=0, active=false;
+                const PX_PER = 8;
+                function onStart(y) { if(_pomoRunning) return; startY=y; startVal=col.get(); active=true; el.classList.add('dragging'); }
+                function onMove(y) { if(!active) return; col.set(startVal+Math.round((startY-y)/PX_PER)); _pomoUpdateSetUI(); _pomoApplySet(); }
+                function onEnd() { active=false; el.classList.remove('dragging'); }
+                el.addEventListener('touchstart', e=>{ e.stopPropagation(); onStart(e.touches[0].clientY); }, {passive:true});
+                el.addEventListener('touchmove',  e=>{ e.stopPropagation(); e.preventDefault(); onMove(e.touches[0].clientY); }, {passive:false});
+                el.addEventListener('touchend',   ()=>onEnd(), {passive:true});
+                el.addEventListener('mousedown',  e=>onStart(e.clientY));
+                window.addEventListener('mousemove', e=>{ if(active) onMove(e.clientY); });
+                window.addEventListener('mouseup',   ()=>{ if(active) onEnd(); });
+            });
+            _pomoUpdateSetUI();
         })();
 
         // ── 番茄统计 ──
         function _pomoLoadLog() { try { return JSON.parse(localStorage.getItem('wanwan_pomo_log') || '[]'); } catch(e) { return []; } }
         function _pomoSaveLog(log) { log = log.filter(r => r.ts > Date.now() - 365*86400000); localStorage.setItem('wanwan_pomo_log', JSON.stringify(log)); }
-        function _pomoRecord(min, reason) { const log = _pomoLoadLog(); log.push({ ts: Date.now(), min, reason: reason||'' }); _pomoSaveLog(log); }
+        function _pomoRecord(sec, reason) {
+            const log = _pomoLoadLog();
+            log.push({ ts: Date.now(), sec, min: Math.round(sec/60), reason: reason||'' });
+            _pomoSaveLog(log);
+        }
         function _pomoStats() {
             const log = _pomoLoadLog(), now = new Date();
             const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
             const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
-            let todayMin=0, todayCount=0, monthMin=0, totalMin=0;
-            log.forEach(r => { totalMin+=r.min; if(r.ts>=monthStart) monthMin+=r.min; if(r.ts>=todayStart){todayMin+=r.min;todayCount++;} });
-            return { todayMin, todayCount, monthMin, totalMin, totalCount: log.length };
+            let todaySec=0, todayCount=0, monthSec=0, totalSec=0;
+            log.forEach(r => {
+                const s = r.sec != null ? r.sec : (r.min||0)*60;
+                totalSec+=s; if(r.ts>=monthStart) monthSec+=s;
+                if(r.ts>=todayStart){todaySec+=s;todayCount++;}
+            });
+            return { todaySec, todayCount, monthSec, totalSec, totalCount: log.length };
         }
-        function fmtMin(min) { if(min<60) return min+'分钟'; const h=Math.floor(min/60),m=min%60; return h+'小时'+(m?m+'分':''); }
+        function fmtSec(sec) {
+            if(sec<60) return sec+'秒';
+            const min=Math.floor(sec/60); if(min<60) return min+'分钟';
+            const h=Math.floor(min/60),m=min%60; return h+'小时'+(m?m+'分':'');
+        }
+        function fmtMin(min) { return fmtSec(min*60); }
         function renderPomoStats() {
             const el = document.getElementById('pomo-stats'); if(!el) return;
             const s = _pomoStats();
             el.innerHTML = `
                 <div class="pomo-stat-item"><span class="pomo-stat-val">${s.todayCount}</span><span class="pomo-stat-label">今日次数</span></div>
-                <div class="pomo-stat-item"><span class="pomo-stat-val">${fmtMin(s.todayMin)}</span><span class="pomo-stat-label">今日专注</span></div>
-                <div class="pomo-stat-item"><span class="pomo-stat-val">${fmtMin(s.monthMin)}</span><span class="pomo-stat-label">本月专注</span></div>
-                <div class="pomo-stat-item"><span class="pomo-stat-val">${fmtMin(s.totalMin)}</span><span class="pomo-stat-label">累计专注</span></div>`;
+                <div class="pomo-stat-item"><span class="pomo-stat-val">${fmtSec(s.todaySec)}</span><span class="pomo-stat-label">今日专注</span></div>
+                <div class="pomo-stat-item"><span class="pomo-stat-val">${fmtSec(s.monthSec)}</span><span class="pomo-stat-label">本月专注</span></div>
+                <div class="pomo-stat-item"><span class="pomo-stat-val">${fmtSec(s.totalSec)}</span><span class="pomo-stat-label">累计专注</span></div>`;
         }
-        function showPomoDoneCard(durationMin, reason) {
+        function showPomoDoneCard(durationSec, reason) {
             const s = _pomoStats();
             const emojis = ['🌿','✨','🌸','🍃','💫','🌙','⭐'];
             document.getElementById('pomo-done-emoji').textContent = emojis[Math.floor(Math.random()*emojis.length)];
-            document.getElementById('pomo-done-title').textContent = '完成了 '+fmtMin(durationMin)+'的专注'+(reason?' · '+reason:'');
-            document.getElementById('pomo-done-sub').innerHTML = '今天第 '+s.todayCount+' 次 &nbsp;·&nbsp; 今日 '+fmtMin(s.todayMin)+'<br>本月累计 '+fmtMin(s.monthMin);
+            document.getElementById('pomo-done-title').textContent = '完成了 '+fmtSec(durationSec)+'的专注'+(reason?' · '+reason:'');
+            document.getElementById('pomo-done-sub').innerHTML = '今天第 '+s.todayCount+' 次 &nbsp;·&nbsp; 今日 '+fmtSec(s.todaySec)+'<br>本月累计 '+fmtSec(s.monthSec);
             document.getElementById('pomo-done-card').style.display = 'flex';
         }
 
         function pomoTick() {
             if (_pomoSeconds <= 0) {
-                const durationMin = Math.round(_pomoDuration / 60);
+                const durationSec = _pomoDuration;
                 const reason = (document.getElementById('pomo-reason')||{}).value || '';
-                _pomoRecord(durationMin, reason);
+                _pomoRecord(durationSec, reason);
                 pomoReset();
-                showPomoDoneCard(durationMin, reason);
+                showPomoDoneCard(durationSec, reason);
                 const label = document.getElementById('pomo-label');
                 if (label) label.textContent = '完成！';
                 return;
@@ -6100,11 +6374,11 @@
         }
 
         function pomoToggle() {
-            const btn = document.getElementById('pomo-btn');
-            const label = document.getElementById('pomo-label');
-            const reason = document.getElementById('pomo-reason');
-            const clock = document.getElementById('pomo-timer');
-            const hint = document.getElementById('pomo-adjust-hint');
+            const btn    = document.getElementById('pomo-btn');
+            const label  = document.getElementById('pomo-label');
+            const setter = document.getElementById('pomo-setter');
+            const clock  = document.getElementById('pomo-timer');
+            const hint   = document.getElementById('pomo-adjust-hint');
 
             if (_pomoRunning) {
                 clearInterval(_pomoInterval); _pomoInterval = null;
@@ -6114,22 +6388,18 @@
                 const avatarBox = document.getElementById('avatar-box');
                 if (avatarBox) avatarBox.style.pointerEvents = '';
             } else {
-                // 退出调节模式
                 _pomoAdjusting = false;
-                if (clock) clock.classList.remove('adjusting');
                 if (hint) hint.classList.remove('visible');
-                // 首次开始：锁定目标
-                if (_pomoSeconds === _pomoDuration) {
-                    const inp = document.getElementById('pomo-reason');
-                    if (inp) { inp.readOnly = true; inp.classList.add('running'); }
-                }
+                // wrap에 running 클래스 추가 → CSS로 setter 숨기고 clock 표시
+                const wrap = document.getElementById('pomo-clock-wrap');
+                if (wrap) wrap.classList.add('running');
+                if (clock) clock.classList.add('running');
+                const inp = document.getElementById('pomo-reason');
+                if (inp) { inp.readOnly = true; inp.classList.add('running'); }
                 renderPomoStats();
-                // 锁定模式切换
+                renderPomoTimer();
                 const avatarBox = document.getElementById('avatar-box');
                 if (avatarBox) avatarBox.style.pointerEvents = 'none';
-                // 秒数显示激活
-                if (clock) clock.classList.add('running');
-                renderPomoTimer();
                 _pomoRunning = true;
                 _pomoInterval = setInterval(pomoTick, 1000);
                 if (btn) btn.textContent = '暂停';
@@ -6144,25 +6414,27 @@
             if (avatarBox) avatarBox.style.pointerEvents = '';
             _pomoAdjusting = false;
             _pomoSeconds = _pomoDuration;
-            renderPomoTimer();
-            const btn = document.getElementById('pomo-btn');
-            const label = document.getElementById('pomo-label');
+            const wrap   = document.getElementById('pomo-clock-wrap');
+            const setter = document.getElementById('pomo-setter');
+            const clock  = document.getElementById('pomo-timer');
+            const hint   = document.getElementById('pomo-adjust-hint');
+            if (wrap)   wrap.classList.remove('running');
+            if (clock)  { clock.classList.remove('adjusting','running'); }
+            if (hint)   hint.classList.remove('visible');
+            const btn    = document.getElementById('pomo-btn');
+            const label  = document.getElementById('pomo-label');
             const reason = document.getElementById('pomo-reason');
-            const clock = document.getElementById('pomo-timer');
-            const hint = document.getElementById('pomo-adjust-hint');
             if (btn) btn.textContent = '开始';
             if (label) label.textContent = '';
             if (reason) { reason.readOnly = false; reason.classList.remove('running'); }
-            if (clock) { clock.classList.remove('adjusting'); clock.classList.remove('running'); }
-            if (hint) hint.classList.remove('visible');
         }
 
         // 初始化：从 state 恢复模式
         window.addEventListener('load', () => {
             const savedMode = (typeof state !== 'undefined' && state.settings && state.settings.lastMode) || 'note';
             _currentMode = savedMode;
-            const dot = document.getElementById('mode-dot');
-            if (dot) dot.dataset.mode = _currentMode;
+            const btn = document.getElementById('special-days-btn');
+            if (btn) btn.dataset.mode = _currentMode;
         });
 
         // ===================== 抽屉 & 模式切换 END =====================
