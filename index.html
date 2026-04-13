@@ -170,15 +170,15 @@
             user-select: none; -webkit-user-select: none;
             -webkit-tap-highlight-color: transparent;
         }
-        .cal-btn[data-mode="note"]     { background: #6bbdbd; }
-        .cal-btn[data-mode="todo"]     { background: #7dba58; }
-        .cal-btn[data-mode="pomodoro"] { background: #b87ab4; }
+        .cal-btn[data-mode="note"]     { background: #bbe0e2; }
+        .cal-btn[data-mode="todo"]     { background: #eefbe0; }
+        .cal-btn[data-mode="pomodoro"] { background: #e6d0e3; }
         .cal-btn-icon { display:block; width:26px; height:26px; object-fit:contain; filter:brightness(0) invert(1); }
         /* 彩点 — 纯CSS展开，position:absolute在wrap内 */
         .mode-dots {
-            position: absolute; top: 50%; left: 50%;
+            position: fixed;
             width: 0; height: 0;
-            pointer-events: none; z-index: 20;
+            pointer-events: none; z-index: 99990;
         }
         .mode-dot {
             position: absolute;
@@ -193,9 +193,9 @@
             cursor: pointer; pointer-events: none;
             -webkit-tap-highlight-color: transparent;
         }
-        .mode-dot.note     { background: #6bbdbd; }
-        .mode-dot.todo     { background: #7dba58; }
-        .mode-dot.pomodoro { background: #b87ab4; }
+        .mode-dot.note     { background: #bbe0e2; }
+        .mode-dot.todo     { background: #eefbe0; }
+        .mode-dot.pomodoro { background: #e6d0e3; }
         .mode-dots.open { pointer-events: auto; }
         .mode-dots.open .mode-dot { opacity: 1; pointer-events: auto; }
         /* 向左下展开 */
@@ -203,7 +203,7 @@
         .mode-dots.open .mode-dot.todo     { transform: translate(-28px, 58px)  scale(1); transition-delay: 0.05s; }
         .mode-dots.open .mode-dot.pomodoro { transform: translate(14px,  68px)  scale(1); transition-delay: 0.10s; }
         .mode-dot.cur-dot { box-shadow: 0 0 0 3px #fff, 0 2px 10px rgba(0,0,0,0.22); }
-        .mode-dots-backdrop { display:none; position:fixed; inset:0; z-index:9; }
+        .mode-dots-backdrop { display:none; position:fixed; inset:0; z-index:99980; }
         .mode-dots-backdrop.show { display:block; }
 
                 /* 日历头部 */
@@ -2140,12 +2140,12 @@
                 <div class="user-signature" id="display-signature" style="min-height:1.2em;"></div>
             </div>
             <div id="mode-dots-backdrop" class="mode-dots-backdrop"></div>
+            <div class="mode-dots" id="mode-dots">
+                <div class="mode-dot note"     id="mdot-note">笔记</div>
+                <div class="mode-dot todo"     id="mdot-todo">待办</div>
+                <div class="mode-dot pomodoro" id="mdot-pomodoro">番茄</div>
+            </div>
             <div class="cal-btn-wrap">
-                <div class="mode-dots" id="mode-dots">
-                    <div class="mode-dot note"     onclick="switchModeDot('note')">笔记</div>
-                    <div class="mode-dot todo"     onclick="switchModeDot('todo')">待办</div>
-                    <div class="mode-dot pomodoro" onclick="switchModeDot('pomodoro')">番茄</div>
-                </div>
                 <button class="cal-btn" id="special-days-btn" data-mode="note" oncontextmenu="return false">
                     <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAAB4CAYAAAA5ZDbSAAAPmklEQVR42u2de6gtVR3HP7+19716I7NSLE27mtkfSqZSmiGWhmUhZWT0ogdcqJQiikBDCKQHRlCESdqbMh+EUFFpZaRFXSgqK0PNR5p1K/OFXuzec8/eqz/2WpzfWWfWzJqZNXvm7HMGNufsvWev1/f3/v3WGgBhcS5Z0L7W7SCr+rcF99mW4xbVbmqfdS5bMk+bsBY259xkAEQiiYsWDj43cdqM87IVAEhNIG0JMUgZyJJI4dIQNFsywSFeNiPxxOZp58RUFmAc+aF00GkucO2cODhHWzaD+G01z1FiY1IxAGk4YFshbtoAIC3BbTrnpiDWWXtJXXspeS8ZFiJV1NuG7eWkdltzfYp+ZzMQYKijpYApUgzGQhGdmzNSdXxTK1EaLF7TMafYG1WiWGr0n6pnS9dj3AG4bV0YSii2TMqk6HdJ5FZpSXxlhmoV8eV0CZNEdJ2Fa2Jl2kxjH5IV3uWYbaLRaVN0jMxpocvAlpp6et6AptgMTQy+NmrGNjWy5sFJduBc2vc4bYVXsor4zMD8R9YhuEO61jCotAhySM8LLBuQe+sGWUQaBiwWKQO1CFeRi2YBTEsxsCkmB74OJgHEoYoj2QS21OKWEGDL2iD5uqXcDXAl2Uym5o/sgBZ20w5ICKuayA2b+m0x9PAqP1gS/rcD4+LNq0KamYofyQBF8+ZVA3CzabwM3kJuhYtpOYiF9yMz/N5mbNvmBrgqb9qV6J6nSmhjVKa4ldIAJMlFJGaDcl3YjrQgjnn5unVCybYtwEK7Csw67Q+VWGzEGM1FFDkqYwpLdmTOXNQn58gACKXTyyToFRu5Z55cNtSFHLz7aCIix65Xiu0R6EESfF8VHW03WA3BABqSsWnrGFll1NimAmTRRLkMeL6lRlbRzXYDcsd6ALlSndZN+C8q9ffhns3lGm9y5UJKERvTqVKDe4dWvrPoVn1q1M3GOHijLtwigd/ITWqil+xQJriegxQN5yd1AaahFW0HvFjrTSpVMZnEXFfThCrWsTVq1xEh1sHBxojXNGhc1hkX5qzrtgyzLi26abDKim5qyc0D3NQN1eFcm+qz2G76QbuX48jCyEDALFt0W9PqL9qwVtVGuOcnxyFp0hfAtgPKzCUeyzJdtka/TXbgl4HS9vywrsG2EjGOpEOwchlGomwIC0zVvca9RH1XZgyGvxf1e4Lv+hbRqVIgeoRDbOB9AhxS/AjYV3Dvfg6M8LuRA2yiCGBaAPxW11dR21vc7ys3fPVkl0gdgGPHFfUBsgZ4BCy7/7cBLwXOAE4AtgMHOhAeBv4G/Ab4CfBnpZJEAXgC8CrgFOAo4Omur8eB+4E/ALcAO4G9qo1JZA2GZK/YmMgyBa+R4oLwsy5fYX84EC8E7ipwW4pey8CPgVeqeb4cuFFxZNXrTuCjwMGBRDA9rEmt9ZMWAQqZE/VpHflW4JOO21Bi1kYMMgkMySuAJ4EPq8+WI36tBGAC7AIuBr6hmGHQuXJpYTjMA2BxABrgC8D7FCge+LKEiSeA0GjShpepmMs+9b3v6+tuLEvus2kP69IYYJkzsLbClRkD1wPnOGA91+iDVO8B7gUect8fAhwDHB60NVFcqfu9H7jb6W5xuvhI14bmdG+cjYGbgHOB/0XiBpbujpiSpv51TAfPU8/4frxB9F03gSW3uF5v/hu4FDjRWb/h9VTgTOCqQJRb18YUuBo4zRlsRVbzi4BLgH8Ev1ty73/qxqnH3sV6tGm/EODRAMAF+LRbyL0BuFcCzypwhcbupcXuZcrY8kB7vfvFgnmPCxbmINXONAD5CiVphmhsRQEeVVjSXQHswT1Lce5EgfKeQHybwL3ThtUOBW6RdW2BCwL9KsE6bFH9vdPp5JCT36i4vsu1qfO9oSCZVMXBXXKzbnubc008t+1zC7kjWMjQd/fjEqeHH1LEMQUedZ/5difAY8BhgSFmgmiYUWrgPEUgvt0HgKf1wL0m4X0lwNIBuOPIYD23nK8iSp7TPqXAlQJgTdDGJwraONf5wzYgnM8FgZAYUXuQLy5o40IVDetDTJvIZ4UG1igQfbkAHqtXbJBbgTuUCJwCf1G/MSXgeu49wPmsU6e/LfAjNddrA8PtEadnSZBeXpTvDNp4AHiK638QQY4ygE3FQpoGgBa9irj3TGWxes57fcBhsTH5Ns5RHObbOVH97vnAHhW3tsA7AvFvIuvhAX5FwTjPU20MAeBRncL3upUMTX3ANyhwRsDtwA+CZEHYftjXmaoNA/zCxZU9UdwN3ODee3DOKsk26QDQxLVxM/Bb938IMPRf8SGANTWiW7nSfLHBeDBODwIH33GLOkogJB9ROj74/HtKdHrArg8iWceqYEjVU1D8WK4KCOFlzkDcN4BEROlhpLZGGrFNaDSMNx8KvECJOVwwoYojbADwwQo8gNsiCQQUWAerdGMqIf3M/b/Ftfkc4OgOAG1aByamARCtU1Yl7W4H9lfx58cVECmVFTYAzX/+ZEHqcakkqUBiP/c4Y05LoOcFRNuXyBaYzyEsNjFjBPDsIGa8S8WHbUm8PCzE2x20c0yBUbY9uGe3s7ilgltESYc9znrWXH3YkLJJJkE0t+XkOvceGCzW4yoblHJ5zr0zAGlHQART4L2qL8ssvzxViYjUBMmjwXcHFBDeIAC2GbiyqQ6xQbiQQIxSobtDYrpRuTRTZ7hdogITFwOvVYCKs6ohrUhPCjJUsTnkloC1ivfHJQOvephk03RY2YD3BuPYr0ZboizgHwL/cgkJnyD4GPAS9/3ZinONC3RcF7SRem0Lxrwns85tugEw+tSV3IeC1ylVfST4zMd3bcQ3LdLFI+AJ4CJW8rdeLL9GgYsy5i5yfRvSjw+cqkwTJSI7m8HUxMg1DUHJ4RoV9bcr0KWHugW0CTpNu0pj4JvM0opbWJ3iW1LgbHH3fJm1lRllBp3nqgOBI4Ix/71Lq5iWTz1NzSTVjUePE4LknhseY3U67zS1gEI8LRZmlLz6uZTiQroJs/ouSmLvVSnNk1Vblll1xxFBAGWeBYpr1sWU+HhVlJxLTIvShQ8Df3Wf+/LY0xN1kRQYdCMnfk9nVih3K/B7Zon+U5yxZVhb9F4lefy6nRGM9V7gn/RTFF9pHEoCt3aVD9aJgs+7Bd/jBroz4IhULg4TEDEjs05KVH8P8Gs3Rp+4uFKJfqG/Cg9TxMFVesdS/9TTJtb0DcrFsU4MnqC4nApJE14T1pbh+PeTkt/ZEu61zOq1TlaSQlhJSXbx9JpGuyJNw466OETbW7s3M6ty9NtTDPBB0jeBxUDWSYRJScw51k4Ydny/GuMYeBD4eeAb5zRaG23C7/u86FDvjZ24uyrQu29xMd5JxJVJISDJQMg+ZXkU8PaA6K51kbdxhx5JtkiWzSAm6lKlKK76qgPa70Xan5USnJSnskmJ6kl9hG7RQ0k8wX3cBTh8GnMJuLwk3CuZGaK1H1wnVNcU2JjeGzPbOPZtZQBNmG1bOYuVQgDboL+YdSslARSdodrHbF/T21i9M+IaZ/2PWB07l8yMUVtMSwFHx3a45wY5RlBeDG5nlsfdpmLG9zuD64lEF6Hu8Q5VKmQbs8qQo5W62AscB9xXoT4GkfBPfbp0V6JGVCTqPicKjTLCjmRWaB5mfeqKRanpEXiiu5xZPZfeZ3ypkzijBMOt90siPl+ZD5q7iNsEEbDfsbZE9UMRf9OQbwtJ6EdfwNoy3FuZVYGOEuMIvVZVUhLUKKqRbrK/t8n2leOdGNQVkhZ4XQXIOcE9W/Xt/y4DJwVx6DoBk97KZvsEOFaD7Avhl5RP+ySzIrccIJcVub/Y6Xy/NyqUIuOSaOAg66JHFQkH6QjgolpsXYf8NSUifXD/YQeABzkXwB7cE10AwwbgXh0BN6cay775LJWDpaHITblPIgs1dgDeEgH5VDeHrQ1jwEXgngr8twDcnc4vLxvzkHYZJiUbTE0KNQ10TtluCm/EHMTsQJUQ5N3MkvlFnJyS8gx3Er7aieXQuLuDlW2rZgDApvSZxMHSEuCmolLv+PODPYLZzoQQ5AkrRzyYRDtC63rf/g5lyGmj7j7npoVGVZ9cmw1gMycdU9Wn13nbHTdpkD3QlylODI2vIkC2qvl/hpUaLi2W72Gl3rkM3E2AG1iz4UJ6kA9ltjdIW9cekF+yssMg3JVoWFv1sZ3ZDgp9EoDf3P1H4LmBUTUEnze170EBHFMPoS72C30As41pmpP3KePr3Wp+Wwq4FuDNwH9UG3rH4U3AMxW4sTXoPbFfB+BUI8v0OAHNycaFELVo1Uc2XMdKnZQOTR4OfIvVRzr4PLEFvqRE/aiHuefyUuYOsMmka7Qh5YMhewJu9kA/6L73+5LPV/7tcsD5S8AHgjVhwACXvqQkP1yUTWmaHbG0O0o3dm6mPnV2mVkJzVeAF6oKDn2m1m3us+Pc+2VWbz673VnRO1XywFJ+nljqfPp4go2MEoHLcbJqm0PGqzI/1onTB5zYfYYDWxcRTJltbjtEcbbXrcZFyt7kLGZ94GidgoKqjNa8U4YikQEJ8aPzm5w4m/uU2qLj9XUuGZeM+KyyppcDAvM6/C7gI8D3FSdPKoCrSsjXKeJrk/ivbHOUwCXSYKK5KhLqSgOr9OPtzHY3jF3WZ2ugv3c7AngX8Ce1FraA2KUGuLkkXpY1LXsoR9UzCvo+VbVqD5E+W/pYB+RJTlT/illh370B19adZ51ql16K78pENEp/DRHgKpD1Ru3lEgk2jRBym1IlGQK4sQmZiK6TgYCbclZHkToxAcFqYMsel9NUFVnyF91l4eCUZwX1CbLtkPOlwgruxBDqcJ1kXHMhQ6qUHoky1TJPfb6SZB7jEM7JanTcgGV4zw5uy8G5dwPaeXJp2RjGDQc3BJC7Oq9roa7xQChxXoRgI0bQIsyt8DKJ3NpEdAyNOKr2Xi3Sk84tFS5RjsnLOqN4WUfgVTGQxES0rFPg6oC7CGI5meFMohirs0dpkUTdoMVvyudtODjH07Rlg4EimTg4+XNTckMRkDl3G8oG47xeHslrWgywjJKa5Ik3MridrUOdw0i7cH02GhfP3X00c+Yoy6YRNg9CLz1GSTrmLNkEM4uYtk04OPW4wJzm/Sa49dZWS0FbF+CcYjgmjjeBrs8ItqmENTXcopw+YBtdbCuIalG4vKomLolhxi3FSmpntmWww9aYlI2onNRChaEFYKpAlrYArwedGgPFlvyfszAuZ6QqdY5JlZspddFdWsiSoR/b0TikJZFLC+JsehzimvtMx4vf1qAoIr4cVY9U2B7z9vlt5nFJmYi2tNtYlvss6RwpzNQUW1fHMzZ1j1qP5//5BK9kviggGQAAAABJRU5ErkJggg==" class="cal-btn-icon">
                 </button>
@@ -2546,6 +2546,22 @@
             renderSpecialPin();
             // 异步从 IDB 补全图片（不阻塞首屏）
             _reloadImgsFromIDB().catch(()=>{});
+            // 如果 localStorage 里笔记为空，尝试从 IDB 备份恢复
+            if (state.notes.length === 0) {
+                _idbGet('wanwan_notes_backup').then(backup => {
+                    if (backup) {
+                        try {
+                            const recovered = JSON.parse(backup);
+                            if (recovered && recovered.length > 0) {
+                                state.notes = recovered;
+                                renderList();
+                                renderTags();
+                                console.log('从 IDB 备份恢复了', recovered.length, '条笔记');
+                            }
+                        } catch(e) {}
+                    }
+                }).catch(()=>{});
+            }
         };
 
         function openSettings() {
@@ -3542,15 +3558,27 @@
             const container = document.getElementById('portrait-frame-presets');
             if (!container) return;
             const presets = state.settings.framePresets || [];
-            container.innerHTML = presets.map(p => {
+            container.innerHTML = '';
+            presets.forEach(p => {
                 const isActive = (state.settings.currentFrame || 'st') === p.id;
-                return `<div onclick="selectFrameFromPortrait('${p.id}')" style="
-                    padding:5px 12px; border-radius:8px; font-size:0.75rem; cursor:pointer;
-                    background:${isActive?'var(--accent-color)':'rgba(0,0,0,0.06)'};
-                    color:${isActive?'#fff':'var(--text-color)'}; border:none;">
-                    ${p.name || p.label || p.id}
-                </div>`;
-            }).join('');
+                const el = document.createElement('div');
+                el.style.cssText = `padding:5px 12px; border-radius:8px; font-size:0.75rem; cursor:pointer;
+                    background:${isActive ? 'var(--accent-color)' : 'rgba(0,0,0,0.06)'};
+                    color:${isActive ? '#fff' : 'var(--text-color)'}; border:none;
+                    transition: transform 0.1s; user-select:none; -webkit-user-select:none;`;
+                el.textContent = p.name || p.label || p.id;
+                el.addEventListener('click', () => selectFrameFromPortrait(p.id));
+                if (!p.isBuiltin) {
+                    setupLongPress(el, () => {
+                        if (confirm(`删除头像框「${p.name || p.id}」？`)) {
+                            state.settings.framePresets = state.settings.framePresets.filter(f => f.id !== p.id);
+                            if (state.settings.currentFrame === p.id) state.settings.currentFrame = 'none';
+                            saveData(); applySettings(); renderPortraitFramePresets(); renderFramePresets();
+                        }
+                    });
+                }
+                container.appendChild(el);
+            });
         }
         function selectFrameFromPortrait(id) {
             // 同步到 setting-frame 相关逻辑
@@ -4099,20 +4127,87 @@
         }
         let _cropDragCleanup = null;
         function initCropDrag() {
-            // 清理旧监听
             if (_cropDragCleanup) _cropDragCleanup();
             const wrap = document.getElementById('avatar-crop-wrap');
             const img = document.getElementById('avatar-crop-img');
             let last = null;
-            function onStart(e) { e.preventDefault(); const pt=e.touches?e.touches[0]:e; last={x:pt.clientX,y:pt.clientY}; img.classList.add('dragging'); }
-            function onMove(e) { e.preventDefault(); if(!last) return; const pt=e.touches?e.touches[0]:e; _cropState.x+=pt.clientX-last.x; _cropState.y+=pt.clientY-last.y; last={x:pt.clientX,y:pt.clientY}; clampCrop(); applyCropTransform(); }
-            function onEnd() { last=null; img.classList.remove('dragging'); }
+            let lastPinchDist = null;
+
+            function getTouchDist(e) {
+                const t = e.touches;
+                const dx = t[0].clientX - t[1].clientX, dy = t[0].clientY - t[1].clientY;
+                return Math.sqrt(dx*dx + dy*dy);
+            }
+            function getTouchCenter(e) {
+                const t = e.touches;
+                return { x: (t[0].clientX + t[1].clientX) / 2, y: (t[0].clientY + t[1].clientY) / 2 };
+            }
+
+            function onStart(e) {
+                e.preventDefault();
+                if (e.touches && e.touches.length === 2) {
+                    lastPinchDist = getTouchDist(e);
+                    last = null;
+                } else {
+                    const pt = e.touches ? e.touches[0] : e;
+                    last = { x: pt.clientX, y: pt.clientY };
+                    lastPinchDist = null;
+                    img.classList.add('dragging');
+                }
+            }
+            function onMove(e) {
+                e.preventDefault();
+                if (e.touches && e.touches.length === 2) {
+                    // 双指缩放
+                    const dist = getTouchDist(e);
+                    if (lastPinchDist !== null) {
+                        const ratio = dist / lastPinchDist;
+                        const center = getTouchCenter(e);
+                        const wRect = wrap.getBoundingClientRect();
+                        const cx = center.x - wRect.left, cy = center.y - wRect.top;
+                        const s = _cropState;
+                        const minScale = Math.max(CROP_SIZE / s.imgW, CROP_SIZE / s.imgH);
+                        const newScale = Math.min(Math.max(s.scale * ratio, minScale), minScale * 8);
+                        // 以双指中心为缩放锚点
+                        s.x = cx - (cx - s.x) * (newScale / s.scale);
+                        s.y = cy - (cy - s.y) * (newScale / s.scale);
+                        s.scale = newScale;
+                        clampCrop(); applyCropTransform();
+                    }
+                    lastPinchDist = dist;
+                    last = null;
+                } else {
+                    lastPinchDist = null;
+                    if (!last) return;
+                    const pt = e.touches ? e.touches[0] : e;
+                    _cropState.x += pt.clientX - last.x;
+                    _cropState.y += pt.clientY - last.y;
+                    last = { x: pt.clientX, y: pt.clientY };
+                    clampCrop(); applyCropTransform();
+                }
+            }
+            function onEnd() { last = null; lastPinchDist = null; img.classList.remove('dragging'); }
+            function onWheel(e) {
+                e.preventDefault();
+                const s = _cropState;
+                const minScale = Math.max(CROP_SIZE / s.imgW, CROP_SIZE / s.imgH);
+                const delta = e.deltaY > 0 ? 0.92 : 1.09;
+                const newScale = Math.min(Math.max(s.scale * delta, minScale), minScale * 8);
+                const wRect = wrap.getBoundingClientRect();
+                const cx = e.clientX - wRect.left, cy = e.clientY - wRect.top;
+                s.x = cx - (cx - s.x) * (newScale / s.scale);
+                s.y = cy - (cy - s.y) * (newScale / s.scale);
+                s.scale = newScale;
+                clampCrop(); applyCropTransform();
+            }
+
             wrap.addEventListener('mousedown', onStart);
             wrap.addEventListener('touchstart', onStart, {passive:false});
             window.addEventListener('mousemove', onMove);
             window.addEventListener('touchmove', onMove, {passive:false});
             window.addEventListener('mouseup', onEnd);
             window.addEventListener('touchend', onEnd);
+            wrap.addEventListener('wheel', onWheel, {passive:false});
             _cropDragCleanup = () => {
                 wrap.removeEventListener('mousedown', onStart);
                 wrap.removeEventListener('touchstart', onStart);
@@ -4120,6 +4215,7 @@
                 window.removeEventListener('touchmove', onMove);
                 window.removeEventListener('mouseup', onEnd);
                 window.removeEventListener('touchend', onEnd);
+                wrap.removeEventListener('wheel', onWheel);
             };
         }
         function confirmCrop() {
@@ -4130,8 +4226,9 @@
             ctx.beginPath(); ctx.arc(out/2, out/2, out/2, 0, Math.PI*2); ctx.clip();
             ctx.drawImage(document.getElementById('avatar-crop-img'), s.x*ratio, s.y*ratio, s.imgW*s.scale*ratio, s.imgH*s.scale*ratio);
             const url = canvas.toDataURL('image/png');
+            const cb = _cropCallback;
             closeCropModal();
-            if (_cropCallback) _cropCallback(url);
+            if (cb) cb(url);
         }
         function changeAvatarUrl(url) {
             if(url) {
@@ -5106,18 +5203,41 @@
                 const key = await _storeImg('ww_font', f.dataUrl);
                 return Object.assign({}, f, { dataUrl: key });
             }));
-            localStorage.setItem('wanwan_notes_v3', JSON.stringify(state.notes));
-            localStorage.setItem('wanwan_settings_v3', JSON.stringify(slim));
-            localStorage.setItem('wanwan_comment_preview', JSON.stringify({
-                enabled: state.commentPreviewEnabled,
-                name: state.commentPreviewName,
-                suffix: state.commentPreviewSuffix,
-                syncName: state.commentPreviewSyncName
-            }));
-            localStorage.setItem('wanwan_special_days', JSON.stringify({
-                days: state.specialDays,
-                pinnedId: state.specialPinnedId
-            }));
+            // 笔记优先存 IDB 兜底，再存 localStorage
+            const notesJson = JSON.stringify(state.notes);
+            try { await _idbSet('wanwan_notes_backup', notesJson); } catch(e) {}
+            try {
+                localStorage.setItem('wanwan_notes_v3', notesJson);
+            } catch(e) {
+                // localStorage 配额超了——尝试清理历史图片后重试
+                try {
+                    for (let i = localStorage.length - 1; i >= 0; i--) {
+                        const k = localStorage.key(i);
+                        if (k && (k.startsWith('ww_av') || k.startsWith('ww_bg') || k.startsWith('ww_charm') || k.startsWith('ww_fp') || k.startsWith('ww_font'))) {
+                            localStorage.removeItem(k);
+                        }
+                    }
+                    localStorage.setItem('wanwan_notes_v3', notesJson);
+                } catch(e2) {
+                    console.error('笔记保存失败！localStorage 配额已满', e2);
+                    // 至少 IDB 里有备份，不弹烦人的 alert
+                }
+            }
+            try { localStorage.setItem('wanwan_settings_v3', JSON.stringify(slim)); } catch(e) {}
+            try {
+                localStorage.setItem('wanwan_comment_preview', JSON.stringify({
+                    enabled: state.commentPreviewEnabled,
+                    name: state.commentPreviewName,
+                    suffix: state.commentPreviewSuffix,
+                    syncName: state.commentPreviewSyncName
+                }));
+            } catch(e) {}
+            try {
+                localStorage.setItem('wanwan_special_days', JSON.stringify({
+                    days: state.specialDays,
+                    pinnedId: state.specialPinnedId
+                }));
+            } catch(e) {}
         }
 
         // 懒加载 JSZip + FileSaver（只在导出/导入时请求）
@@ -5378,8 +5498,7 @@
 
                 <!-- 头像 tab -->
                 <div class="portrait-tab-panel active" id="pp-avatar">
-                    <button class="portrait-upload-btn" onclick="document.getElementById('avatar-input-p').click()">＋ 更换头像</button>
-                    <input type="file" id="avatar-input-p" style="display:none" accept="image/*" onchange="changeAvatar(this)">
+                    <label for="avatar-input-p" class="portrait-upload-btn" style="display:block;text-align:center;cursor:pointer;">＋ 更换头像</label>
                     <div id="portrait-history-avatars" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;"></div>
                     <div class="portrait-row">
                         <label>缩放</label>
@@ -5398,8 +5517,7 @@
 
                 <!-- 头像框 tab -->
                 <div class="portrait-tab-panel" id="pp-frame">
-                    <button class="portrait-upload-btn" onclick="document.getElementById('frame-input-p').click()">＋ 上传头像框</button>
-                    <input type="file" id="frame-input-p" style="display:none" accept="image/*" onchange="addFramePresetFromFile(this)">
+                    <label for="frame-input-p" class="portrait-upload-btn" style="display:block;text-align:center;cursor:pointer;">＋ 上传头像框</label>
                     <div class="portrait-presets" id="portrait-frame-presets"></div>
                     <div class="portrait-row">
                         <label>框大小</label>
@@ -5414,8 +5532,7 @@
                         <label>启用</label>
                         <input type="checkbox" id="p-charm-toggle" style="width:auto;margin:0;" onchange="onPortraitCharmToggle(this.checked)">
                     </div>
-                    <button class="portrait-upload-btn" onclick="document.getElementById('charm-input-p').click()" style="margin-top:8px;">＋ 更换挂件</button>
-                    <input type="file" id="charm-input-p" style="display:none" accept="image/*" onchange="changeCharm(this)">
+                    <label for="charm-input-p" class="portrait-upload-btn" style="display:block;text-align:center;cursor:pointer;margin-top:8px;">＋ 更换挂件</label>
                     <div id="history-charms" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;"></div>
                     <div class="portrait-row">
                         <label>大小</label>
@@ -6012,6 +6129,10 @@
         function _openModeDots() {
             const dots = document.getElementById('mode-dots');
             const bd   = document.getElementById('mode-dots-backdrop');
+            const btn  = document.getElementById('special-days-btn');
+            const r    = btn.getBoundingClientRect();
+            dots.style.left = (r.left + r.width / 2) + 'px';
+            dots.style.top  = (r.top  + r.height / 2) + 'px';
             dots.classList.add('open');
             bd.classList.add('show');
             _updateCurDot();
@@ -6036,7 +6157,13 @@
                 applyModeView(mode);
             });
         }
-        function cycleMode(e) {}
+        // 彩点 touch 绑定（touchend触发，避免preventDefault后click不响应）
+        ;['note','todo','pomodoro'].forEach(mode => {
+            const el = document.getElementById('mdot-' + mode);
+            if (!el) return;
+            el.addEventListener('touchend', e => { e.preventDefault(); e.stopPropagation(); switchModeDot(mode); }, { passive: false });
+            el.addEventListener('click', e => { e.stopPropagation(); switchModeDot(mode); });
+        });
 
         (function() {
             const btn = document.getElementById('special-days-btn');
@@ -6516,6 +6643,11 @@
         }
     </script>
 
+    <!-- portrait panel file inputs（移到body层避免overflow:hidden截断，用opacity:0避免display:none在iOS label触发失效） -->
+    <input type="file" id="avatar-input-p" style="opacity:0;position:fixed;width:0;height:0;pointer-events:none;" accept="image/*" onchange="changeAvatar(this)">
+    <input type="file" id="frame-input-p" style="opacity:0;position:fixed;width:0;height:0;pointer-events:none;" accept="image/*" onchange="addFramePresetFromFile(this)">
+    <input type="file" id="charm-input-p" style="opacity:0;position:fixed;width:0;height:0;pointer-events:none;" accept="image/*" onchange="changeCharm(this)">
+
     <!-- 圆形头像裁切 -->
     <div id="avatar-crop-modal">
         <div id="avatar-crop-wrap">
@@ -6526,7 +6658,7 @@
                 <circle cx="140" cy="140" r="136" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="2"/>
             </svg>
         </div>
-        <p class="avatar-crop-hint">拖动图片调整位置</p>
+        <p class="avatar-crop-hint">拖动调整位置 · 双指/滚轮缩放</p>
         <div class="avatar-crop-actions">
             <button class="avatar-crop-btn cancel" onclick="closeCropModal()">取消</button>
             <button class="avatar-crop-btn confirm" onclick="confirmCrop()">完成</button>
