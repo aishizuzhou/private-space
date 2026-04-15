@@ -169,11 +169,28 @@
             position: relative; z-index: 10;
             user-select: none; -webkit-user-select: none;
             -webkit-tap-highlight-color: transparent;
+            padding: 0;
+            transition: background 0.3s;
         }
-        .cal-btn[data-mode="note"]     { background: #bbe0e2; }
-        .cal-btn[data-mode="todo"]     { background: #eefbe0; }
-        .cal-btn[data-mode="pomodoro"] { background: #e6d0e3; }
-        .cal-btn-icon { display:block; width:26px; height:26px; object-fit:contain; filter:brightness(0) invert(1); }
+        .cal-btn[data-mode="note"]     { background: var(--mode-color-note, #bbe0e2); }
+        .cal-btn[data-mode="todo"]     { background: var(--mode-color-todo, #bdd4b0); }
+        .cal-btn[data-mode="pomodoro"] { background: var(--mode-color-pomo, #e6d0e3); }
+        .cal-btn-icon { display:block; width:20px; height:20px; object-fit:contain; filter:brightness(0) invert(1); vertical-align:middle; }
+        /* 右上角当前模式小圆点 */
+        .cal-btn::after {
+            content: '';
+            position: absolute;
+            top: -3px; right: -3px;
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.9);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+            pointer-events: none;
+            transition: background 0.3s;
+        }
+        .cal-btn[data-mode="note"]::after     { background: #bbe0e2; }
+        .cal-btn[data-mode="todo"]::after     { background: #bdd4b0; }
+        .cal-btn[data-mode="pomodoro"]::after { background: #e6d0e3; }
         /* 彩点 — 纯CSS展开，position:absolute在wrap内 */
         .mode-dots {
             position: fixed;
@@ -194,7 +211,7 @@
             -webkit-tap-highlight-color: transparent;
         }
         .mode-dot.note     { background: #bbe0e2; }
-        .mode-dot.todo     { background: #eefbe0; }
+        .mode-dot.todo     { background: #bdd4b0; }
         .mode-dot.pomodoro { background: #e6d0e3; }
         .mode-dots.open { pointer-events: auto; }
         .mode-dots.open .mode-dot { opacity: 1; pointer-events: auto; }
@@ -817,21 +834,34 @@
         /* ── 圆形头像裁切 ── */
         #avatar-crop-modal {
             display: none; position: fixed; inset: 0; z-index: 99999;
-            background: rgba(0,0,0,0.88); flex-direction: column;
+            background: rgba(0,0,0,0.92); flex-direction: column;
             align-items: center; justify-content: center;
         }
         #avatar-crop-modal.active { display: flex; }
-        #avatar-crop-wrap {
-            position: relative; width: 280px; height: 280px; flex-shrink: 0;
+        /* 全屏图片层，图片可拖出整个屏幕范围 */
+        #avatar-crop-fullscreen {
+            position: absolute; inset: 0; overflow: hidden;
         }
         #avatar-crop-img {
             position: absolute; transform-origin: 0 0;
             touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab;
         }
         #avatar-crop-img.dragging { cursor: grabbing; }
-        #avatar-crop-ring { position: absolute; inset: 0; pointer-events: none; }
-        .avatar-crop-hint { color: rgba(255,255,255,0.5); font-size: 0.8rem; margin-top: 16px; text-align: center; }
-        .avatar-crop-actions { display: flex; gap: 16px; margin-top: 24px; }
+        /* 全屏遮罩SVG，圆形镂空 */
+        #avatar-crop-ring {
+            position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;
+        }
+        /* 底部控制栏固定在底部 */
+        #avatar-crop-footer {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            display: flex; flex-direction: column; align-items: center;
+            padding: 16px 24px max(24px, env(safe-area-inset-bottom));
+            background: linear-gradient(transparent, rgba(0,0,0,0.7));
+            pointer-events: none;
+        }
+        #avatar-crop-footer > * { pointer-events: auto; }
+        .avatar-crop-hint { color: rgba(255,255,255,0.5); font-size: 0.8rem; margin-bottom: 16px; text-align: center; }
+        .avatar-crop-actions { display: flex; gap: 16px; }
         .avatar-crop-btn { padding: 10px 32px; border-radius: 24px; border: none; font-size: 0.95rem; cursor: pointer; }
         .avatar-crop-btn.cancel { background: rgba(255,255,255,0.12); color: #fff; }
         .avatar-crop-btn.confirm { background: var(--accent-color); color: var(--accent-text); }
@@ -858,7 +888,7 @@
         .portrait-panel {
             position: absolute;
             bottom: 0; left: 0; right: 0;
-            background: rgba(255,255,255,0.55);
+            background: rgba(255,255,255,0.72);
             backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             border-radius: 20px 20px 0 0;
             max-height: 62vh;
@@ -866,8 +896,9 @@
             flex-direction: column;
             overflow: hidden;
             box-shadow: 0 -4px 32px rgba(0,0,0,0.18);
+            border-top: 1px solid rgba(255,255,255,0.6);
         }
-        body.dark-mode .portrait-panel { background: #2a201c; }
+        body.dark-mode .portrait-panel { background: rgba(30,22,20,0.88); border-top-color: rgba(255,255,255,0.08); }
 
         /* 面板顶部拖条 + 标题 */
         .portrait-panel-header {
@@ -1505,6 +1536,7 @@
             border: 1px solid var(--glass-border);
             border-radius: 18px;
             padding: 16px;
+            margin-bottom: max(12px, env(safe-area-inset-bottom));
         }
         /* ===================== 待机模式 ===================== */
         #standby-overlay {
@@ -1651,9 +1683,6 @@
         /* ===================== 待机模式 END ===================== */
 
         /* ===================== 抽屉 & 模式切换 ===================== */
-        .cal-btn[data-mode="note"]     { background: #bbe0e2; }
-        .cal-btn[data-mode="todo"]     { background: #eefbe0; }
-        .cal-btn[data-mode="pomodoro"] { background: #e6d0e3; }
 
         #ink-splash {
             position: fixed; inset: 0;
@@ -1939,7 +1968,7 @@
             <input type="number" id="setting-charm-y" style="display:none" onchange="updateSettings()">
             <input type="range" id="setting-charm-size" style="display:none" min="20" max="150" onchange="updateSettings()">
             <input type="range" id="setting-charm-swing" style="display:none" min="0" max="45" onchange="updateSettings()">
-            <div id="history-avatars" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;"></div>
+            <div id="history-avatars" style="display:none;gap:6px;flex-wrap:wrap;margin-bottom:6px;"></div>
             <div id="frame-preset-list" style="display:none;"></div>
         </div>
 
@@ -2288,7 +2317,7 @@
                 <input type="file" id="file-input" style="display:none" multiple accept="image/*" onchange="handleImageUpload(this)">
                 <input type="file" id="file-input-camera" style="display:none" accept="image/*" capture="environment" onchange="handleImageUpload(this)">
                 <button class="ea-btn" id="ea-tag-btn" onclick="editorPopover('tag')">#</button>
-                <button class="ea-btn" onclick="document.getElementById('file-input-camera').click()" title="拍照">📸</button>
+                <button class="ea-btn" onclick="document.getElementById('file-input-camera').click()" title="拍照"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="18" height="18" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><path d="M38 36 Q38 28 46 28 L54 28 Q62 28 62 36"/><path d="M18 36 L18 72 Q18 80 26 80 L74 80 Q82 80 82 72 L82 36 Q82 28 74 28 L26 28 Q18 28 18 36Z"/><circle cx="50" cy="56" r="12" stroke-dasharray="60 16"/></svg></button>
                 <button class="ea-btn" onclick="document.getElementById('file-input').click()" title="从相册选择"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="18" height="18"><g stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M 55 15 L 25 15 A 10 10 0 0 0 15 25 L 15 75 A 10 10 0 0 0 25 85 L 75 85 A 10 10 0 0 0 85 75 L 85 45"/><path d="M 15 65 L 35 40 L 55 55 L 70 42 L 85 58"/><path d="M 75 40 L 75 10 M 62 22 L 75 10 L 88 22"/></g></svg></button>
                 <button class="ea-btn" id="ea-timer-btn" onclick="editorPopover('timer')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="14" height="14"><defs><mask id="ribbon-gap"><rect width="200" height="200" fill="white"/><path d="M 145 25 C 145 95, 55 105, 55 175" fill="none" stroke="black" stroke-width="44" stroke-linecap="butt"/></mask></defs><g fill="currentColor"><polygon points="25,12 175,12 162,38 38,38"/><polygon points="25,188 175,188 162,162 38,162"/></g><path d="M 55 25 C 55 95, 145 105, 145 175" fill="none" stroke="currentColor" stroke-width="26" stroke-linecap="butt" mask="url(#ribbon-gap)"/><path d="M 145 25 C 145 95, 55 105, 55 175" fill="none" stroke="currentColor" stroke-width="26" stroke-linecap="butt"/></svg></button>
                 <button class="ea-save-btn" onclick="saveItem()">↑</button>
@@ -3238,6 +3267,46 @@
             document.documentElement.style.setProperty('--accent-color-30', `rgba(${r},${g},${b},0.3)`);
             document.documentElement.style.setProperty('--accent-color-20', `rgba(${r},${g},${b},0.2)`);
 
+            // 模式切换按钮三色 —— 基于 accent 混入不同方向的色相偏移，保持柔和
+            // note: accent 混白，高亮度浅色
+            // todo: 向绿偏移（+120°），混白
+            // pomo: 向紫偏移（+240°/−120°），混白
+            (function setModeColors(r, g, b) {
+                function mix(c, w) { return Math.round(c * (1 - w) + 255 * w); }
+                function rotateHue(r, g, b, deg) {
+                    const cos = Math.cos(deg * Math.PI / 180);
+                    const sin = Math.sin(deg * Math.PI / 180);
+                    const m = [
+                        [0.213 + cos*0.787 - sin*0.213, 0.715 - cos*0.715 - sin*0.715, 0.072 - cos*0.072 + sin*0.928],
+                        [0.213 - cos*0.213 + sin*0.143, 0.715 + cos*0.285 + sin*0.140, 0.072 - cos*0.072 - sin*0.283],
+                        [0.213 - cos*0.213 - sin*0.787, 0.715 - cos*0.715 + sin*0.715, 0.072 + cos*0.928 + sin*0.072]
+                    ];
+                    return [
+                        Math.min(255, Math.max(0, Math.round(m[0][0]*r + m[0][1]*g + m[0][2]*b))),
+                        Math.min(255, Math.max(0, Math.round(m[1][0]*r + m[1][1]*g + m[1][2]*b))),
+                        Math.min(255, Math.max(0, Math.round(m[2][0]*r + m[2][1]*g + m[2][2]*b)))
+                    ];
+                }
+                const W = 0.52; // 混白比例，柔和
+                // note: 原色混白
+                const nr = mix(r, W), ng = mix(g, W), nb = mix(b, W);
+                // todo: +120° 混白
+                const [tr, tg, tb] = rotateHue(r, g, b, 120);
+                const tnr = mix(tr, W), tng = mix(tg, W), tnb = mix(tb, W);
+                // pomo: -120° 混白
+                const [pr, pg, pb_] = rotateHue(r, g, b, -120);
+                const pnr = mix(pr, W), png = mix(pg, W), pnb = mix(pb_, W);
+                const css = document.documentElement;
+                css.style.setProperty('--mode-color-note', `rgb(${nr},${ng},${nb})`);
+                css.style.setProperty('--mode-color-todo', `rgb(${tnr},${tng},${tnb})`);
+                css.style.setProperty('--mode-color-pomo', `rgb(${pnr},${png},${pnb})`);
+                // 小圆点：饱和度更高（混白少）
+                const DW = 0.2;
+                css.style.setProperty('--mode-dot-note', `rgb(${mix(r,DW)},${mix(g,DW)},${mix(b,DW)})`);
+                css.style.setProperty('--mode-dot-todo', `rgb(${mix(tr,DW)},${mix(tg,DW)},${mix(tb,DW)})`);
+                css.style.setProperty('--mode-dot-pomo', `rgb(${mix(pr,DW)},${mix(pg,DW)},${mix(pb_,DW)})`);
+            })(r, g, b);
+
             // 日历范围色跟着 accent-color 走，低饱和处理
             // 把 accent-color 混入灰色降饱和，透明度控制
             document.documentElement.style.setProperty('--cal-range-bg', `rgba(${r},${g},${b},0.18)`);
@@ -3532,7 +3601,11 @@
             const container = document.getElementById('portrait-history-avatars');
             if (!container) return;
             container.innerHTML = '';
-            const list = state.settings.historyAvatars || [];
+            const stored = state.settings.historyAvatars || [];
+            const cur = state.settings.currentAvatar;
+            const placeholder = 'https://via.placeholder.com/150';
+            const list = (cur && cur !== placeholder && !stored.includes(cur))
+                ? [cur, ...stored] : stored;
             list.forEach((src, i) => {
                 const img = document.createElement('img');
                 img.src = src;
@@ -3540,7 +3613,7 @@
                 img.onclick = () => selectHistoryAvatar(src);
                 setupLongPress(img, () => {
                     if (confirm('删除这张历史头像？')) {
-                        state.settings.historyAvatars = (state.settings.historyAvatars||[]).filter((_,idx)=>idx!==i);
+                        state.settings.historyAvatars = (state.settings.historyAvatars||[]).filter(u => u !== src);
                         saveData(); renderPortraitHistoryAvatars();
                     }
                 });
@@ -3970,19 +4043,25 @@
             const container = document.getElementById('history-avatars');
             if (!container) return;
             container.innerHTML = '';
-            const list = state.settings.historyAvatars || [];
+            const stored = state.settings.historyAvatars || [];
+            const cur = state.settings.currentAvatar;
+            const placeholder = 'https://via.placeholder.com/150';
+            // 当前头像不在历史中则加到最前
+            const list = (cur && cur !== placeholder && !stored.includes(cur))
+                ? [cur, ...stored] : stored;
             list.forEach((url, i) => {
                 const img = document.createElement('img');
                 img.src = url;
                 img.style.cssText = 'width:40px;height:40px;border-radius:50%;object-fit:cover;cursor:pointer;flex-shrink:0;';
                 img.title = '点击使用 / 长按删除';
+                if (url === cur) { img.style.outline = '2px solid var(--accent-color)'; img.style.outlineOffset = '1px'; }
                 img.onclick = () => {
                     state.settings.currentAvatar = url;
                     saveData(); applySettings(); renderHistoryAvatars();
                 };
                 setupLongPress(img, () => {
                     if (confirm('删除这张历史头像？')) {
-                        state.settings.historyAvatars = (state.settings.historyAvatars||[]).filter((_,idx)=>idx!==i);
+                        state.settings.historyAvatars = (state.settings.historyAvatars||[]).filter(u => u !== url);
                         saveData(); renderHistoryAvatars();
                     }
                 });
@@ -4023,11 +4102,20 @@
             });
         }
 
+        function _charmEntry() {
+            // 当前挂件参数快照
+            const s = state.settings;
+            return { url: s.charmImage, size: s.charmSize, swing: s.charmSwing, x: s.charmX, y: s.charmY };
+        }
         function addToHistoryCharms(url) {
             if (!url) return;
-            let list = state.settings.historyCharms || [];
-            list = list.filter(item => item !== url);
-            list.unshift(url);
+            const entry = _charmEntry();
+            if (!entry.url) return;
+            let list = (state.settings.historyCharms || []).map(item =>
+                typeof item === 'string' ? { url: item, size: 60, swing: 8, x: 20, y: 10 } : item
+            );
+            list = list.filter(item => item.url !== entry.url);
+            list.unshift(entry);
             if (list.length > 10) list = list.slice(0, 10);
             state.settings.historyCharms = list;
         }
@@ -4036,25 +4124,47 @@
             const container = document.getElementById('history-charms');
             if (!container) return;
             container.innerHTML = '';
-            const list = state.settings.historyCharms || [];
-            list.forEach((url, i) => {
+            // 规范化（兼容旧数据是字符串）
+            const rawList = (state.settings.historyCharms || []).map(item =>
+                typeof item === 'string' ? { url: item, size: 60, swing: 8, x: 20, y: 10 } : item
+            );
+            // 加入当前正在用的（不重复）
+            const cur = state.settings.charmImage;
+            const list = cur && !rawList.find(e => e.url === cur)
+                ? [_charmEntry(), ...rawList]
+                : rawList;
+            list.forEach((entry, i) => {
+                const wrap = document.createElement('div');
+                wrap.style.cssText = 'position:relative;flex-shrink:0;';
                 const img = document.createElement('img');
-                img.src = url;
-                img.style.cssText = 'width:40px;height:40px;border-radius:6px;object-fit:cover;cursor:pointer;flex-shrink:0;';
-                img.title = '点击使用 / 长按删除';
+                img.src = entry.url;
+                img.style.cssText = 'width:40px;height:40px;border-radius:6px;object-fit:cover;cursor:pointer;display:block;';
+                img.title = '点击切换（含参数）/ 长按删除';
+                // 当前正在用的加高亮
+                if (entry.url === state.settings.charmImage) {
+                    img.style.outline = '2px solid var(--accent-color)';
+                    img.style.outlineOffset = '1px';
+                }
                 img.onclick = () => {
-                    state.settings.charmImage = url;
-                    const el = document.getElementById('charm-display');
-                    if (el) el.querySelector('img').src = url;
-                    saveData(); applySettings(); renderHistoryCharms();
+                    // 保存当前参数到历史再切换
+                    addToHistoryCharms(state.settings.charmImage);
+                    state.settings.charmImage = entry.url;
+                    state.settings.charmSize  = entry.size  ?? 60;
+                    state.settings.charmSwing = entry.swing ?? 8;
+                    state.settings.charmX     = entry.x     ?? 20;
+                    state.settings.charmY     = entry.y     ?? 10;
+                    saveData(); applySettings(); syncPortraitFromState(); renderHistoryCharms();
                 };
                 setupLongPress(img, () => {
                     if (confirm('删除这个历史挂件？')) {
-                        state.settings.historyCharms = (state.settings.historyCharms||[]).filter((_,idx)=>idx!==i);
+                        state.settings.historyCharms = (state.settings.historyCharms||[])
+                            .map(it => typeof it === 'string' ? { url: it } : it)
+                            .filter(it => it.url !== entry.url);
                         saveData(); renderHistoryCharms();
                     }
                 });
-                container.appendChild(img);
+                wrap.appendChild(img);
+                container.appendChild(wrap);
             });
         }
 
@@ -4069,7 +4179,25 @@
         }
         let _cropCallback = null;
         let _cropState = { x:0, y:0, scale:1, imgW:0, imgH:0 };
-        const CROP_SIZE = 280, CROP_R = 136;
+        // 全屏裁剪：圆圈大小 = min(屏幕宽,屏幕高) * 0.8，居中
+        function _getCropCircle() {
+            const W = window.innerWidth, H = window.innerHeight;
+            const r = Math.floor(Math.min(W, H) * 0.4);
+            return { cx: W/2, cy: H/2, r, W, H };
+        }
+        function _updateCropRingSvg() {
+            const { cx, cy, r, W, H } = _getCropCircle();
+            const svg = document.getElementById('avatar-crop-ring');
+            svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+            const bg = document.getElementById('cmask-bg');
+            bg.setAttribute('width', W); bg.setAttribute('height', H);
+            const circle = document.getElementById('cmask-circle');
+            circle.setAttribute('cx', cx); circle.setAttribute('cy', cy); circle.setAttribute('r', r);
+            const overlay = document.getElementById('cmask-overlay');
+            overlay.setAttribute('width', W); overlay.setAttribute('height', H);
+            const ring = document.getElementById('cmask-ring');
+            ring.setAttribute('cx', cx); ring.setAttribute('cy', cy); ring.setAttribute('r', r);
+        }
 
         function changeAvatar(input) {
             if (!input.files[0]) return;
@@ -4096,11 +4224,14 @@
             _cropCallback = callback;
             const modal = document.getElementById('avatar-crop-modal');
             const img = document.getElementById('avatar-crop-img');
+            _updateCropRingSvg();
             img.src = '';
             img.onload = () => {
+                const { cx, cy, r } = _getCropCircle();
+                const CROP_SIZE = r * 2;
                 const iw = img.naturalWidth, ih = img.naturalHeight;
                 const s = Math.max(CROP_SIZE/iw, CROP_SIZE/ih);
-                _cropState = { x:(CROP_SIZE-iw*s)/2, y:(CROP_SIZE-ih*s)/2, scale:s, imgW:iw, imgH:ih };
+                _cropState = { x: cx - iw*s/2, y: cy - ih*s/2, scale:s, imgW:iw, imgH:ih };
                 applyCropTransform();
             };
             img.onerror = () => {
@@ -4122,13 +4253,17 @@
         }
         function clampCrop() {
             const s = _cropState, iw=s.imgW*s.scale, ih=s.imgH*s.scale;
-            s.x = Math.min(s.x, 0); s.y = Math.min(s.y, 0);
-            s.x = Math.max(s.x, CROP_SIZE-iw); s.y = Math.max(s.y, CROP_SIZE-ih);
+            const { cx, cy, r } = _getCropCircle();
+            // 图片必须覆盖圆圈区域
+            const minX = cx + r - iw, maxX = cx - r;
+            const minY = cy + r - ih, maxY = cy - r;
+            s.x = Math.min(Math.max(s.x, minX), maxX);
+            s.y = Math.min(Math.max(s.y, minY), maxY);
         }
         let _cropDragCleanup = null;
         function initCropDrag() {
             if (_cropDragCleanup) _cropDragCleanup();
-            const wrap = document.getElementById('avatar-crop-wrap');
+            const layer = document.getElementById('avatar-crop-fullscreen');
             const img = document.getElementById('avatar-crop-img');
             let last = null;
             let lastPinchDist = null;
@@ -4158,17 +4293,15 @@
             function onMove(e) {
                 e.preventDefault();
                 if (e.touches && e.touches.length === 2) {
-                    // 双指缩放
                     const dist = getTouchDist(e);
                     if (lastPinchDist !== null) {
                         const ratio = dist / lastPinchDist;
                         const center = getTouchCenter(e);
-                        const wRect = wrap.getBoundingClientRect();
-                        const cx = center.x - wRect.left, cy = center.y - wRect.top;
+                        const cx = center.x, cy = center.y;
                         const s = _cropState;
-                        const minScale = Math.max(CROP_SIZE / s.imgW, CROP_SIZE / s.imgH);
+                        const { r } = _getCropCircle();
+                        const minScale = Math.max(r*2 / s.imgW, r*2 / s.imgH);
                         const newScale = Math.min(Math.max(s.scale * ratio, minScale), minScale * 8);
-                        // 以双指中心为缩放锚点
                         s.x = cx - (cx - s.x) * (newScale / s.scale);
                         s.y = cy - (cy - s.y) * (newScale / s.scale);
                         s.scale = newScale;
@@ -4190,41 +4323,46 @@
             function onWheel(e) {
                 e.preventDefault();
                 const s = _cropState;
-                const minScale = Math.max(CROP_SIZE / s.imgW, CROP_SIZE / s.imgH);
+                const { r } = _getCropCircle();
+                const minScale = Math.max(r*2 / s.imgW, r*2 / s.imgH);
                 const delta = e.deltaY > 0 ? 0.92 : 1.09;
                 const newScale = Math.min(Math.max(s.scale * delta, minScale), minScale * 8);
-                const wRect = wrap.getBoundingClientRect();
-                const cx = e.clientX - wRect.left, cy = e.clientY - wRect.top;
+                const cx = e.clientX, cy = e.clientY;
                 s.x = cx - (cx - s.x) * (newScale / s.scale);
                 s.y = cy - (cy - s.y) * (newScale / s.scale);
                 s.scale = newScale;
                 clampCrop(); applyCropTransform();
             }
 
-            wrap.addEventListener('mousedown', onStart);
-            wrap.addEventListener('touchstart', onStart, {passive:false});
+            layer.addEventListener('mousedown', onStart);
+            layer.addEventListener('touchstart', onStart, {passive:false});
             window.addEventListener('mousemove', onMove);
             window.addEventListener('touchmove', onMove, {passive:false});
             window.addEventListener('mouseup', onEnd);
             window.addEventListener('touchend', onEnd);
-            wrap.addEventListener('wheel', onWheel, {passive:false});
+            layer.addEventListener('wheel', onWheel, {passive:false});
             _cropDragCleanup = () => {
-                wrap.removeEventListener('mousedown', onStart);
-                wrap.removeEventListener('touchstart', onStart);
+                layer.removeEventListener('mousedown', onStart);
+                layer.removeEventListener('touchstart', onStart);
                 window.removeEventListener('mousemove', onMove);
                 window.removeEventListener('touchmove', onMove);
                 window.removeEventListener('mouseup', onEnd);
                 window.removeEventListener('touchend', onEnd);
-                wrap.removeEventListener('wheel', onWheel);
+                layer.removeEventListener('wheel', onWheel);
             };
         }
         function confirmCrop() {
             if (_cropDragCleanup) { _cropDragCleanup(); _cropDragCleanup = null; }
             const canvas = document.getElementById('avatar-crop-canvas'), out = 400;
             canvas.width = out; canvas.height = out;
-            const ctx = canvas.getContext('2d'), s = _cropState, ratio = out/CROP_SIZE;
+            const ctx = canvas.getContext('2d'), s = _cropState;
+            const { cx, cy, r } = _getCropCircle();
+            const ratio = out / (r * 2);
+            // 将图片相对于圆圈左上角的坐标映射到canvas
+            const drawX = (s.x - (cx - r)) * ratio;
+            const drawY = (s.y - (cy - r)) * ratio;
             ctx.beginPath(); ctx.arc(out/2, out/2, out/2, 0, Math.PI*2); ctx.clip();
-            ctx.drawImage(document.getElementById('avatar-crop-img'), s.x*ratio, s.y*ratio, s.imgW*s.scale*ratio, s.imgH*s.scale*ratio);
+            ctx.drawImage(document.getElementById('avatar-crop-img'), drawX, drawY, s.imgW*s.scale*ratio, s.imgH*s.scale*ratio);
             const url = canvas.toDataURL('image/png');
             const cb = _cropCallback;
             closeCropModal();
@@ -5546,12 +5684,17 @@
                     </div>
                     <div class="portrait-row">
                         <label>X 坐标</label>
-                        <input type="number" id="p-charm-x" placeholder="距右侧px" oninput="onPortraitCharmX(this.value)">
+                        <button class="portrait-snap-btn" onclick="state.settings.charmX=Math.max(0,(+state.settings.charmX||0)-2);saveData();applySettings();syncPortraitFromState()">−</button>
+                        <input type="number" id="p-charm-x" placeholder="距右侧px" oninput="onPortraitCharmX(this.value)" style="flex:1;">
+                        <button class="portrait-snap-btn" onclick="state.settings.charmX=(+state.settings.charmX||0)+2;saveData();applySettings();syncPortraitFromState()">＋</button>
                         <button class="portrait-snap-btn" onclick="setCharmX(20);syncPortraitFromState()">贴右</button>
+                        <button class="portrait-snap-btn" onclick="setCharmX(-(parseInt(getComputedStyle(document.documentElement).getPropertyValue('--charm-size'))||50)-4);syncPortraitFromState()">贴左</button>
                     </div>
                     <div class="portrait-row">
                         <label>Y 坐标</label>
-                        <input type="number" id="p-charm-y" placeholder="距顶部px" oninput="onPortraitCharmY(this.value)">
+                        <button class="portrait-snap-btn" onclick="state.settings.charmY=Math.max(0,(+state.settings.charmY||0)-2);saveData();applySettings();syncPortraitFromState()">−</button>
+                        <input type="number" id="p-charm-y" placeholder="距顶部px" oninput="onPortraitCharmY(this.value)" style="flex:1;">
+                        <button class="portrait-snap-btn" onclick="state.settings.charmY=(+state.settings.charmY||0)+2;saveData();applySettings();syncPortraitFromState()">＋</button>
                         <button class="portrait-snap-btn" onclick="setCharmY(0);syncPortraitFromState()">顶</button>
                         <button class="portrait-snap-btn" onclick="snapCharmY30();syncPortraitFromState()">30%</button>
                     </div>
@@ -6121,7 +6264,13 @@
         // --- 同步统计到抽屉 ---
         // --- 模式切换 & 墨水扩散 ---
         const MODES = ['note', 'todo', 'pomodoro'];
-        const MODE_COLORS = { note: '#bbe0e2', todo: '#eefbe0', pomodoro: '#e6d0e3' };
+        const MODE_COLORS = new Proxy({}, {
+            get(_, mode) {
+                const map = { note: '--mode-color-note', todo: '--mode-color-todo', pomodoro: '--mode-color-pomo' };
+                const v = getComputedStyle(document.documentElement).getPropertyValue(map[mode] || '--accent-color');
+                return v.trim() || '#bbe0e2';
+            }
+        });
         const MODE_LABELS = { note: '笔记', todo: '待办', pomodoro: '番茄' };
 
         let _lpTimer = null;
@@ -6289,6 +6438,32 @@
         }
 
         // ---- 确认弹窗 ----
+        function showActionSheet(actions) {
+            // 简单底部弹出菜单
+            const existing = document.getElementById('_action-sheet-overlay');
+            if (existing) existing.remove();
+            const overlay = document.createElement('div');
+            overlay.id = '_action-sheet-overlay';
+            overlay.style.cssText = 'position:fixed;inset:0;z-index:999999;display:flex;flex-direction:column;justify-content:flex-end;background:rgba(0,0,0,0.35);';
+            const sheet = document.createElement('div');
+            sheet.style.cssText = 'background:rgba(255,255,255,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:18px 18px 0 0;padding:12px 16px max(20px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:6px;';
+            actions.forEach(a => {
+                const btn = document.createElement('button');
+                btn.textContent = a.label;
+                btn.style.cssText = `padding:13px;border-radius:12px;border:none;font-size:0.95rem;cursor:pointer;background:${a.danger?'rgba(255,80,80,0.1)':'rgba(0,0,0,0.05)'};color:${a.danger?'#c0392b':'var(--text-color)'};font-weight:500;`;
+                btn.onclick = () => { overlay.remove(); a.fn(); };
+                sheet.appendChild(btn);
+            });
+            const cancel = document.createElement('button');
+            cancel.textContent = '取消';
+            cancel.style.cssText = 'padding:13px;border-radius:12px;border:none;font-size:0.95rem;cursor:pointer;background:rgba(0,0,0,0.05);color:var(--text-color);margin-top:4px;';
+            cancel.onclick = () => overlay.remove();
+            sheet.appendChild(cancel);
+            overlay.appendChild(sheet);
+            overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+            document.body.appendChild(overlay);
+        }
+
         function _confirmDelete(msg, onConfirm) {
             // 复用现有 modal 或创建简单 confirm
             if (confirm(msg)) onConfirm();
@@ -6309,12 +6484,23 @@
                 btn.textContent = sec.name;
                 btn.onclick = () => { _currentSectionId = sec.id; renderTodoPage(); };
                 setupLongPress(btn, () => {
-                    const newName = prompt('分区名称：', sec.name);
-                    if (newName && newName.trim()) {
-                        sec.name = newName.trim();
-                        saveTodoSections();
-                        renderTodoTabs();
-                    }
+                    const actions = [
+                        { label: '改名', fn: () => {
+                            const newName = prompt('分区名称：', sec.name);
+                            if (newName && newName.trim()) {
+                                sec.name = newName.trim();
+                                saveTodoSections(); renderTodoTabs();
+                            }
+                        }},
+                        { label: '删除', fn: () => {
+                            if (state.todoSections.length <= 1) { alert('至少保留一个分区'); return; }
+                            if (!confirm(`删除「${sec.name}」及其所有待办？`)) return;
+                            state.todoSections = state.todoSections.filter(s => s.id !== sec.id);
+                            if (_currentSectionId === sec.id) _currentSectionId = state.todoSections[0]?.id;
+                            saveTodoSections(); renderTodoPage();
+                        }}
+                    ];
+                    showActionSheet(actions);
                 });
                 container.appendChild(btn);
             });
@@ -6650,18 +6836,28 @@
 
     <!-- 圆形头像裁切 -->
     <div id="avatar-crop-modal">
-        <div id="avatar-crop-wrap">
+        <!-- 全屏图片拖拽层 -->
+        <div id="avatar-crop-fullscreen">
             <img id="avatar-crop-img" draggable="false">
-            <svg id="avatar-crop-ring" viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg">
-                <defs><mask id="circle-mask"><rect width="280" height="280" fill="white"/><circle cx="140" cy="140" r="136" fill="black"/></mask></defs>
-                <rect width="280" height="280" fill="rgba(0,0,0,0.55)" mask="url(#circle-mask)"/>
-                <circle cx="140" cy="140" r="136" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="2"/>
+            <!-- 全屏遮罩SVG，动态尺寸，圆形镂空居中 -->
+            <svg id="avatar-crop-ring" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <mask id="circle-mask-fs">
+                        <rect id="cmask-bg" fill="white"/>
+                        <circle id="cmask-circle" fill="black"/>
+                    </mask>
+                </defs>
+                <rect id="cmask-overlay" fill="rgba(0,0,0,0.6)" mask="url(#circle-mask-fs)"/>
+                <circle id="cmask-ring" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="2"/>
             </svg>
         </div>
-        <p class="avatar-crop-hint">拖动调整位置 · 双指/滚轮缩放</p>
-        <div class="avatar-crop-actions">
-            <button class="avatar-crop-btn cancel" onclick="closeCropModal()">取消</button>
-            <button class="avatar-crop-btn confirm" onclick="confirmCrop()">完成</button>
+        <!-- 固定底部控制栏 -->
+        <div id="avatar-crop-footer">
+            <p class="avatar-crop-hint">拖动调整位置 · 双指/滚轮缩放</p>
+            <div class="avatar-crop-actions">
+                <button class="avatar-crop-btn cancel" onclick="closeCropModal()">取消</button>
+                <button class="avatar-crop-btn confirm" onclick="confirmCrop()">完成</button>
+            </div>
         </div>
         <canvas id="avatar-crop-canvas" style="display:none;"></canvas>
     </div>
