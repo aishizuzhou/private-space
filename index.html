@@ -170,12 +170,10 @@
             user-select: none; -webkit-user-select: none;
             -webkit-tap-highlight-color: transparent;
             padding: 0;
+            background: var(--accent-color);
             transition: background 0.3s;
         }
-        .cal-btn[data-mode="note"]     { background: var(--mode-color-note, #bbe0e2); }
-        .cal-btn[data-mode="todo"]     { background: var(--mode-color-todo, #bdd4b0); }
-        .cal-btn[data-mode="pomodoro"] { background: var(--mode-color-pomo, #e6d0e3); }
-        .cal-btn-icon { display:block; width:20px; height:20px; object-fit:contain; filter:brightness(0) invert(1); vertical-align:middle; }
+        .cal-btn-icon { display:block; width:20px; height:20px; object-fit:contain; vertical-align:middle; }
         /* 右上角当前模式小圆点 */
         .cal-btn::after {
             content: '';
@@ -3256,12 +3254,14 @@
             document.documentElement.style.setProperty('--accent-color', s.themeColor);
 
             // accent-color 文字可读性：用感知亮度公式判断白字还是黑字
-            const hex = s.themeColor.replace('#', '');
+            const rawHex = (s.themeColor || '#d4929a').replace('#', '');
+            const hex = /^[0-9a-fA-F]{6}$/.test(rawHex) ? rawHex : 'd4929a';
             const r = parseInt(hex.substring(0,2), 16);
             const g = parseInt(hex.substring(2,4), 16);
             const b = parseInt(hex.substring(4,6), 16);
             const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
             document.documentElement.style.setProperty('--accent-text', luminance > 186 ? '#222' : '#fff');
+            document.querySelectorAll('.cal-btn-icon').forEach(el => el.style.filter = luminance > 186 ? 'brightness(0)' : 'brightness(0) invert(1)');
             document.documentElement.style.setProperty('--accent-color-60', `rgba(${r},${g},${b},0.6)`);
             document.documentElement.style.setProperty('--accent-color-40', `rgba(${r},${g},${b},0.4)`);
             document.documentElement.style.setProperty('--accent-color-30', `rgba(${r},${g},${b},0.3)`);
@@ -3273,38 +3273,11 @@
             // pomo: 向紫偏移（+240°/−120°），混白
             (function setModeColors(r, g, b) {
                 function mix(c, w) { return Math.round(c * (1 - w) + 255 * w); }
-                function rotateHue(r, g, b, deg) {
-                    const cos = Math.cos(deg * Math.PI / 180);
-                    const sin = Math.sin(deg * Math.PI / 180);
-                    const m = [
-                        [0.213 + cos*0.787 - sin*0.213, 0.715 - cos*0.715 - sin*0.715, 0.072 - cos*0.072 + sin*0.928],
-                        [0.213 - cos*0.213 + sin*0.143, 0.715 + cos*0.285 + sin*0.140, 0.072 - cos*0.072 - sin*0.283],
-                        [0.213 - cos*0.213 - sin*0.787, 0.715 - cos*0.715 + sin*0.715, 0.072 + cos*0.928 + sin*0.072]
-                    ];
-                    return [
-                        Math.min(255, Math.max(0, Math.round(m[0][0]*r + m[0][1]*g + m[0][2]*b))),
-                        Math.min(255, Math.max(0, Math.round(m[1][0]*r + m[1][1]*g + m[1][2]*b))),
-                        Math.min(255, Math.max(0, Math.round(m[2][0]*r + m[2][1]*g + m[2][2]*b)))
-                    ];
-                }
-                const W = 0.52; // 混白比例，柔和
-                // note: 原色混白
-                const nr = mix(r, W), ng = mix(g, W), nb = mix(b, W);
-                // todo: +120° 混白
-                const [tr, tg, tb] = rotateHue(r, g, b, 120);
-                const tnr = mix(tr, W), tng = mix(tg, W), tnb = mix(tb, W);
-                // pomo: -120° 混白
-                const [pr, pg, pb_] = rotateHue(r, g, b, -120);
-                const pnr = mix(pr, W), png = mix(pg, W), pnb = mix(pb_, W);
-                const css = document.documentElement;
-                css.style.setProperty('--mode-color-note', `rgb(${nr},${ng},${nb})`);
-                css.style.setProperty('--mode-color-todo', `rgb(${tnr},${tng},${tnb})`);
-                css.style.setProperty('--mode-color-pomo', `rgb(${pnr},${png},${pnb})`);
-                // 小圆点：饱和度更高（混白少）
                 const DW = 0.2;
+                const css = document.documentElement;
                 css.style.setProperty('--mode-dot-note', `rgb(${mix(r,DW)},${mix(g,DW)},${mix(b,DW)})`);
-                css.style.setProperty('--mode-dot-todo', `rgb(${mix(tr,DW)},${mix(tg,DW)},${mix(tb,DW)})`);
-                css.style.setProperty('--mode-dot-pomo', `rgb(${mix(pr,DW)},${mix(pg,DW)},${mix(pb_,DW)})`);
+                css.style.setProperty('--mode-dot-todo', `rgb(${mix(r,DW)},${mix(g,DW)},${mix(b,DW)})`);
+                css.style.setProperty('--mode-dot-pomo', `rgb(${mix(r,DW)},${mix(g,DW)},${mix(b,DW)})`);
             })(r, g, b);
 
             // 日历范围色跟着 accent-color 走，低饱和处理
@@ -6814,6 +6787,8 @@
             _currentMode = savedMode;
             const btn = document.getElementById('special-days-btn');
             if (btn) btn.dataset.mode = _currentMode;
+            // 确保图标filter在load后也生效
+            // 图标颜色由applySettings统一处理
         });
 
         // ===================== 抽屉 & 模式切换 END =====================
