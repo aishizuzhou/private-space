@@ -65,7 +65,7 @@
         body.dark-mode .cal-month-label { color: #e0d8e8; }
         body.dark-mode .cal-nav { color: #aaa; }
         body.dark-mode .stats-cell { background: rgba(255,255,255,0.06); }
-        body.dark-mode .stats-cell .stats-val { color: #e0d8e8; }
+        body.dark-mode .stats-cell .stats-val { color: var(--text-color); }
         body.dark-mode .filter-tag { background: rgba(255,255,255,0.08); color: #e0d8e8; }
         body.dark-mode .filter-tag.active { background: rgba(255,255,255,0.18); }
         body.dark-mode .tag { background: rgba(255,255,255,0.1); color: #c8bcd8; }
@@ -347,7 +347,7 @@
         }
         .stats-cell:hover { background:rgba(0,0,0,0.07); }
         .stats-cell .stats-label { font-size:0.7rem; color:#aaa; }
-        .stats-cell .stats-val { font-size:1.2rem; font-weight:bold; color:var(--accent-color); }
+        .stats-cell .stats-val { font-size:1.2rem; font-weight:bold; color:var(--text-color); }
         .stats-cell .stats-sub { font-size:0.65rem; color:#bbb; }
 
         .status-bar {
@@ -779,6 +779,7 @@
             border: 1px solid #ddd;
             border-radius: 20px;
             font-size: 0.8rem;
+            color: var(--text-color);
             cursor: pointer;
             user-select: none;
             transition: background 0.2s, box-shadow 0.2s;
@@ -821,7 +822,7 @@
             box-shadow: 0 0 0 2px #ff4d4d;
         }
         .frame-preset-label {
-            font-size: 0.7rem; color: #666; text-align: center;
+            font-size: 0.7rem; color: var(--text-color); opacity: 0.65; text-align: center;
             max-width: 55px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
         }
         /* ═开场加载遮罩═ */
@@ -1920,8 +1921,8 @@
             <div style="flex:1;">
                 <div class="drawer-name" id="drawer-display-name">宛宛</div>
                 <div style="display:flex;align-items:center;gap:8px;margin-top:3px;">
-                    <span style="font-size:0.7rem;opacity:0.38;">昵称 / 签名 / 昵称颜色</span>
-                    <button onclick="event.stopPropagation();openPortrait();" style="padding:2px 10px;border-radius:20px;background:var(--accent-color);color:#fff;border:none;font-size:0.65rem;cursor:pointer;opacity:0.85;">调整形象</button>
+                    <span style="font-size:0.7rem;opacity:0.38;color:var(--text-color);">昵称 / 签名 / 昵称颜色</span>
+                    <button onclick="event.stopPropagation();openPortrait();" style="padding:2px 10px;border-radius:20px;background:var(--accent-color);color:var(--accent-text);border:none;font-size:0.65rem;cursor:pointer;opacity:0.85;">调整形象</button>
                 </div>
             </div>
             <span id="drawer-avatar-arrow" style="font-size:0.8rem;opacity:0.3;transition:transform 0.2s;flex-shrink:0;">▾</span>
@@ -2081,10 +2082,10 @@
                 </div>
                 <div class="drawer-row" style="align-items:flex-start;">
                     <label style="margin-top:2px;">字体颜色</label>
-                    <div id="lockable-textcolor" style="flex:1;">
-                        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;"><span style="font-size:0.72rem;color:#aaa;width:12px;">R</span><input type="range" id="tc-r" min="0" max="255" value="51" style="flex:1;height:5px;accent-color:#f66;" oninput="onRgbSliderChange()"><span id="tc-r-val" style="font-size:0.72rem;color:#aaa;width:22px;text-align:right;">51</span></div>
-                        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;"><span style="font-size:0.72rem;color:#aaa;width:12px;">G</span><input type="range" id="tc-g" min="0" max="255" value="51" style="flex:1;height:5px;accent-color:#4c4;" oninput="onRgbSliderChange()"><span id="tc-g-val" style="font-size:0.72rem;color:#aaa;width:22px;text-align:right;">51</span></div>
-                        <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:0.72rem;color:#aaa;width:12px;">B</span><input type="range" id="tc-b" min="0" max="255" value="51" style="flex:1;height:5px;accent-color:#66f;" oninput="onRgbSliderChange()"><span id="tc-b-val" style="font-size:0.72rem;color:#aaa;width:22px;text-align:right;">51</span></div>
+                    <div id="lockable-textcolor" style="flex:1;min-width:0;">
+                        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;"><span style="font-size:0.72rem;color:#aaa;width:12px;">R</span><input type="range" id="tc-r" min="0" max="255" value="51" style="flex:1;min-width:0;max-width:120px;height:5px;accent-color:#f66;" oninput="onRgbSliderChange()"><span id="tc-r-val" style="font-size:0.72rem;color:#aaa;width:22px;text-align:right;">51</span></div>
+                        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;"><span style="font-size:0.72rem;color:#aaa;width:12px;">G</span><input type="range" id="tc-g" min="0" max="255" value="51" style="flex:1;min-width:0;max-width:120px;height:5px;accent-color:#4c4;" oninput="onRgbSliderChange()"><span id="tc-g-val" style="font-size:0.72rem;color:#aaa;width:22px;text-align:right;">51</span></div>
+                        <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:0.72rem;color:#aaa;width:12px;">B</span><input type="range" id="tc-b" min="0" max="255" value="51" style="flex:1;min-width:0;max-width:120px;height:5px;accent-color:#66f;" oninput="onRgbSliderChange()"><span id="tc-b-val" style="font-size:0.72rem;color:#aaa;width:22px;text-align:right;">51</span></div>
                         <div style="display:flex;align-items:center;gap:6px;margin-top:4px;"><div id="text-color-preview" style="width:24px;height:18px;border-radius:4px;border:1px solid #ddd;"></div><span id="text-color-hex" style="font-size:0.72rem;color:#aaa;">#333333</span></div>
                     </div>
                     <button class="lock-btn" id="lock-textcolor" onclick="toggleLock('textcolor')" style="margin-top:2px;">🔓</button>
@@ -2288,11 +2289,11 @@
     <div class="modal" id="tag-manage-modal">
         <div class="modal-content" style="max-height:70vh; display:flex; flex-direction:column;">
             <h3 style="margin-bottom:12px;">标签管理</h3>
-            <p style="font-size:0.8rem; color:#999; margin-bottom:10px;">点击标签选中，再点删除按钮移除（仅删除标签，笔记保留）</p>
+            <p style="font-size:0.8rem; color:#999; margin-bottom:10px;">点击给该笔记使用标签，再次点击取消使用</p>
             <div id="tag-manage-list" style="flex:1; overflow-y:auto; display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px;"></div>
             <div class="btn-group">
                 <button onclick="closeModal('tag-manage-modal')">关闭</button>
-                <button class="btn-primary" id="tag-delete-btn" onclick="deleteSelectedTags()" style="background:#ff6b6b;">删除所选</button>
+                <button class="btn-primary" id="tag-delete-btn" onclick="saveNoteTags()">保存</button>
             </div>
         </div>
     </div>
@@ -2855,7 +2856,7 @@
                         <span class="note-action-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${item.isPinned ? '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>' : '<line x1="12" y1="5" x2="12" y2="19"/><polyline points="5 12 12 5 19 12"/>'}</svg></span>
                         <span class="note-action-label">${item.isPinned ? '取消置顶' : '置顶'}</span>
                     </button>
-                    <button class="note-action-btn" onclick="event.stopPropagation();openTagManager();resetCardSwipe(this)">
+                    <button class="note-action-btn" onclick="event.stopPropagation();openTagManager(${item.id});resetCardSwipe(this)">
                         <span class="note-action-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></span>
                         <span class="note-action-label">标签</span>
                     </button>
@@ -4807,26 +4808,34 @@
             closeDrawer();
             renderList(); renderTags();
         }
-        let _selectedTagsToDelete = new Set();
-        function openTagManager() {
-            _selectedTagsToDelete = new Set();
+        let _tagManagerNoteId = null;
+        let _tagManagerSelected = new Set();
+        function openTagManager(noteId) {
+            _tagManagerNoteId = noteId;
+            const note = state.notes.find(n => n.id === noteId);
+            _tagManagerSelected = new Set(note ? note.tags : []);
             const allTags = new Set();
             state.notes.forEach(n => n.tags.forEach(t => allTags.add(t)));
             const list = document.getElementById('tag-manage-list');
             list.innerHTML = '';
+            if (allTags.size === 0) {
+                list.innerHTML = '<div style="color:#bbb;font-size:0.82rem;padding:8px 0;">还没有任何标签</div>';
+            }
             allTags.forEach(tag => {
                 const el = document.createElement('div');
                 el.className = 'filter-tag';
                 el.innerText = tag;
                 el.style.cursor = 'pointer';
+                const active = _tagManagerSelected.has(tag);
+                if (active) { el.style.background = 'var(--accent, #a78bfa)'; el.style.color = '#fff'; }
                 el.onclick = () => {
-                    if (_selectedTagsToDelete.has(tag)) {
-                        _selectedTagsToDelete.delete(tag);
+                    if (_tagManagerSelected.has(tag)) {
+                        _tagManagerSelected.delete(tag);
                         el.style.background = '';
                         el.style.color = '';
                     } else {
-                        _selectedTagsToDelete.add(tag);
-                        el.style.background = '#ff6b6b';
+                        _tagManagerSelected.add(tag);
+                        el.style.background = 'var(--accent, #a78bfa)';
                         el.style.color = '#fff';
                     }
                 };
@@ -4835,16 +4844,10 @@
             openModal('tag-manage-modal');
         }
 
-        function deleteSelectedTags() {
-            if (_selectedTagsToDelete.size === 0) return;
-            if (!confirm(`确认删除这 ${_selectedTagsToDelete.size} 个标签？（笔记本身保留）`)) return;
-            state.notes.forEach(note => {
-                note.tags = note.tags.filter(t => !_selectedTagsToDelete.has(t));
-            });
-            // 同步清理blockedTags和filterTag
-            state.blockedTags = state.blockedTags.filter(t => !_selectedTagsToDelete.has(t));
-            if (_selectedTagsToDelete.has(state.filterTag)) state.filterTag = null;
-            _selectedTagsToDelete = new Set();
+        function saveNoteTags() {
+            if (_tagManagerNoteId === null) { closeModal('tag-manage-modal'); return; }
+            const note = state.notes.find(n => n.id === _tagManagerNoteId);
+            if (note) { note.tags = Array.from(_tagManagerSelected); }
             saveData(); renderList(); renderTags();
             closeModal('tag-manage-modal');
         }
