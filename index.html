@@ -18,8 +18,9 @@
         }
 
         :root {
-            --bg-image: none;
+            --bg-image: linear-gradient(135deg, #e8d5d8 0%, #c8d8e8 50%, #d5e8d5 100%);
             --glass-bg: rgba(255, 255, 255, 0.45);
+            --page-bg: #f5f5f5;
             --glass-border: rgba(255, 255, 255, 0.35);
             --text-color: #4a3c38;
             --name-color: #4a3c38;
@@ -40,7 +41,7 @@
             --frame-scale: 1;
             --content-padding: 16px;
             --glass-blur: 15px;
-            --card-opacity: 0.96;
+            --card-opacity: 0.55;
             --cal-range-bg: rgba(180,140,145,0.22);
             --cal-dot-bg: rgba(160,120,125,0.65);
             --cal-text-on-range: #3a2a2c;
@@ -49,13 +50,14 @@
 
         body.dark-mode {
             --glass-bg: rgba(0, 0, 0, 0.35);
+            --page-bg: #1e1714;
             --glass-border: rgba(255, 255, 255, 0.1);
             --text-color: #e8ddd8;
             --name-color: #e8ddd8;
         }
         body.dark-mode #app-container { background: rgba(28, 22, 18, 0.78); }
-        body.dark-mode .note-card { background: rgba(42, 34, 30, 0.98) !important; border-color: rgba(255,255,255,0.07) !important; }
-        body.dark-mode .note-card:hover, body.dark-mode .note-card:active { background: rgba(60, 46, 40, 0.75); }
+        body.dark-mode .note-card { background: rgba(42, 34, 30, 0.72) !important; border-color: transparent !important; }
+        body.dark-mode .note-card:hover, body.dark-mode .note-card:active { background: rgba(60, 46, 40, 0.85) !important; }
         body.dark-mode .modal-content { background: rgba(28, 22, 18, 0.97) !important; border-color: rgba(255,255,255,0.08); color: #e0d8e8; }
         body.dark-mode .modal-content h3, body.dark-mode .modal-content label, body.dark-mode .settings-title { color: #c8bcd8; }
         body.dark-mode .modal-content input, body.dark-mode .modal-content textarea, body.dark-mode .modal-content select { background: rgba(255,255,255,0.06); color: #e0d8e8; border-color: rgba(255,255,255,0.1); }
@@ -66,9 +68,9 @@
         body.dark-mode .cal-nav { color: #aaa; }
         body.dark-mode .stats-cell { background: rgba(255,255,255,0.06); }
         body.dark-mode .stats-cell .stats-val { color: var(--text-color); }
-        body.dark-mode .filter-tag { background: rgba(255,255,255,0.08); color: #e0d8e8; }
-        body.dark-mode .filter-tag.active { background: rgba(255,255,255,0.18); }
-        body.dark-mode .tag { background: rgba(255,255,255,0.1); color: #c8bcd8; }
+        body.dark-mode .filter-tag { background: none; color: var(--text-color); }
+        body.dark-mode .filter-tag.active { background: none; color: var(--accent-color); }
+        body.dark-mode .tag { background: none; color: var(--text-color); }
         body.dark-mode .cal-input-row input { background: rgba(255,255,255,0.06); color: #e0d8e8; border-color: rgba(255,255,255,0.1); }
         body.dark-mode #full-note-body { color: #e0d8e8; background: rgba(22, 17, 32, 0.97); }
         body.dark-mode .glass-modal-content { background: rgba(28, 22, 18, 0.97) !important; }
@@ -93,7 +95,7 @@
 
         #app-container {
             width: 100%; height: 100%; max-width: 500px;
-            background: var(--glass-bg);
+            background: rgba(255,255,255,0.15);
             backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
             border: 1px solid var(--glass-border);
             box-shadow: 0 8px 32px 0 rgba(0,0,0,0.15);
@@ -227,7 +229,7 @@
             margin-bottom: 10px;
         }
         .cal-nav { background:none; border:none; font-size:1.1rem; cursor:pointer; padding:4px 8px; color:#666; }
-        .cal-month-label { font-size:0.9rem; font-weight:bold; color:#333; cursor:pointer; }
+        .cal-month-label { font-size:0.9rem; font-weight:bold; color:var(--text-color); cursor:pointer; }
 
         /* 日历格子 */
         .cal-grid {
@@ -239,7 +241,7 @@
         .cal-cell {
             aspect-ratio: 1; display:flex; align-items:center; justify-content:center;
             font-size:0.75rem; cursor:pointer;
-            color:#333; user-select:none; position:relative;
+            color:var(--text-color); user-select:none; position:relative;
         }
         .cal-cell:hover { background: rgba(0,0,0,0.04); }
         .cal-cell.today { font-weight:bold; color: var(--accent-color); }
@@ -321,6 +323,32 @@
             padding:6px 10px; border-radius:8px; font-size:0.82rem; flex-shrink:0;
             background: var(--accent-color); color: var(--accent-text); border:none; cursor:pointer;
         }
+        /* 日历特殊日气泡 */
+        .cal-special-bubble {
+            position: absolute;
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 7px 11px;
+            font-size: 0.75rem;
+            color: var(--text-color);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+            z-index: 50;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(4px);
+            transition: opacity 0.18s, transform 0.18s;
+            max-width: 180px;
+            white-space: normal;
+            line-height: 1.5;
+        }
+        .cal-special-bubble.show { opacity: 1; transform: translateY(0); }
+        .cal-special-bubble-item { display: flex; align-items: center; gap: 5px; }
+        .cal-special-bubble-item + .cal-special-bubble-item { margin-top: 4px; }
+
         .cal-clear-btn {
             width:100%; padding:6px; border-radius:8px; font-size:0.8rem;
             background:rgba(0,0,0,0.05); border:none; cursor:pointer; color:#666;
@@ -430,15 +458,15 @@
         .content-wrapper {
             flex: 1;
             display: flex; flex-direction: column;
-            padding: 0 var(--content-padding);
+            padding: 0;
             overflow: hidden;
         }
 
         .search-bar {
-            width: 100% !important;
+            width: calc(100% - 24px) !important;
             height: 40px !important;
             padding: 0 20px !important;
-            margin: 0 0 15px 0 !important;
+            margin: 0 12px 15px !important;
             border-radius: 10px !important;
             border: 1px solid var(--glass-border) !important;
             background: var(--glass-bg) !important;
@@ -459,37 +487,41 @@
             display: flex;
             flex-wrap: wrap;
             gap: 6px;
-            padding: 5px 0;
+            padding: 5px 12px;
             margin-bottom: 10px;
             position: relative;
             z-index: 10;
         }
 
         .filter-tag {
-            padding: 6px 14px;
-            background: rgba(255,255,255,0.4);
+            padding: 4px 10px;
+            background: none;
+            border: none;
             border-radius: 8px;
             font-size: 0.78rem;
             white-space: nowrap;
             cursor: pointer;
-            color: #333;
+            color: var(--text-color);
+            opacity: 0.6;
             user-select: none;
             -webkit-user-select: none;
-            transition: transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+            transition: opacity 0.2s;
         }
         .filter-tag:hover, .filter-tag:active {
-            transform: none;
-            background: rgba(255, 255, 255, 0.55);
+            opacity: 0.9;
+            background: none;
             box-shadow: none;
+            transform: none;
         }
         .filter-tag.active {
-            background: var(--accent-color);
-            color: #fff;
+            background: none;
+            color: var(--accent-color);
+            opacity: 1;
             font-weight: 600;
             transform: none;
             box-shadow: none;
         }
-        .filter-tag.blocked { background: #ff4d4d !important; color: #fff !important; text-decoration: line-through; }
+        .filter-tag.blocked { background: none !important; color: #ff4d4d !important; opacity: 1 !important; text-decoration: line-through; }
 
         .content-area {
             flex: 1;
@@ -500,9 +532,12 @@
         }
 
         .note-wrapper {
-            position: relative; margin-bottom: 8px; border-radius: 14px;
+            position: relative; margin-bottom: 0; border-radius: 0;
             overflow: hidden;
+            border-bottom: 1px solid rgba(74,60,56,0.08);
         }
+        body.dark-mode .note-wrapper { border-bottom-color: rgba(255,255,255,0.07); }
+        .note-wrapper:last-child { border-bottom: none; }
 
         /* 左滑操作按钮区 */
         .note-action-bg {
@@ -560,30 +595,45 @@
         }
 
         .note-card {
-            background: var(--glass-bg);
+            background: rgba(255,255,255, var(--card-opacity, 0.45));
             backdrop-filter: blur(var(--glass-blur));
             -webkit-backdrop-filter: blur(var(--glass-blur));
-            border: 1px solid var(--glass-border);
-            border-radius: 14px; padding: 13px 14px;
+            border: none;
+            border-radius: 0; padding: 10px 14px;
             position: relative; z-index: 2;
             transform: translateZ(0);
-            transition: transform 0.25s ease;
+            transition: transform 0.25s ease, background 0.15s;
             will-change: transform;
             cursor: pointer;
             letter-spacing: 0.02em;
         }
-
-        .note-card:active {
-            background: rgba(245,236,230,0.88);
+        body.dark-mode .note-card {
+            background: rgba(42, 34, 30, var(--card-opacity, 0.45)) !important;
         }
 
-        .note-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; margin-bottom: 8px; }
+        .note-card:active {
+            background: rgba(245,236,230,0.7);
+        }
+        body.dark-mode .note-card:active {
+            background: rgba(60, 46, 40, 0.85) !important;
+        }
+
+        .note-header { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+        .note-header-avatar {
+            width: 28px; height: 28px; border-radius: 50%;
+            object-fit: cover; flex-shrink: 0;
+            border: 1.5px solid rgba(255,255,255,0.6);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+            background: linear-gradient(135deg, #e87070, #7090e8);
+        }
+        .note-header-name { font-size: 0.82rem; font-weight: 600; color: var(--name-color); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .note-header-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
 
         .note-time {
             color: var(--text-color);
             font-weight: 500;
-            opacity: 0.45;
-            font-size: 0.75rem;
+            opacity: 0.4;
+            font-size: 0.68rem;
             letter-spacing: 0.02em;
         }
 
@@ -593,6 +643,10 @@
             display:flex; align-items:center; justify-content:center;
             flex-shrink: 0;
             transition: opacity 0.15s;
+            color: var(--accent-color);
+            opacity: 0.75;
+            min-width: 28px; min-height: 28px;
+            padding: 4px;
         }
         .edit-btn:active { opacity: 0.6; }
         .edit-icon-img {
@@ -600,16 +654,50 @@
         }
         .live-timer { color: var(--text-color); font-weight: bold; font-family: monospace; font-size: 1rem; text-shadow: 0 0 6px rgba(0,0,0,0.4); }
 
-        .note-content { font-size: var(--font-size-base); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: var(--preview-lines); -webkit-box-orient: vertical; overflow: hidden; white-space: pre-wrap; }
+        .note-content { font-size: var(--font-size-base); line-height: 1.58; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; white-space: pre-wrap; margin-bottom: 5px; }
         .note-images { display: flex; gap: 5px; margin-top: 10px; overflow-x: auto; }
-        .note-thumb { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; cursor: pointer; }
-        .note-tags { margin-top: 8px; display: flex; gap: 5px; flex-wrap: wrap; }
-        .tag { background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; white-space: nowrap; }
+        .note-thumb { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; cursor: pointer; flex-shrink: 0; }
+        .note-tags { display: flex; gap: 5px; flex-wrap: wrap; }
+        .tag { background: none; padding: 1px 4px; border-radius: 10px; font-size: 0.65rem; color: var(--text-color); opacity: 0.55; border: none; white-space: nowrap; }
+
+        /* 卡片底栏：时间+标签左，操作右 */
+        .note-card-footer {
+            display: flex; align-items: center;
+            justify-content: space-between;
+            margin-top: 3px;
+        }
+        .note-card-meta { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+        .note-card-actions { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+        .note-card-action-btn {
+            display: flex; align-items: center; gap: 3px;
+            font-size: 0.7rem; opacity: 0.35;
+            background: none; border: none;
+            color: var(--text-color); cursor: pointer;
+            padding: 2px 0;
+        }
+        .note-card-action-btn svg { width: 14px; height: 14px; }
+        .note-card-action-btn:active { opacity: 0.8; }
+
+        /* 列表里的转发引用小块 */
+        .note-quote-mini {
+            font-size: 0.75rem; line-height: 1.5;
+            border-left: 2px solid var(--accent-color);
+            padding: 4px 8px; margin-bottom: 5px;
+            border-radius: 0 6px 6px 0;
+            background: rgba(0,0,0,0.03);
+            color: var(--text-color); opacity: 0.6;
+            display: -webkit-box; -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical; overflow: hidden;
+        }
+        body.dark-mode .note-quote-mini { background: rgba(255,255,255,0.04); }
+        .note-quote-mini-author { font-weight: 600; color: var(--name-color); opacity: 1; margin-right: 3px; }
 
         .fab { position: absolute; bottom: 20px; right: 20px; width: 50px; height: 50px; border-radius: 50%; background: var(--accent-color); color: var(--accent-text); border: none; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 50; }
         .fab span { display:block; transform: translateY(-2px); }
 
         .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 100; display: none; justify-content: center; align-items: center; }
+        #full-note-modal { background: none; align-items: stretch; justify-content: stretch; position: absolute; z-index: 200; }
+        #full-note-modal .full-note-modal-wrap { background: var(--page-bg, #f5f5f5) !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
         .modal.open { display: flex; }
         .modal-content { background: rgba(255,255,255,0.94); backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px); border: 1px solid rgba(255,255,255,0.35); width: 85%; max-height: 80vh; overflow-y: auto; border-radius: 15px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); font-family: var(--custom-font); font-weight: var(--custom-font-weight); }
         .modal-content h3 { font-weight: calc(var(--custom-font-weight, 400) + 300); }
@@ -1036,13 +1124,9 @@
             backdrop-filter: blur(var(--glass-blur));
             -webkit-backdrop-filter: blur(var(--glass-blur));
         }
-        .tag {
-            background: rgba(255,255,255,0.25);
-            border: 1px solid rgba(255,255,255,0.4);
-        }
         body.dark-mode .tag {
-            background: rgba(255,255,255,0.1);
-            border-color: rgba(255,255,255,0.12);
+            background: none;
+            border-color: transparent;
         }
         .lock-btn { background:none; border:1px solid rgba(0,0,0,0.12); border-radius:6px; padding:2px 6px; cursor:pointer; font-size:0.8rem; color:#bbb; flex-shrink:0; transition:color 0.2s,border-color 0.2s; }
         .lock-btn.locked { color:#e08; border-color:#e08; }
@@ -1102,7 +1186,7 @@
         .special-item.pinned { background: rgba(212,146,154,0.1); }
         .special-item-emoji { font-size:1.2rem; flex-shrink:0; }
         .special-item-info { flex:1; min-width:0; }
-        .special-item-name { font-size:0.88rem; font-weight:500; color:#333; }
+        .special-item-name { font-size:0.88rem; font-weight:500; color:var(--text-color); }
         .special-item-date { font-size:0.72rem; color:#aaa; margin-top:1px; }
         .special-item-days { font-size:1rem; font-weight:bold; color:var(--accent-color); flex-shrink:0; text-align:right; }
         .special-item-days span { display:block; font-size:0.65rem; font-weight:normal; color:#aaa; }
@@ -1732,7 +1816,7 @@
         .drawer-header:active { opacity: 0.75; }
         .drawer-avatar-wrap { position: relative; width: 56px; height: 56px; flex-shrink: 0; }
         .drawer-avatar-wrap img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
-        .drawer-name { font-size: 1rem; font-weight: 600; color: var(--text-color); }
+        .drawer-name { font-size: 1rem; font-weight: 600; color: var(--name-color); }
         .drawer-section-title {
             padding: 14px 16px 4px;
             font-size: 0.65rem; font-weight: 700;
@@ -2047,7 +2131,7 @@
                 <div class="drawer-row">
                     <label>卡片透明</label>
                     <input type="range" id="setting-card-opacity" min="0" max="100" step="1" style="flex:1;height:5px;" onchange="updateCardOpacity(this.value)">
-                    <span id="setting-card-opacity-val" style="font-size:0.72rem;color:#aaa;width:28px;text-align:right;flex-shrink:0;">96</span>
+                    <span id="setting-card-opacity-val" style="font-size:0.72rem;color:#aaa;width:28px;text-align:right;flex-shrink:0;">55</span>
                 </div>
                 <!-- 追评预览：开关 + 折叠子项 -->
                 <div class="drawer-row" style="cursor:pointer;" onclick="toggleCommentPreviewPanel()">
@@ -2271,17 +2355,33 @@
         </div>
 
         <button class="fab" onclick="openEditor()" id="main-fab"><span>⍚</span></button>
+
+        <div class="modal" id="full-note-modal" style="align-items:stretch; justify-content:stretch; padding:0;">
+            <div class="modal-content glass-modal-content full-note-modal-wrap" style="display:flex; flex-direction:column; padding:0; overflow:hidden; height:100%; max-height:100%; width:100%; max-width:100%; border-radius:0; background:var(--page-bg, #f5f5f5) !important; backdrop-filter:none; -webkit-backdrop-filter:none;">
+                <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 16px 8px; border-bottom:1px solid var(--glass-border); flex-shrink:0; background:var(--page-bg, #f5f5f5);">
+                    <button onclick="closeModal('full-note-modal')" style="background:none;border:none;font-size:1.3rem;color:var(--text-color);opacity:0.5;cursor:pointer;padding:2px 6px 2px 0;">‹</button>
+                    <span style="font-size:0.88rem;font-weight:600;opacity:0.6;color:var(--text-color);">详情</span>
+                    <div style="width:32px;"></div>
+                </div>
+                <div id="full-note-body" style="flex:1; overflow-y:auto; padding:16px 16px 12px; background:var(--page-bg, #f5f5f5);"></div>
+                <div class="full-note-comment-bar" style="display:flex; align-items:flex-start; gap:8px; padding:10px 16px 14px; border-top:1px solid rgba(0,0,0,0.08); background:var(--page-bg, #f5f5f5); flex-shrink:0;">
+                    <textarea id="comment-input" rows="1" placeholder="何か言いたいの？" style="flex:1; padding:9px 16px; border-radius:18px; border:1px solid rgba(200,200,200,0.8); background:rgba(245,245,245,0.9); font-size:0.9rem; outline:none; margin:0; resize:none; overflow-y:auto; max-height:100px; line-height:1.5; font-family:var(--custom-font);"
+                        oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,100)+'px';"
+                        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submitComment();}"></textarea>
+                    <button onclick="submitComment()" style="width:36px; height:36px; border-radius:50%; border:none; background:var(--accent-color); color:var(--accent-text); font-size:1rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; cursor:pointer; margin-top:2px;">⋀</button>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="modal" id="full-note-modal">
-        <div class="modal-content glass-modal-content full-note-modal-wrap" style="display:flex; flex-direction:column; padding:0; overflow:hidden; max-height:88vh; background:rgba(255,255,255,0.94)!important;">
-            <button class="close-btn" onclick="closeModal('full-note-modal')" style="position:absolute; top:10px; right:15px; z-index:10;">＞</button>
-            <div id="full-note-body" style="flex:1; overflow-y:auto; padding:30px 20px 12px;"></div>
-            <div class="full-note-comment-bar" style="display:flex; align-items:flex-start; gap:8px; padding:10px 16px 14px; border-top:1px solid rgba(0,0,0,0.08); background:var(--glass-bg); backdrop-filter:blur(var(--glass-blur)); -webkit-backdrop-filter:blur(var(--glass-blur)); flex-shrink:0;">
-                <textarea id="comment-input" rows="1" placeholder="何か言いたいの？" style="flex:1; padding:9px 16px; border-radius:18px; border:1px solid rgba(200,200,200,0.8); background:rgba(245,245,245,0.9); font-size:0.9rem; outline:none; margin:0; resize:none; overflow-y:auto; max-height:100px; line-height:1.5; font-family:var(--custom-font);"
-                    oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,100)+'px';"
-                    onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submitComment();}"></textarea>
-                <button onclick="submitComment()" style="width:36px; height:36px; border-radius:50%; border:none; background:var(--accent-color); color:var(--accent-text); font-size:1rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; cursor:pointer; margin-top:2px;">⋀</button>
+    <div class="modal" id="forward-modal">
+        <div class="modal-content" style="max-height:60vh; display:flex; flex-direction:column;">
+            <h3 style="margin-bottom:10px;">转发笔记</h3>
+            <div id="forward-modal-quote" style="border-left:2.5px solid var(--accent-color);border-radius:0 8px 8px 0;padding:8px 10px;margin-bottom:12px;font-size:0.8rem;line-height:1.55;opacity:0.65;background:rgba(0,0,0,0.03);color:var(--text-color);max-height:80px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;"></div>
+            <textarea id="forward-comment-input" rows="3" placeholder="说点什么…（可以不填）" style="flex:1;padding:10px 12px;border-radius:10px;border:1px solid rgba(0,0,0,0.1);background:rgba(255,255,255,0.6);font-size:0.88rem;outline:none;resize:none;font-family:var(--custom-font);color:var(--text-color);margin-bottom:12px;"></textarea>
+            <div class="btn-group">
+                <button onclick="closeModal('forward-modal')">取消</button>
+                <button class="btn-primary" onclick="confirmForward()">转发</button>
             </div>
         </div>
     </div>
@@ -2709,6 +2809,43 @@
         }
 
         function saveItem() {
+            // 转发模式：走转发逻辑
+            if (_isForwardMode && _pendingForward) {
+                const content = document.getElementById('edit-content').value.trim();
+                if (state.editingId) {
+                    // 编辑已有转发笔记
+                    const note = state.notes.find(n => n.id === state.editingId);
+                    if (note) {
+                        note.content = content;
+                        note.images = [...state.tempImages];
+                        note.forwardFrom = { id: _pendingForward.id, name: _pendingForward.name, content: _pendingForward.content };
+                    }
+                } else {
+                    // 新建转发
+                    const now = new Date();
+                    const pad = n => String(n).padStart(2,'0');
+                    const ts = `${now.getFullYear()}/${pad(now.getMonth()+1)}/${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+                    state.notes.unshift({
+                        id: Date.now(),
+                        content: content,
+                        tags: [],
+                        images: [...state.tempImages],
+                        timestamp: ts,
+                        rawTimestamp: Date.now(),
+                        createdTime: Date.now(),
+                        destructTime: null,
+                        isTrash: false,
+                        isTodo: false,
+                        todoItems: [],
+                        comments: [],
+                        forwardFrom: { id: _pendingForward.id, name: _pendingForward.name, content: _pendingForward.content }
+                    });
+                }
+                _pendingForward = null;
+                _isForwardMode = false;
+                saveData(); closeModal('editor-modal'); renderList(); renderTags();
+                return;
+            }
             const content = document.getElementById('edit-content').value;
             const tagsInput = document.getElementById('edit-tags').value;
             const timerVal = parseInt(document.getElementById('edit-timer').value);
@@ -2732,19 +2869,29 @@
                 note.isTodo = _todoMode;
                 note.todoItems = _todoMode ? [..._todoItems] : [];
             } else {
-                state.notes.unshift({
+                const newNote = {
                     id: Date.now(),
                     content: _todoMode ? '' : content,
                     tags: tags,
                     images: state.tempImages,
                     timestamp: new Date().toLocaleString(),
+                    rawTimestamp: Date.now(),
                     createdTime: Date.now(),
                     destructTime: destructTime,
                     isTrash: false,
                     isTodo: _todoMode,
-                    todoItems: _todoMode ? [..._todoItems] : []
-                });
+                    todoItems: _todoMode ? [..._todoItems] : [],
+                    comments: []
+                };
+                if (_pendingForward) {
+                    newNote.forwardFrom = { id: _pendingForward.id, name: _pendingForward.name, content: _pendingForward.content };
+                    _pendingForward = null;
+                }
+                state.notes.unshift(newNote);
             }
+            // 清理转发预览块
+            const fp = document.getElementById('forward-preview');
+            if (fp) fp.remove();
 
             saveData(); closeModal('editor-modal'); renderList(); renderTags();
         }
@@ -2771,6 +2918,89 @@
             note.isPinned = !note.isPinned;
             saveData(); renderList();
         }
+
+        function forwardNote(id) {
+            const note = state.notes.find(n => n.id === id);
+            if (!note) return;
+
+            // 判断是编辑已有转发笔记，还是新建转发
+            const isEditForward = !!note.forwardFrom;
+            if (isEditForward) {
+                // 编辑转发：编辑这条笔记自己的content，引用块是它的forwardFrom
+                _pendingForward = { id: note.forwardFrom.id, name: note.forwardFrom.name, content: note.forwardFrom.content };
+                _isForwardMode = true;
+                state.editingId = note.id; // 标记为编辑模式
+            } else {
+                // 新建转发：引用当前笔记
+                _pendingForward = { id: note.id, name: state.settings.name, content: note.content };
+                _isForwardMode = true;
+                state.editingId = null;
+            }
+            closeModal('full-note-modal');
+
+            // 复用editor-modal
+            const contentInput = document.getElementById('edit-content');
+            const tagsInput = document.getElementById('edit-tags');
+            const timerInput = document.getElementById('edit-timer');
+            if (isEditForward) {
+                contentInput.value = note.content || '';
+                state.tempImages = [...(note.images || [])];
+            } else {
+                contentInput.value = '';
+                state.tempImages = [];
+            }
+            tagsInput.value = '';
+            timerInput.value = '0';
+            _todoMode = false;
+            _todoItems = [];
+            applyTodoModeUI();
+            editorClosePopover();
+            contentInput.style.height = 'auto';
+            renderTempImages();
+
+            // 插入引用预览块到textarea上方
+            const editorBody = document.querySelector('.editor-body');
+            let preview = document.getElementById('forward-preview');
+            if (!preview) {
+                preview = document.createElement('div');
+                preview.id = 'forward-preview';
+                preview.style.cssText = 'margin:8px 16px 0;border-left:2.5px solid var(--accent-color);border-radius:0 8px 8px 0;padding:7px 10px;font-size:0.78rem;line-height:1.5;background:rgba(0,0,0,0.03);color:var(--text-color);opacity:0.7;';
+                preview.innerHTML = `<div style="font-weight:600;color:var(--name-color);font-size:0.72rem;margin-bottom:2px;">${state.settings.name}：</div><div style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${note.content || '（无文字内容）'}</div>`;
+                editorBody.parentNode.insertBefore(preview, editorBody);
+            }
+
+            openModal('editor-modal');
+            requestAnimationFrame(() => editorAutoResize(contentInput));
+        }
+
+        function confirmForward() {
+            if (!_pendingForward) return;
+            const input = document.getElementById('forward-comment-input');
+            const comment = input ? input.value.trim() : '';
+            const now = new Date();
+            const pad = n => String(n).padStart(2,'0');
+            const ts = `${now.getFullYear()}/${pad(now.getMonth()+1)}/${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+            state.notes.unshift({
+                id: Date.now(),
+                content: comment,
+                tags: [],
+                images: [],
+                timestamp: ts,
+                rawTimestamp: Date.now(),
+                createdTime: Date.now(),
+                destructTime: null,
+                isTrash: false,
+                isTodo: false,
+                todoItems: [],
+                comments: [],
+                forwardFrom: { id: _pendingForward.id, name: _pendingForward.name, content: _pendingForward.content }
+            });
+            _pendingForward = null;
+            saveData(); renderList(); renderTags();
+            closeModal('forward-modal');
+        }
+        let _pendingForward = null;
+        let _isForwardMode = false;
 
         function renderList() {
             const container = document.getElementById('list-container');
@@ -2963,7 +3193,7 @@
                 if (item.isTodo && item.todoItems && item.todoItems.length > 0) {
                     const doneCount = item.todoItems.filter(t => t.done).length;
                     todoHtml = `<div style="margin-top:6px;">
-                        <div style="font-size:0.7rem; color:#aaa; margin-bottom:5px;">☑ ${doneCount}/${item.todoItems.length}</div>
+                        <div style="font-size:0.7rem; color:var(--text-color); opacity:0.45; margin-bottom:5px;">☑ ${doneCount}/${item.todoItems.length}</div>
                         ${item.todoItems.map((t, idx) => `
                         <div style="display:flex; align-items:center; gap:8px; padding:3px 0; cursor:pointer;" onclick="event.stopPropagation(); toggleTodoDone(${item.id}, ${idx})">
                             <span style="font-size:1rem; flex-shrink:0; color:${t.done ? 'var(--accent-color)' : '#ccc'};">${t.done ? '☑' : '☐'}</span>
@@ -2975,18 +3205,27 @@
                 card.innerHTML = `
                     <div class="pin-bar">∅</div>
                     <div class="note-header">
-                        <span class="note-time">${item.timestamp}</span>
-                        <div class="note-actions">
+                        <img src="${state.settings.currentAvatar}" class="note-header-avatar">
+                        <span class="note-header-name">${state.settings.name}</span>
+                        <div class="note-header-right">
                             ${timerHtml}
-                            <span class="edit-btn" onclick="openEditor(${item.id})"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAABQCAYAAABxs9dPAAAC80lEQVR42u2YTYhOYRTHf/fOh2nIxxTZSGJFJNmIt5QsLDSapMSGhY2dslJTlmp2ko0okZVSdrOxsPFRr5gMQhZYoXyk0XjvvTbn1On0vrf3vvM+dyY9/3p67sfTPf/nfD3nXIiIiIiIiIiIiIiIWCpIZCwqUmCwzfPBxSA34O7XyPCEayWzEbgEPAO+yGgCF4F1HYgHI3ME+AYUHcYn4EBoTSmZBtASwfNA5sa8vJsDdofSlEbRKPBOBLbcbK//yvwcGAqhJY2m005g3sZcuSM33q2WqrAuZJ6Q60QEJ8BNYIeY5555pwQnjJb7Zi7d4RunoRm3dhj44NY87ZZQ2oPZRpzGmobIkDj0rFsz6u4XTEg/NA/8dLttiMCWjDFglzErwI8QGhoQIbOGYAZsAqaMz1wF1su9buZFiNAfcE7tQ/4gcLzDu/2hcpEepk+MwFzGd+CXuVcy0yGztX50u2ThVkkeysR3NovvBD8+zjqz5G0S4om6DljN2ndLjo4bbm3wEz8BtkgqyJ2Wfkv5kdZVE6kJbpdo6HLd9dDJNmR0ZDIfCk1KS5CVwGcTTZ6QknwlR0qwBkAd9FSJdjypw1W0VNXh9MgYN4LL1lpCSZUdd2uuTHa61SW73JBLjYkSYJs59/pKSLECWOV2nZbUUGNyXZi5bybTneZGMwDvgWPAGTkurDnzOlrmGdNx2PAGuCDP/sj8oMrm0x5yUGEIFSXf1PfNkKe9+txRo6Fc2qK1wD6pKDMT9ntDJkeNnBHgrTNbA5g0DWIBPKxaevSSh1Lxj3PmuRZkc2ZNDpx3tXXfCWFy0X3gjulKEzMPA1eAR7I2Cx1pKniDCfM9RiMfgdVmHSE1pCZKRfB1ozkVPiU1dtpNL9bPH0oJcM1E0YiQvWXaaeoipH7xUjS1TAg15b9R7YRsbpkBlksH21xIl7HQAlz9Yxr4CryW3qyo6jv/PRKXySMiIiIiIiIiIpYAavsFXCv68UdCy9ZJYCfwuJcGUfEPRBMUNTxHaHMAAAAASUVORK5CYII=" class="edit-icon-img"></span>
+                            ${item.forwardFrom ? `<span class="edit-btn" onclick="event.stopPropagation();forwardNote(${item.id})" title="编辑转发"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></span>` : ''}
+                            <span class="edit-btn" onclick="event.stopPropagation();openEditor(${item.id})"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAABQCAYAAABxs9dPAAAC80lEQVR42u2YTYhOYRTHf/fOh2nIxxTZSGJFJNmIt5QsLDSapMSGhY2dslJTlmp2ko0okZVSdrOxsPFRr5gMQhZYoXyk0XjvvTbn1On0vrf3vvM+dyY9/3p67sfTPf/nfD3nXIiIiIiIiIiIiIiIWCpIZCwqUmCwzfPBxSA34O7XyPCEayWzEbgEPAO+yGgCF4F1HYgHI3ME+AYUHcYn4EBoTSmZBtASwfNA5sa8vJsDdofSlEbRKPBOBLbcbK//yvwcGAqhJY2m005g3sZcuSM33q2WqrAuZJ6Q60QEJ8BNYIeY5555pwQnjJb7Zi7d4RunoRm3dhj44NY87ZZQ2oPZRpzGmobIkDj0rFsz6u4XTEg/NA/8dLttiMCWjDFglzErwI8QGhoQIbOGYAZsAqaMz1wF1su9buZFiNAfcE7tQ/4gcLzDu/2hcpEepk+MwFzGd+CXuVcy0yGztX50u2ThVkkeysR3NovvBD8+zjqz5G0S4om6DljN2ndLjo4bbm3wEz8BtkgqyJ2Wfkv5kdZVE6kJbpdo6HLd9dDJNmR0ZDIfCk1KS5CVwGcTTZ6QknwlR0qwBkAd9FSJdjypw1W0VNXh9MgYN4LL1lpCSZUdd2uuTHa61SW73JBLjYkSYJs59/pKSLECWOV2nZbUUGNyXZi5bybTneZGMwDvgWPAGTkurDnzOlrmGdNx2PAGuCDP/sj8oMrm0x5yUGEIFSXf1PfNkKe9+txRo6Fc2qK1wD6pKDMT9ntDJkeNnBHgrTNbA5g0DWIBPKxaevSSh1Lxj3PmuRZkc2ZNDpx3tXXfCWFy0X3gjulKEzMPA1eAR7I2Cx1pKniDCfM9RiMfgdVmHSE1pCZKRfB1ozkVPiU1dtpNL9bPH0oJcM1E0YiQvWXaaeoipH7xUjS1TAg15b9R7YRsbpkBlksH21xIl7HQAlz9Yxr4CryW3qyo6jv/PRKXySMiIiIiIiIiIpYAavsFXCv68UdCy9ZJYCfwuJcGUfEPRBMUNTxHaHMAAAAASUVORK5CYII=" class="edit-icon-img"></span>
                         </div>
                     </div>
+                    ${item.forwardFrom ? `<div class="note-quote-mini"><span class="note-quote-mini-author">${item.forwardFrom.name}：</span>${item.forwardFrom.content}</div>` : ''}
                     ${item.isTodo ? todoHtml : `<div class="note-content">${item.content}</div>`}
                     ${imagesHtml}
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
-                        <div class="note-tags">${tagsHtml}</div>
+                    <div class="note-card-footer">
+                        <div class="note-card-meta">
+                            <span class="note-time">${item.timestamp}</span>
+                            ${tagsHtml ? `<div class="note-tags">${tagsHtml}</div>` : ''}
+                        </div>
+                        <div class="note-card-actions">
+                            ${(item.comments||[]).length > 0 ? `<button class="note-card-action-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>${item.comments.length}</button>` : ''}
+                            <button class="note-card-action-btn" onclick="event.stopPropagation();forwardNote(${item.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></button>
+                        </div>
                     </div>
-                    ${commentPreviewHtml}
                     ${specialNoteHtml}
                 `;
 
@@ -3028,7 +3267,7 @@
                     ${note.images.map((img, idx) => `
                         <div>
                             <img src="${img.src}" data-idx="${idx}" style="width:100%; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1); cursor:pointer;">
-                            ${img.remark ? `<div style="font-size:0.85rem; color:#555; margin-top:5px; font-style:italic;">${img.remark}</div>` : ''}
+                            ${img.remark ? `<div style="font-size:0.85rem; color:var(--text-color); opacity:0.6; margin-top:5px; font-style:italic;">${img.remark}</div>` : ''}
                         </div>
                     `).join('')}
                 </div>`;
@@ -3040,7 +3279,7 @@
             if (note.isTodo && note.todoItems && note.todoItems.length > 0) {
                 const doneCount = note.todoItems.filter(t => t.done).length;
                 bodyContentHtml = `
-                    <div style="margin-bottom:4px; font-size:0.75rem; color:#aaa;">☑ ${doneCount} / ${note.todoItems.length}</div>
+                    <div style="margin-bottom:4px; font-size:0.75rem; color:var(--text-color); opacity:0.45;">☑ ${doneCount} / ${note.todoItems.length}</div>
                     <div id="full-note-todo-list" style="display:flex; flex-direction:column; gap:2px;">
                         ${note.todoItems.map((t, idx) => `
                         <div onclick="toggleTodoDoneFromFull(${note.id}, ${idx})" style="display:flex; align-items:flex-start; gap:10px; padding:8px 10px; border-radius:10px; cursor:pointer; transition:background 0.15s; background:${t.done ? 'rgba(0,0,0,0.02)' : 'transparent'};">
@@ -3052,16 +3291,37 @@
                 bodyContentHtml = `<div style="font-size: 1.05rem; line-height: 1.6; white-space: pre-wrap; color:var(--text-color);">${note.content}</div>`;
             }
 
+            // 时间戳格式化到秒
+            const ts = note.timestamp;
+            let fullTs = ts;
+            try {
+                const d = new Date(note.rawTimestamp || ts);
+                if (!isNaN(d)) {
+                    const pad = n => String(n).padStart(2,'0');
+                    fullTs = `${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+                }
+            } catch(e) {}
+
             document.getElementById('full-note-body').innerHTML = `
-                <div style="display: flex; align-items: center; margin-bottom: 15px;">
-                    <img src="${state.settings.currentAvatar}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; margin-right: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-                    <span style="font-weight: bold; font-size: 1.1rem; ${(()=>{ const nc = state.settings.nameColor||'#333'; return nc.includes('gradient') ? `background:${nc};-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;` : `color:${nc};`; })()}">${state.settings.name}</span>
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:13px;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <img src="${state.settings.currentAvatar}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:1px solid rgba(255,255,255,0.5);">
+                        <span style="font-weight:600; font-size:0.95rem; ${(()=>{ const nc = state.settings.nameColor||'#333'; return nc.includes('gradient') ? `background:${nc};-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;` : `color:${nc};`; })()}">${state.settings.name}</span>
+                    </div>
+                    <span class="edit-btn" onclick="closeModal('full-note-modal');openEditor(${note.id})" style="padding:4px 6px;"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAABQCAYAAABxs9dPAAAC80lEQVR42u2YTYhOYRTHf/fOh2nIxxTZSGJFJNmIt5QsLDSapMSGhY2dslJTlmp2ko0okZVSdrOxsPFRr5gMQhZYoXyk0XjvvTbn1On0vrf3vvM+dyY9/3p67sfTPf/nfD3nXIiIiIiIiIiIiIiIWCpIZCwqUmCwzfPBxSA34O7XyPCEayWzEbgEPAO+yGgCF4F1HYgHI3ME+AYUHcYn4EBoTSmZBtASwfNA5sa8vJsDdofSlEbRKPBOBLbcbK//yvwcGAqhJY2m005g3sZcuSM33q2WqrAuZJ6Q60QEJ8BNYIeY5555pwQnjJb7Zi7d4RunoRm3dhj44NY87ZZQ2oPZRpzGmobIkDj0rFsz6u4XTEg/NA/8dLttiMCWjDFglzErwI8QGhoQIbOGYAZsAqaMz1wF1su9buZFiNAfcE7tQ/4gcLzDu/2hcpEepk+MwFzGd+CXuVcy0yGztX50u2ThVkkeysR3NovvBD8+zjqz5G0S4om6DljN2ndLjo4bbm3wEz8BtkgqyJ2Wfkv5kdZVE6kJbpdo6HLd9dDJNmR0ZDIfCk1KS5CVwGcTTZ6QknwlR0qwBkAd9FSJdjypw1W0VNXh9MgYN4LL1lpCSZUdd2uuTHa61SW73JBLjYkSYJs59/pKSLECWOV2nZbUUGNyXZi5bybTneZGMwDvgWPAGTkurDnzOlrmGdNx2PAGuCDP/sj8oMrm0x5yUGEIFSXf1PfNkKe9+txRo6Fc2qK1wD6pKDMT9ntDJkeNnBHgrTNbA5g0DWIBPKxaevSSh1Lxj3PmuRZkc2ZNDpx3tXXfCWFy0X3gjulKEzMPA1eAR7I2Cx1pKniDCfM9RiMfgdVmHSE1pCZKRfB1ozkVPiU1dtpNL9bPH0oJcM1E0YiQvWXaaeoipH7xUjS1TAg15b9R7YRsbpkBlksH21xIl7HQAlz9Yxr4CryW3qyo6jv/PRKXySMiIiIiIiIiIpYAavsFXCv68UdCy9ZJYCfwuJcGUfEPRBMUNTxHaHMAAAAASUVORK5CYII=" class="edit-icon-img"></span>
                 </div>
+                ${note.forwardFrom ? `<div style="border-left:2.5px solid var(--accent-color);border-radius:0 8px 8px 0;padding:9px 11px;margin-bottom:13px;font-size:0.82rem;line-height:1.6;opacity:0.68;background:rgba(0,0,0,0.03);"><div style="font-weight:600;color:var(--name-color);font-size:0.75rem;margin-bottom:4px;">${note.forwardFrom.name}：</div>${note.forwardFrom.content}</div>` : ''}
                 ${bodyContentHtml}
                 ${imagesHtml}
-                <div style="margin-top: 20px; display: flex; gap: 8px; flex-wrap: wrap;">${tagsHtml}</div>
-                <div style="font-size: 0.8rem; color: #999; text-align: right; margin-top: 12px; font-style: italic;">${note.timestamp}</div>
-                <div style="border-top: 1px solid rgba(0,0,0,0.09); margin: 16px 0 0;"></div>
+                <div style="margin-top:13px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                    <span style="font-size:0.72rem; color:var(--text-color); opacity:0.38;">${fullTs}</span>
+                    ${note.tags.length > 0 ? note.tags.map(t => `<span style="font-size:0.65rem;padding:1px 7px;border-radius:10px;background:rgba(200,132,142,0.1);color:var(--accent-color);border:1px solid rgba(200,132,142,0.18);">#${t}</span>`).join('') : ''}
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:18px; padding:10px 0; border-bottom:1px solid rgba(74,60,56,0.08); margin-top:4px;">
+                    <button onclick="forwardNote(${note.id})" style="display:flex;align-items:center;gap:4px;font-size:0.75rem;opacity:0.4;background:none;border:none;color:var(--text-color);cursor:pointer;font-family:var(--custom-font);">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>转发
+                    </button>
+                </div>
                 <div id="full-note-comments"></div>
             `;
             renderComments(note);
@@ -3088,13 +3348,16 @@
                 return;
             }
             container.innerHTML = comments.map((c, i) => `
-                <div class="comment-item" data-note-id="${note.id}" data-idx="${i}" style="position:relative; overflow:hidden; border-radius:8px; margin-bottom:2px;">
+                <div class="comment-item" data-note-id="${note.id}" data-idx="${i}" style="position:relative; overflow:hidden; border-radius:8px; margin-bottom:10px;">
                     <div class="comment-delete-bg" style="position:absolute; top:0; right:0; bottom:0; width:60px; background:transparent; display:flex; align-items:center; justify-content:center; font-size:1.4rem; cursor:pointer; opacity:0; transition:opacity 0.3s;" onclick="deleteComment(${note.id},${i})">🗑️</div>
-                    <div class="comment-inner" style="display:flex; align-items:flex-start; gap:8px; padding:10px 4px; background:transparent; position:relative; z-index:2; transition:transform 0.3s ease; will-change:transform;">
-                        <img src="${state.settings.currentAvatar}" style="width:26px; height:26px; border-radius:50%; object-fit:cover; flex-shrink:0; margin-top:2px;">
+                    <div class="comment-inner" style="display:flex; align-items:flex-start; gap:9px; padding:6px 4px; background:transparent; position:relative; z-index:2; transition:transform 0.3s ease; will-change:transform;">
+                        <img src="${state.settings.currentAvatar}" style="width:28px; height:28px; border-radius:50%; object-fit:cover; flex-shrink:0; margin-top:1px;">
                         <div style="flex:1;">
-                            <div style="font-size:0.78rem; color:#bbb; margin-bottom:3px;">${c.time}</div>
-                            <div style="font-size:0.9rem; line-height:1.5; color:var(--text-color); white-space:pre-wrap;">${c.text}</div>
+                            <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:4px;">
+                                <span style="font-size:0.75rem;font-weight:600;color:var(--name-color);">${state.settings.name}</span>
+                                <span style="font-size:0.65rem;color:var(--text-color);opacity:0.35;">${c.time}</span>
+                            </div>
+                            <div style="font-size:0.88rem; line-height:1.55; color:var(--text-color); white-space:pre-wrap; background:var(--glass-bg); backdrop-filter:blur(var(--glass-blur)); border:1px solid var(--glass-border); border-radius:4px 12px 12px 12px; padding:8px 11px;">${c.text}</div>
                         </div>
                     </div>
                 </div>
@@ -3319,22 +3582,23 @@
             const nameColor = s.nameColor || '#333333';
             // 渐变需要用 background-clip 实现，纯色直接 color
             const nameEl = document.getElementById('display-name');
-            if (nameEl) {
+            const drawerNameEl = document.getElementById('drawer-display-name');
+            [nameEl, drawerNameEl].filter(Boolean).forEach(el => {
                 const isGradient = nameColor.includes('gradient');
                 if (isGradient) {
-                    nameEl.style.backgroundImage = nameColor;
-                    nameEl.style.webkitBackgroundClip = 'text';
-                    nameEl.style.webkitTextFillColor = 'transparent';
-                    nameEl.style.backgroundClip = 'text';
-                    document.documentElement.style.setProperty('--name-color', 'transparent');
+                    el.style.backgroundImage = nameColor;
+                    el.style.webkitBackgroundClip = 'text';
+                    el.style.webkitTextFillColor = 'transparent';
+                    el.style.backgroundClip = 'text';
                 } else {
-                    nameEl.style.backgroundImage = '';
-                    nameEl.style.webkitBackgroundClip = '';
-                    nameEl.style.webkitTextFillColor = '';
-                    nameEl.style.backgroundClip = '';
-                    document.documentElement.style.setProperty('--name-color', nameColor);
+                    el.style.backgroundImage = '';
+                    el.style.webkitBackgroundClip = '';
+                    el.style.webkitTextFillColor = '';
+                    el.style.backgroundClip = '';
+                    el.style.color = nameColor;
                 }
-            }
+            });
+            document.documentElement.style.setProperty('--name-color', nameColor.includes('gradient') ? 'transparent' : nameColor);
             // 预览框
             const namePreview = document.getElementById('name-color-preview');
             if (namePreview) namePreview.style.background = nameColor;
@@ -3352,7 +3616,7 @@
             // 背景：优先用当前模式专属背景，回退到全局背景
             const modeKey = { note: 'bgNote', todo: 'bgTodo', pomodoro: 'bgPomodoro' };
             const activeBg = s[modeKey[_currentMode] || 'bgNote'] || s.bgImage || '';
-            document.documentElement.style.setProperty('--bg-image', activeBg ? `url(${activeBg})` : 'none');
+            document.documentElement.style.setProperty('--bg-image', activeBg ? `url(${activeBg})` : 'linear-gradient(135deg, #e8d5d8 0%, #c8d8e8 50%, #d5e8d5 100%)');
 
             // 应用字体
             const activeFont = (s.fontPresets || []).find(f => f.id === s.currentFont);
@@ -3487,7 +3751,10 @@
             if (blurVal) blurVal.textContent = blur;
 
             // 卡片透明度
-            const cardOp = state.settings.cardOpacity ?? 96;
+            const cardOp = state.settings.cardOpacity ?? 55;
+            if (state.settings.cardOpacity === undefined || state.settings.cardOpacity >= 96) {
+                state.settings.cardOpacity = 55;
+            }
             document.documentElement.style.setProperty('--card-opacity', (cardOp / 100).toFixed(2));
             const cardOpSlider = document.getElementById('setting-card-opacity');
             const cardOpVal = document.getElementById('setting-card-opacity-val');
@@ -5142,9 +5409,67 @@
             const clearBtn = document.getElementById('drawer-cal-clear');
             if (clearBtn) clearBtn.style.display = state.filterDateFrom ? '' : 'none';
 
+            // 特殊日气泡
+            showCalSpecialBubble(y, m, d);
+
             renderCalendar();
             renderList();
             renderStats();
+        }
+
+        function showCalSpecialBubble(y, m, d) {
+            // 找这一天匹配的特殊日
+            const clicked = new Date(y, m - 1, d); clicked.setHours(0,0,0,0);
+            const matches = (state.specialDays || []).filter(sd => {
+                let target = new Date(sd.date); target.setHours(0,0,0,0);
+                if (sd.annual) target.setFullYear(y);
+                return target.getTime() === clicked.getTime();
+            });
+            // 清掉旧气泡
+            const old = document.getElementById('cal-special-bubble');
+            if (old) old.remove();
+            if (matches.length === 0) return;
+
+            // 找对应格子DOM
+            const grid = document.getElementById('cal-grid');
+            if (!grid) return;
+            const cells = grid.querySelectorAll('.cal-cell:not(.other-month)');
+            let targetCell = null;
+            cells.forEach(cell => {
+                const span = cell.querySelector('span');
+                if (span && parseInt(span.innerText) === d) targetCell = cell;
+            });
+            if (!targetCell) return;
+
+            const bubble = document.createElement('div');
+            bubble.id = 'cal-special-bubble';
+            bubble.className = 'cal-special-bubble';
+            bubble.innerHTML = matches.map(sd => `
+                <div class="cal-special-bubble-item">
+                    <span>${sd.emoji || '✦'}</span>
+                    <span style="color:var(--accent-color);font-weight:500;">${sd.name}</span>
+                </div>
+            `).join('');
+
+            // 定位：相对grid容器
+            const gridRect = grid.getBoundingClientRect();
+            const cellRect = targetCell.getBoundingClientRect();
+            const left = Math.min(cellRect.left - gridRect.left, gridRect.width - 190);
+            const top = cellRect.bottom - gridRect.top + 4;
+
+            bubble.style.left = Math.max(0, left) + 'px';
+            bubble.style.top = top + 'px';
+
+            // 气泡相对grid定位
+            grid.style.position = 'relative';
+            grid.appendChild(bubble);
+            requestAnimationFrame(() => bubble.classList.add('show'));
+
+            // 3秒后自动消失，或点其他地方消失
+            const remove = () => { bubble.classList.remove('show'); setTimeout(() => bubble.remove(), 200); };
+            setTimeout(remove, 3000);
+            const outside = (e) => { if (!bubble.contains(e.target)) { remove(); document.removeEventListener('touchstart', outside); document.removeEventListener('click', outside); } };
+            setTimeout(() => { document.addEventListener('touchstart', outside, {once:true}); document.addEventListener('click', outside, {once:true}); }, 100);
         }
 
         function calClearFilter() {
@@ -5225,7 +5550,15 @@
             }
         }
         function openModal(id) { document.getElementById(id).classList.add('open'); }
-        function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('open');
+            if (id === 'editor-modal' || id === 'forward-modal') {
+                _pendingForward = null;
+                _isForwardMode = false;
+                const fp = document.getElementById('forward-preview');
+                if (fp) fp.remove();
+            }
+        }
         // ── IndexedDB 图片存储（IDB不可用时自动降级到localStorage）──
         const _IDB_NAME = 'wanwan_imgs', _IDB_STORE = 'imgs', _IDB_VER = 1;
         let _idb = null;
