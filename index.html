@@ -286,8 +286,8 @@
             pointer-events:none;
         }
         .cal-cell.range-start, .cal-cell.range-end { isolation: isolate; }
-        .cal-cell.range-start::after, .cal-cell.range-end::after {
-            content:''; position:absolute;
+        .cal-cell .range-dot {
+            position:absolute;
             top:50%; left:50%;
             transform:translate(-50%,-50%);
             width:78%; padding-top:78%;
@@ -718,7 +718,8 @@
         }
         #editor-modal .modal-content {
             width: 100%;
-            max-height: 92vh;
+            height: 92vh;
+            max-height: 100vh;
             border-radius: 20px 20px 0 0;
             padding: 0;
             box-shadow: 0 -4px 30px rgba(0,0,0,0.18);
@@ -726,21 +727,27 @@
             flex-direction: column;
             overflow: visible;
             transform: translateY(100%);
-            transition: transform 0.32s cubic-bezier(0.32,0.72,0,1);
+            transition: transform 0.32s cubic-bezier(0.32,0.72,0,1), border-radius 0.22s ease, height 0.22s ease;
             position: relative;
         }
         #editor-modal.open .modal-content { transform: translateY(0); }
+        #editor-modal .modal-content.sheet-fullscreen { border-radius: 0; height: 100vh; }
         .editor-handle {
             width: 36px; height: 4px;
             background: rgba(0,0,0,0.15);
             border-radius: 2px;
             margin: 10px auto 4px;
             flex-shrink: 0;
+            cursor: ns-resize;
+            padding: 10px 40px;
+            box-sizing: content-box;
         }
         .editor-body {
             overflow-y: auto;
             padding: 10px 16px 6px;
             min-height: 52px;
+            flex: 1;
+            cursor: text;
         }
         .editor-body textarea {
             width: 100%; border: none; outline: none;
@@ -1824,7 +1831,7 @@
         }
         .drawer-header:active { opacity: 0.75; }
         .drawer-avatar-wrap { position: relative; width: 56px; height: 56px; flex-shrink: 0; }
-        .drawer-avatar-wrap img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+        .drawer-avatar-wrap img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; transition: border-radius 0.2s; }
         .drawer-name { font-size: 1rem; font-weight: 600; color: var(--name-color); }
         .drawer-section-title {
             padding: 14px 16px 4px;
@@ -2023,23 +2030,12 @@
 
         <div class="drawer-scroll">
             <!-- 头像/昵称/头像框/挂件 展开面板（在scroll内，可滚动） -->
-            <div id="drawer-avatar-panel" style="display:none;border-bottom:1px solid rgba(0,0,0,0.06);margin-bottom:4px;">            <div class="drawer-settings-area" style="padding-top:4px;">
-                <div class="drawer-row">
-                    <label>昵称</label>
-                    <input type="text" id="setting-name" class="drawer-input" onchange="updateSettings()">
-                </div>
-                <div class="drawer-row" style="align-items:flex-start;">
-                    <label style="padding-top:8px;">签名</label>
-                    <textarea id="setting-signature" class="drawer-input" rows="1" placeholder="留空不显示" style="resize:none;overflow:hidden;line-height:1.5;font-family:var(--custom-font);" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';updateSettings()"></textarea>
-                </div>
-                <div class="drawer-row">
-                    <label>昵称颜色</label>
-                    <div style="display:flex;gap:6px;align-items:center;flex:1;">
-                        <input type="text" id="setting-name-color" class="drawer-input" placeholder="#333 或 gradient" style="flex:1;" oninput="updateSettings()">
-                        <div id="name-color-preview" style="width:30px;height:28px;border-radius:6px;border:1px solid #ddd;flex-shrink:0;cursor:pointer;" onclick="toggleNameColorPicker()"></div>
-                    </div>
-                </div>
-            </div>
+            <div id="drawer-avatar-panel" style="display:none;border-bottom:1px solid rgba(0,0,0,0.06);margin-bottom:4px;">
+            <!-- 保留隐藏 input 供 applySettings / updateSettings 读写 -->
+            <input type="text" id="setting-name" style="display:none" onchange="updateSettings()">
+            <textarea id="setting-signature" style="display:none" oninput="updateSettings()"></textarea>
+            <input type="text" id="setting-name-color" style="display:none" oninput="updateSettings()">
+            <div id="name-color-preview" style="display:none;"></div>
             <!-- 头像/头像框/挂件 调整已移至「调整形象」浮层 -->
             <!-- 保留隐藏 input 供其他地方调用 -->
             <input type="file" id="avatar-input" style="display:none" accept="image/*" onchange="changeAvatar(this)">
@@ -2402,14 +2398,14 @@
         </div>
     </div>
 
-    <div class="modal" id="editor-modal" onclick="if(event.target===this)closeModal('editor-modal')">
+    <div class="modal" id="editor-modal" onclick="if(event.target===this)_editorDismiss()">
         <div class="modal-content">
             <div class="editor-handle"></div>
             <div id="todo-editor-area" class="editor-todo-area">
                 <div id="todo-items-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px;"></div>
                 <button onclick="addTodoItem()" style="width:100%;padding:7px;border-radius:8px;border:1px dashed rgba(0,0,0,0.15);background:transparent;color:#aaa;font-size:0.82rem;cursor:pointer;">+ 添加待办项</button>
             </div>
-            <div class="editor-body">
+            <div class="editor-body" onclick="if(event.target===this)document.getElementById('edit-content').focus()">
                 <textarea id="edit-content" rows="1" placeholder="おかえりなさい♡" oninput="editorAutoResize(this)"></textarea>
             </div>
             <div id="image-preview-area" style="display:flex;gap:5px;overflow-x:auto;padding:0 16px 6px;"></div>
@@ -2707,6 +2703,88 @@
             openModal('special-modal');
         }
 
+        // ── 编辑器草稿 ──
+        let _editorDraft = null;
+
+        function _editorSaveDraft() {
+            if (state.editingId) return;
+            const content = document.getElementById('edit-content').value || '';
+            const tags = document.getElementById('edit-tags').value || '';
+            const timer = document.getElementById('edit-timer').value || '0';
+            if (!content.trim() && !state.tempImages.length) { _editorDraft = null; return; }
+            _editorDraft = { content, tags, timer, tempImages: [...state.tempImages], todoMode: _todoMode, todoItems: [..._todoItems] };
+        }
+
+        function _editorRestoreDraft() {
+            if (!_editorDraft) return;
+            const d = _editorDraft;
+            document.getElementById('edit-content').value = d.content;
+            document.getElementById('edit-tags').value = d.tags;
+            document.getElementById('edit-timer').value = d.timer;
+            state.tempImages = [...d.tempImages];
+            _todoMode = d.todoMode; _todoItems = [...d.todoItems];
+            applyTodoModeUI(); renderTempImages();
+            requestAnimationFrame(() => editorAutoResize(document.getElementById('edit-content')));
+            _editorDraft = null;
+        }
+
+        function _editorDismiss() {
+            _editorSaveDraft();
+            closeModal('editor-modal');
+            if (_editorDraft) {
+                const tip = document.createElement('div');
+                tip.textContent = '草稿已保存';
+                tip.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.55);color:#fff;padding:6px 16px;border-radius:20px;font-size:0.78rem;z-index:9999;pointer-events:none;';
+                document.body.appendChild(tip);
+                setTimeout(() => tip.remove(), 1800);
+            }
+        }
+
+        // ── editor sheet 拖拽扩展（在函数定义完成后执行）──
+        window.addEventListener('DOMContentLoaded', function() {
+            const DEFAULT_H = 0.92;
+            function _getSheet() { return document.querySelector('#editor-modal .modal-content'); }
+            function _snapTo(full, animated) {
+                const sheet = _getSheet(); if (!sheet) return;
+                sheet.style.transition = animated ? 'transform 0.32s cubic-bezier(0.32,0.72,0,1), border-radius 0.22s ease, height 0.22s ease' : 'none';
+                if (full) { sheet.classList.add('sheet-fullscreen'); sheet.style.height = '100vh'; }
+                else { sheet.classList.remove('sheet-fullscreen'); sheet.style.height = (DEFAULT_H * 100) + 'vh'; }
+            }
+            const _origClose = closeModal;
+            closeModal = function(id) {
+                if (id === 'editor-modal') {
+                    const sheet = _getSheet();
+                    if (sheet) { sheet.style.transition = 'none'; sheet.classList.remove('sheet-fullscreen'); sheet.style.height = (DEFAULT_H * 100) + 'vh'; }
+                }
+                _origClose(id);
+            };
+            function _initDrag() {
+                const handle = document.querySelector('.editor-handle');
+                if (!handle || handle._sheetDragInit) return;
+                handle._sheetDragInit = true;
+                let startY = 0, startH = 0, dragging = false;
+                function onStart(y) { const s = _getSheet(); if (!s) return; dragging = true; startY = y; startH = s.getBoundingClientRect().height; s.style.transition = 'none'; }
+                function onMove(y) {
+                    if (!dragging) return; const s = _getSheet(); if (!s) return;
+                    const newH = Math.min(window.innerHeight, Math.max(window.innerHeight * 0.3, startH + (startY - y)));
+                    s.style.height = newH + 'px';
+                    s.style.borderRadius = Math.max(0, 20 * (1 - (newH / window.innerHeight) * 2)) + 'px ' + Math.max(0, 20 * (1 - (newH / window.innerHeight) * 2)) + 'px 0 0';
+                }
+                function onEnd() { if (!dragging) return; dragging = false; const s = _getSheet(); if (!s) return; _snapTo(s.getBoundingClientRect().height > window.innerHeight * 0.55, true); }
+                handle.addEventListener('touchstart', e => onStart(e.touches[0].clientY), { passive: true });
+                handle.addEventListener('touchmove', e => { onMove(e.touches[0].clientY); e.preventDefault(); }, { passive: false });
+                handle.addEventListener('touchend', onEnd);
+                handle.addEventListener('mousedown', e => {
+                    onStart(e.clientY);
+                    const mm = ev => onMove(ev.clientY);
+                    const mu = () => { onEnd(); window.removeEventListener('mousemove', mm); window.removeEventListener('mouseup', mu); };
+                    window.addEventListener('mousemove', mm); window.addEventListener('mouseup', mu);
+                });
+            }
+            const _origOpen = openModal;
+            openModal = function(id) { _origOpen(id); if (id === 'editor-modal') requestAnimationFrame(_initDrag); };
+        });
+
         // ── editor bottom sheet helpers ──
         function editorAutoResize(ta) {
             ta.style.height = 'auto';
@@ -2776,10 +2854,14 @@
                 } else { timerInput.value = 0; }
                 state.tempImages = [...note.images];
             } else {
-                contentInput.value = '';
-                tagsInput.value = (state.filterTag && !state.blockedTags.includes(state.filterTag)) ? state.filterTag : '';
-                timerInput.value = (state.filterTag === '⏳') ? '3' : '0';
-                state.tempImages = [];
+                if (_editorDraft) {
+                    _editorRestoreDraft();
+                } else {
+                    contentInput.value = '';
+                    tagsInput.value = (state.filterTag && !state.blockedTags.includes(state.filterTag)) ? state.filterTag : '';
+                    timerInput.value = (state.filterTag === '⏳') ? '3' : '0';
+                    state.tempImages = [];
+                }
             }
 
             const isTodo = id ? !!((state.notes.find(n => n.id === id) || {}).isTodo) : (_currentMode === 'todo');
@@ -2847,7 +2929,7 @@
                 }
                 _pendingForward = null;
                 _isForwardMode = false;
-                saveData(); closeModal('editor-modal'); renderList(); renderTags();
+                saveData(); _editorDraft = null; closeModal('editor-modal'); renderList(); renderTags();
                 return;
             }
             const content = document.getElementById('edit-content').value;
@@ -2897,7 +2979,7 @@
             const fp = document.getElementById('forward-preview');
             if (fp) fp.remove();
 
-            saveData(); closeModal('editor-modal'); renderList(); renderTags();
+            saveData(); _editorDraft = null; closeModal('editor-modal'); renderList(); renderTags();
         }
 
         function deleteNote(id) {
@@ -2927,32 +3009,20 @@
             const note = state.notes.find(n => n.id === id);
             if (!note) return;
 
-            // 判断是编辑已有转发笔记，还是新建转发
-            const isEditForward = !!note.forwardFrom;
-            if (isEditForward) {
-                // 编辑转发：编辑这条笔记自己的content，引用块是它的forwardFrom
-                _pendingForward = { id: note.forwardFrom.id, name: note.forwardFrom.name, content: note.forwardFrom.content };
-                _isForwardMode = true;
-                state.editingId = note.id; // 标记为编辑模式
-            } else {
-                // 新建转发：引用当前笔记
-                _pendingForward = { id: note.id, name: state.settings.name, content: note.content };
-                _isForwardMode = true;
-                state.editingId = null;
-            }
+            // 统一新建转发；已有转发笔记则引用其原帖
+            const quoteSource = note.forwardFrom
+                ? { id: note.forwardFrom.id, name: note.forwardFrom.name, content: note.forwardFrom.content }
+                : { id: note.id, name: state.settings.name, content: note.content };
+            _pendingForward = quoteSource;
+            _isForwardMode = true;
+            state.editingId = null;
             closeModal('full-note-modal');
 
-            // 复用editor-modal
             const contentInput = document.getElementById('edit-content');
             const tagsInput = document.getElementById('edit-tags');
             const timerInput = document.getElementById('edit-timer');
-            if (isEditForward) {
-                contentInput.value = note.content || '';
-                state.tempImages = [...(note.images || [])];
-            } else {
-                contentInput.value = '';
-                state.tempImages = [];
-            }
+            contentInput.value = '';
+            state.tempImages = [];
             tagsInput.value = '';
             timerInput.value = '0';
             _todoMode = false;
@@ -2962,16 +3032,16 @@
             contentInput.style.height = 'auto';
             renderTempImages();
 
-            // 插入引用预览块到textarea上方
+            // 插入引用预览块
             const editorBody = document.querySelector('.editor-body');
             let preview = document.getElementById('forward-preview');
             if (!preview) {
                 preview = document.createElement('div');
                 preview.id = 'forward-preview';
                 preview.style.cssText = 'margin:8px 16px 0;border-left:2.5px solid var(--accent-color);border-radius:0 8px 8px 0;padding:7px 10px;font-size:0.78rem;line-height:1.5;background:rgba(0,0,0,0.03);color:var(--text-color);opacity:0.7;';
-                preview.innerHTML = `<div style="font-weight:600;color:var(--name-color);font-size:0.72rem;margin-bottom:2px;">${state.settings.name}：</div><div style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${note.content || '（无文字内容）'}</div>`;
                 editorBody.parentNode.insertBefore(preview, editorBody);
             }
+            preview.innerHTML = `<div style="font-weight:600;color:var(--name-color);font-size:0.72rem;margin-bottom:2px;">${quoteSource.name}：</div><div style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${quoteSource.content || '（无文字内容）'}</div>`;
 
             openModal('editor-modal');
             requestAnimationFrame(() => editorAutoResize(contentInput));
@@ -3141,7 +3211,6 @@
                         <span class="note-header-name">${state.settings.name}</span>
                         <div class="note-header-right">
                             ${timerHtml}
-                            ${item.forwardFrom ? `<span class="edit-btn" onclick="event.stopPropagation();forwardNote(${item.id})" title="编辑转发"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></span>` : ''}
                             <span class="edit-btn" onclick="event.stopPropagation();openEditor(${item.id})"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAABQCAYAAABxs9dPAAAC80lEQVR42u2YTYhOYRTHf/fOh2nIxxTZSGJFJNmIt5QsLDSapMSGhY2dslJTlmp2ko0okZVSdrOxsPFRr5gMQhZYoXyk0XjvvTbn1On0vrf3vvM+dyY9/3p67sfTPf/nfD3nXIiIiIiIiIiIiIiIWCpIZCwqUmCwzfPBxSA34O7XyPCEayWzEbgEPAO+yGgCF4F1HYgHI3ME+AYUHcYn4EBoTSmZBtASwfNA5sa8vJsDdofSlEbRKPBOBLbcbK//yvwcGAqhJY2m005g3sZcuSM33q2WqrAuZJ6Q60QEJ8BNYIeY5555pwQnjJb7Zi7d4RunoRm3dhj44NY87ZZQ2oPZRpzGmobIkDj0rFsz6u4XTEg/NA/8dLttiMCWjDFglzErwI8QGhoQIbOGYAZsAqaMz1wF1su9buZFiNAfcE7tQ/4gcLzDu/2hcpEepk+MwFzGd+CXuVcy0yGztX50u2ThVkkeysR3NovvBD8+zjqz5G0S4om6DljN2ndLjo4bbm3wEz8BtkgqyJ2Wfkv5kdZVE6kJbpdo6HLd9dDJNmR0ZDIfCk1KS5CVwGcTTZ6QknwlR0qwBkAd9FSJdjypw1W0VNXh9MgYN4LL1lpCSZUdd2uuTHa61SW73JBLjYkSYJs59/pKSLECWOV2nZbUUGNyXZi5bybTneZGMwDvgWPAGTkurDnzOlrmGdNx2PAGuCDP/sj8oMrm0x5yUGEIFSXf1PfNkKe9+txRo6Fc2qK1wD6pKDMT9ntDJkeNnBHgrTNbA5g0DWIBPKxaevSSh1Lxj3PmuRZkc2ZNDpx3tXXfCWFy0X3gjulKEzMPA1eAR7I2Cx1pKniDCfM9RiMfgdVmHSE1pCZKRfB1ozkVPiU1dtpNL9bPH0oJcM1E0YiQvWXaaeoipH7xUjS1TAg15b9R7YRsbpkBlksH21xIl7HQAlz9Yxr4CryW3qyo6jv/PRKXySMiIiIiIiIiIpYAavsFXCv68UdCy9ZJYCfwuJcGUfEPRBMUNTxHaHMAAAAASUVORK5CYII=" class="edit-icon-img"></span>
                         </div>
                     </div>
@@ -3339,6 +3408,27 @@
             }
             openModal('full-note-modal');
             document.getElementById('main-fab').style.display = 'none';
+
+            const commentBar = document.querySelector('.full-note-comment-bar');
+            const modalWrap = document.querySelector('.full-note-modal-wrap');
+            function _onVVResize() {
+                if (!document.getElementById('full-note-modal').classList.contains('open')) return;
+                const vv = window.visualViewport; if (!vv) return;
+                const kbH = window.innerHeight - vv.height;
+                if (commentBar) commentBar.style.transform = `translateY(-${Math.max(0, kbH)}px)`;
+                if (modalWrap) { modalWrap.style.height = vv.height + 'px'; modalWrap.style.maxHeight = vv.height + 'px'; }
+            }
+            if (window._fullNoteVVCleanup) window._fullNoteVVCleanup();
+            if (window.visualViewport) {
+                window.visualViewport.addEventListener('resize', _onVVResize);
+                window.visualViewport.addEventListener('scroll', _onVVResize);
+                window._fullNoteVVCleanup = () => {
+                    window.visualViewport.removeEventListener('resize', _onVVResize);
+                    window.visualViewport.removeEventListener('scroll', _onVVResize);
+                    if (commentBar) commentBar.style.transform = '';
+                    if (modalWrap) { modalWrap.style.height = ''; modalWrap.style.maxHeight = ''; }
+                };
+            }
         }
 
         function renderComments(note) {
@@ -3729,6 +3819,10 @@
                 avatarInner.classList.remove('is-framed');
             }
 
+            // 同步抽屉头像裁切
+            const drawerAvatarImg = document.getElementById('drawer-avatar-img');
+            if (drawerAvatarImg) drawerAvatarImg.style.borderRadius = frameVal === 'none' ? '8px' : '50%';
+
             // 同步旧 frameStyle（兼容旧逻辑，防止 updateSettings 读取时出错）
             s.frameStyle = frameVal === 'none' ? 'none' : (frameVal === 'circle' ? 'circle' : 'st');
 
@@ -3816,7 +3910,7 @@
             }
         }
         function switchPortraitTab(tab) {
-            ['avatar','frame','charm'].forEach(t => {
+            ['avatar','frame','charm','profile'].forEach(t => {
                 document.getElementById('pt-' + t).classList.toggle('active', t === tab);
                 document.getElementById('pp-' + t).classList.toggle('active', t === tab);
             });
@@ -3850,6 +3944,15 @@
             if (pCX) pCX.value = s.charmX ?? 20;
             const pCY = document.getElementById('p-charm-y');
             if (pCY) pCY.value = s.charmY ?? 0;
+            // 资料
+            const pName = document.getElementById('p-profile-name');
+            if (pName) pName.value = s.name || '';
+            const pSig = document.getElementById('p-profile-signature');
+            if (pSig) { pSig.value = s.signature || ''; pSig.style.height = 'auto'; pSig.style.height = pSig.scrollHeight + 'px'; }
+            const pNC = document.getElementById('p-profile-name-color');
+            if (pNC) pNC.value = s.nameColor || '#333333';
+            const pNCP = document.getElementById('p-name-color-preview');
+            if (pNCP) pNCP.style.background = s.nameColor || '#333333';
             renderPortraitHistoryAvatars();
             renderPortraitFramePresets();
         }
@@ -3877,7 +3980,9 @@
             });
         }
         function selectHistoryAvatar(src) {
+            addToHistoryAvatars(state.settings.currentAvatar);
             state.settings.currentAvatar = src;
+            addToHistoryAvatars(src);
             document.getElementById('current-avatar').src = src;
             document.getElementById('drawer-avatar-img').src = src;
             saveData();
@@ -3989,6 +4094,24 @@
             const hidden = document.getElementById('setting-charm-y');
             if (hidden) hidden.value = v;
             saveData();
+        }
+
+        function onPortraitProfileName(val) {
+            state.settings.name = val;
+            const h = document.getElementById('setting-name'); if (h) h.value = val;
+            saveData(); applySettings();
+        }
+        function onPortraitProfileSignature(val) {
+            state.settings.signature = val;
+            const h = document.getElementById('setting-signature'); if (h) h.value = val;
+            saveData(); applySettings();
+        }
+        function onPortraitProfileNameColor(val) {
+            state.settings.nameColor = val;
+            const h = document.getElementById('setting-name-color'); if (h) h.value = val;
+            const p = document.getElementById('p-name-color-preview'); if (p) p.style.background = val;
+            const p2 = document.getElementById('name-color-preview'); if (p2) p2.style.background = val;
+            saveData(); applySettings();
         }
 
         function snapCharmY30() {
@@ -4312,7 +4435,11 @@
                 img.title = '点击使用 / 长按删除';
                 if (url === cur) { img.style.outline = '2px solid var(--accent-color)'; img.style.outlineOffset = '1px'; }
                 img.onclick = () => {
+                    // 현재 아바타를 히스토리에 보존
+                    addToHistoryAvatars(state.settings.currentAvatar);
                     state.settings.currentAvatar = url;
+                    // 클릭한 히스토리 아바타도 히스토리에 유지
+                    addToHistoryAvatars(url);
                     saveData(); applySettings(); renderHistoryAvatars();
                 };
                 setupLongPress(img, () => {
@@ -4345,7 +4472,9 @@
                 img.style.cssText = 'width:40px;height:40px;border-radius:6px;object-fit:cover;cursor:pointer;flex-shrink:0;';
                 img.title = '点击使用 / 长按删除';
                 img.onclick = () => {
+                    addToHistoryBgs(state.settings.bgImage);
                     state.settings.bgImage = url;
+                    addToHistoryBgs(url);
                     saveData(); applySettings(); renderHistoryBgs();
                 };
                 setupLongPress(img, () => {
@@ -4409,6 +4538,7 @@
                     state.settings.charmSwing = entry.swing ?? 8;
                     state.settings.charmX     = entry.x     ?? 20;
                     state.settings.charmY     = entry.y     ?? 10;
+                    addToHistoryCharms(entry.url);
                     saveData(); applySettings(); syncPortraitFromState(); renderHistoryCharms();
                 };
                 setupLongPress(img, () => {
@@ -5363,8 +5493,10 @@
                 if (fromYMD && toYMD) {
                     if (cy===fromYMD.y && cm===fromYMD.m && cd===fromYMD.d) {
                         el.classList.add('range-start');
+                        const dot = document.createElement('span'); dot.className = 'range-dot'; el.appendChild(dot);
                     } else if (cy===toYMD.y && cm===toYMD.m && cd===toYMD.d) {
                         el.classList.add('range-end');
+                        const dot = document.createElement('span'); dot.className = 'range-dot'; el.appendChild(dot);
                     } else {
                         const after = cy>fromYMD.y || (cy===fromYMD.y && (cm>fromYMD.m || (cm===fromYMD.m && cd>fromYMD.d)));
                         const before = cy<toYMD.y || (cy===toYMD.y && (cm<toYMD.m || (cm===toYMD.m && cd<toYMD.d)));
@@ -5392,41 +5524,40 @@
 
         function calSelectDate(y, m, d) {
             const key = dateToKey(y, m, d);
+            const hasSingle = state.filterDateFrom && !state.filterDateTo;
 
-            if (_calPickStep === 0 || _calPickStep === 2) {
+            if (hasSingle && key === state.filterDateFrom) {
+                // 再次点同一天：取消筛选
+                state.filterDateFrom = null;
+                state.filterDateTo = null;
+                _calLastClick = null;
+                _calPickStep = 0;
+            } else if (hasSingle) {
+                // 已有起点，点另一天：设为范围终点
+                const from = keyToDate(state.filterDateFrom);
+                from.setHours(0,0,0,0);
+                const picked = new Date(y, m-1, d);
+                picked.setHours(0,0,0,0);
+                if (picked < from) {
+                    state.filterDateTo = state.filterDateFrom;
+                    state.filterDateFrom = key;
+                } else {
+                    state.filterDateTo = key;
+                }
+                _calLastClick = null;
+                _calPickStep = 2;
+            } else {
+                // 无选中或已有范围：重新以这天为单日起点
                 state.filterDateFrom = key;
                 state.filterDateTo = null;
                 _calLastClick = key;
                 _calPickStep = 1;
-            } else if (_calPickStep === 1) {
-                if (key === _calLastClick) {
-                    state.filterDateFrom = null;
-                    state.filterDateTo = null;
-                    _calLastClick = null;
-                    _calPickStep = 0;
-                } else {
-                    const from = keyToDate(state.filterDateFrom);
-                    from.setHours(0,0,0,0);
-                    const picked = new Date(y, m-1, d);
-                    picked.setHours(0,0,0,0);
-                    if (picked < from) {
-                        state.filterDateTo = state.filterDateFrom;
-                        state.filterDateFrom = key;
-                    } else {
-                        state.filterDateTo = key;
-                    }
-                    _calLastClick = null;
-                    _calPickStep = 2;
-                }
             }
 
-            // 清除筛选按钮可见性
             const clearBtn = document.getElementById('drawer-cal-clear');
             if (clearBtn) clearBtn.style.display = state.filterDateFrom ? '' : 'none';
 
-            // 特殊日气泡
             showCalSpecialBubble(y, m, d);
-
             renderCalendar();
             renderList();
             renderStats();
@@ -5569,6 +5700,7 @@
             document.getElementById(id).classList.remove('open');
             if (id === 'full-note-modal') {
                 document.getElementById('main-fab').style.display = '';
+                if (window._fullNoteVVCleanup) { window._fullNoteVVCleanup(); window._fullNoteVVCleanup = null; }
             }
             if (id === 'editor-modal' || id === 'forward-modal') {
                 _pendingForward = null;
@@ -5958,6 +6090,7 @@
                 <div class="portrait-tab active" id="pt-avatar" onclick="switchPortraitTab('avatar')">头像</div>
                 <div class="portrait-tab" id="pt-frame" onclick="switchPortraitTab('frame')">头像框</div>
                 <div class="portrait-tab" id="pt-charm" onclick="switchPortraitTab('charm')">挂件</div>
+                <div class="portrait-tab" id="pt-profile" onclick="switchPortraitTab('profile')">资料</div>
             </div>
             <div class="portrait-content">
 
@@ -6024,6 +6157,23 @@
                         <button class="portrait-snap-btn" onclick="state.settings.charmY=(+state.settings.charmY||0)+2;saveData();applySettings();syncPortraitFromState()">＋</button>
                         <button class="portrait-snap-btn" onclick="setCharmY(0);syncPortraitFromState()">顶</button>
                         <button class="portrait-snap-btn" onclick="snapCharmY30();syncPortraitFromState()">30%</button>
+                    </div>
+                </div>
+
+                <!-- 资料 tab -->
+                <div class="portrait-tab-panel" id="pp-profile">
+                    <div class="portrait-row">
+                        <label>昵称</label>
+                        <input type="text" id="p-profile-name" class="portrait-input" style="flex:1;" oninput="onPortraitProfileName(this.value)">
+                    </div>
+                    <div class="portrait-row" style="align-items:flex-start;">
+                        <label style="padding-top:6px;">签名</label>
+                        <textarea id="p-profile-signature" class="portrait-input" rows="2" placeholder="留空不显示" style="flex:1;resize:none;overflow:hidden;line-height:1.5;font-family:var(--custom-font);" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';onPortraitProfileSignature(this.value)"></textarea>
+                    </div>
+                    <div class="portrait-row">
+                        <label>昵称颜色</label>
+                        <input type="text" id="p-profile-name-color" class="portrait-input" placeholder="#333 或 gradient" style="flex:1;" oninput="onPortraitProfileNameColor(this.value)">
+                        <div id="p-name-color-preview" style="width:28px;height:28px;border-radius:6px;border:1px solid rgba(0,0,0,0.12);flex-shrink:0;cursor:pointer;margin-left:6px;" onclick="toggleNameColorPicker()"></div>
                     </div>
                 </div>
 
