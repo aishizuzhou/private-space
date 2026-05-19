@@ -462,7 +462,19 @@
             overflow: hidden;
         }
 
-        .search-bar {
+        .lf-option {
+            padding: 10px 16px;
+            font-size: 0.82rem;
+            color: var(--text-color);
+            cursor: pointer;
+            border-bottom: 1px solid var(--glass-border);
+            transition: background 0.12s;
+        }
+        .lf-option:last-child { border-bottom: none; }
+        .lf-option:active { background: rgba(0,0,0,0.06); }
+        .lf-option.active { color: var(--accent-color); font-weight: 600; }
+        #length-filter-btn.active { background: var(--accent-color); color: var(--accent-text); border-color: var(--accent-color); }
+        #length-filter-btn.active svg { stroke: var(--accent-text); }
             width: calc(100% - 24px) !important;
             height: 40px !important;
             padding: 0 20px !important;
@@ -725,7 +737,7 @@
             box-shadow: 0 -4px 30px rgba(0,0,0,0.18);
             display: flex;
             flex-direction: column;
-            overflow: visible;
+            overflow: hidden;
             transform: translateY(100%);
             transition: transform 0.32s cubic-bezier(0.32,0.72,0,1), border-radius 0.22s ease, height 0.22s ease;
             position: relative;
@@ -739,8 +751,14 @@
             margin: 10px auto 4px;
             flex-shrink: 0;
             cursor: ns-resize;
-            padding: 10px 40px;
-            box-sizing: content-box;
+            position: relative;
+        }
+        /* 用伪元素扩大触摸热区，不影响视觉 */
+        .editor-handle::before {
+            content: '';
+            position: absolute;
+            top: -12px; bottom: -12px;
+            left: -40px; right: -40px;
         }
         .editor-body {
             overflow-y: auto;
@@ -994,7 +1012,8 @@
             background: rgba(255,255,255,0.72);
             backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             border-radius: 20px 20px 0 0;
-            max-height: 62vh;
+            height: 78vh;
+            max-height: 88vh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -1064,7 +1083,7 @@
             flex: 1; overflow-y: auto;
             padding: 12px 20px 32px;
         }
-        .portrait-tab-panel { display: none; }
+        .portrait-tab-panel { display: none; min-height: 260px; }
         .portrait-tab-panel.active { display: block; }
 
         /* 调节行 */
@@ -1430,15 +1449,58 @@
             display: flex; align-items: center; justify-content: center;
         }
 
-        /* ===== 番茄钟页面 ===== */
+        .pomo-log-wrap {
+            width: 100%;
+            margin-top: 20px;
+        }
+        .pomo-log-title {
+            font-size: 0.72rem;
+            letter-spacing: 0.12em;
+            opacity: 0.35;
+            margin-bottom: 10px;
+            text-align: left;
+            padding-left: 2px;
+        }
+        .pomo-log-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.35);
+            margin-bottom: 6px;
+            font-size: 0.82rem;
+        }
+        body.dark-mode .pomo-log-item { background: rgba(255,255,255,0.07); }
+        .pomo-log-reason {
+            flex: 1;
+            color: var(--text-color);
+            opacity: 0.8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .pomo-log-reason.empty { opacity: 0.3; font-style: italic; }
+        .pomo-log-dur {
+            font-size: 0.75rem;
+            opacity: 0.5;
+            flex-shrink: 0;
+            font-variant-numeric: tabular-nums;
+        }
+        .pomo-log-time {
+            font-size: 0.7rem;
+            opacity: 0.3;
+            flex-shrink: 0;
+        }
         .pomo-page {
             flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            padding: 20px 24px 40px;
+            justify-content: flex-start;
+            padding: 20px 24px 24px;
             gap: 0;
+            overflow-y: auto;
         }
         .pomo-title {
             font-size: 0.85rem;
@@ -1633,9 +1695,11 @@
             backdrop-filter: blur(var(--glass-blur));
             -webkit-backdrop-filter: blur(var(--glass-blur));
             border: 1px solid var(--glass-border);
-            border-radius: 18px;
+            border-radius: 18px 18px 0 0;
+            border-bottom: none;
             padding: 16px;
-            margin-bottom: max(12px, env(safe-area-inset-bottom));
+            padding-bottom: max(24px, env(safe-area-inset-bottom));
+            margin-bottom: 0;
         }
         /* ===================== 待机模式 ===================== */
         #standby-overlay {
@@ -2014,18 +2078,13 @@
     <!-- 抽屉本体 - 内容从这里开始 -->
     <div id="drawer">
         <!-- 头部：点击头像展开个人设置 -->
-        <div class="drawer-header" id="drawer-header" onclick="toggleDrawerAvatarPanel()">
+        <div class="drawer-header" id="drawer-header" onclick="openPortrait()">
             <div class="drawer-avatar-wrap">
                 <img id="drawer-avatar-img" src="https://via.placeholder.com/150" alt="">
             </div>
             <div style="flex:1;">
                 <div class="drawer-name" id="drawer-display-name">宛宛</div>
-                <div style="display:flex;align-items:center;gap:8px;margin-top:3px;">
-                    <span style="font-size:0.7rem;opacity:0.38;color:var(--text-color);">昵称 / 签名 / 昵称颜色</span>
-                    <button onclick="event.stopPropagation();openPortrait();" style="padding:2px 10px;border-radius:20px;background:var(--accent-color);color:var(--accent-text);border:none;font-size:0.65rem;cursor:pointer;opacity:0.85;">调整形象</button>
-                </div>
             </div>
-            <span id="drawer-avatar-arrow" style="font-size:0.8rem;opacity:0.3;transition:transform 0.2s;flex-shrink:0;">▾</span>
         </div>
 
         <div class="drawer-scroll">
@@ -2276,7 +2335,18 @@
 
             <!-- ===== 笔记页面 ===== -->
             <div id="page-note" class="mode-page">
-                <input type="text" class="search-bar" placeholder="搜索内容、图片备注..." oninput="handleSearch(this.value)">
+                <div style="display:flex;align-items:center;gap:6px;margin:0 12px 15px;position:relative;">
+                    <input type="text" class="search-bar" placeholder="搜索内容、图片备注..." oninput="handleSearch(this.value)" style="margin:0!important;flex:1;width:auto!important;">
+                    <button id="length-filter-btn" onclick="toggleLengthFilter()" style="height:40px;width:40px;flex-shrink:0;border-radius:10px;border:1px solid var(--glass-border);background:var(--glass-bg);backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);color:var(--text-color);cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative;transition:background 0.15s;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                    </button>
+                    <div id="length-filter-popup" style="display:none;position:absolute;right:12px;top:56px;z-index:200;background:var(--glass-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,0.12);overflow:hidden;min-width:110px;">
+                        <div class="lf-option" data-val="" onclick="setLengthFilter('')">全部</div>
+                        <div class="lf-option" data-val="0-200" onclick="setLengthFilter('0-200')">短篇 ≤200</div>
+                        <div class="lf-option" data-val="201-500" onclick="setLengthFilter('201-500')">中篇 201–500</div>
+                        <div class="lf-option" data-val="500+" onclick="setLengthFilter('500+')">长篇 500+</div>
+                    </div>
+                </div>
                 <div class="content-area" id="list-container"></div>
             </div>
 
@@ -2344,6 +2414,7 @@
                         <button class="pomo-ctrl-btn pomo-reset" onclick="pomoReset()">重置</button>
                     </div>
                     <div class="pomo-status" id="pomo-label"></div>
+                    <div class="pomo-log-wrap" id="pomo-log-wrap"></div>
                 </div>
             </div>
             <div class="pomo-done-card" id="pomo-done-card" style="display:none;" onclick="document.getElementById('pomo-done-card').style.display='none'">
@@ -2419,6 +2490,9 @@
                 <button class="ea-btn" onclick="document.getElementById('file-input-camera').click()" title="拍照"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="18" height="18" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><path d="M38 36 Q38 28 46 28 L54 28 Q62 28 62 36"/><path d="M18 36 L18 72 Q18 80 26 80 L74 80 Q82 80 82 72 L82 36 Q82 28 74 28 L26 28 Q18 28 18 36Z"/><circle cx="50" cy="56" r="12" stroke-dasharray="60 16"/></svg></button>
                 <button class="ea-btn" onclick="document.getElementById('file-input').click()" title="从相册选择"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="18" height="18"><g stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M 55 15 L 25 15 A 10 10 0 0 0 15 25 L 15 75 A 10 10 0 0 0 25 85 L 75 85 A 10 10 0 0 0 85 75 L 85 45"/><path d="M 15 65 L 35 40 L 55 55 L 70 42 L 85 58"/><path d="M 75 40 L 75 10 M 62 22 L 75 10 L 88 22"/></g></svg></button>
                 <button class="ea-btn" id="ea-timer-btn" onclick="editorPopover('timer')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="14" height="14"><defs><mask id="ribbon-gap"><rect width="200" height="200" fill="white"/><path d="M 145 25 C 145 95, 55 105, 55 175" fill="none" stroke="black" stroke-width="44" stroke-linecap="butt"/></mask></defs><g fill="currentColor"><polygon points="25,12 175,12 162,38 38,38"/><polygon points="25,188 175,188 162,162 38,162"/></g><path d="M 55 25 C 55 95, 145 105, 145 175" fill="none" stroke="currentColor" stroke-width="26" stroke-linecap="butt" mask="url(#ribbon-gap)"/><path d="M 145 25 C 145 95, 55 105, 55 175" fill="none" stroke="currentColor" stroke-width="26" stroke-linecap="butt"/></svg></button>
+                <button class="ea-btn" onclick="wrapFormat('bold')" title="加粗" style="font-weight:700;font-size:0.95rem;">B</button>
+                <button class="ea-btn" onclick="wrapFormat('italic')" title="斜体" style="font-style:italic;font-size:0.95rem;">I</button>
+                <button class="ea-btn" onclick="wrapFormat('strike')" title="删除线" style="text-decoration:line-through;font-size:0.85rem;">S</button>
                 <button class="ea-save-btn" onclick="saveItem()">↑</button>
             </div>
             <div class="ea-popover" id="ea-popover" style="display:none;">
@@ -2519,7 +2593,7 @@
                 pinnedTags: []
             },
             tempImages: [], filterTag: null, blockedTags: [], searchQuery: '',
-            editingId: null, filterDateFrom: null, filterDateTo: null,
+            editingId: null, filterDateFrom: null, filterDateTo: null, filterLength: '',
             specialDays: [], specialPinnedId: null,
             commentPreviewName: '宛宛',
             commentPreviewSuffix: '说：',
@@ -2770,7 +2844,19 @@
                     s.style.height = newH + 'px';
                     s.style.borderRadius = Math.max(0, 20 * (1 - (newH / window.innerHeight) * 2)) + 'px ' + Math.max(0, 20 * (1 - (newH / window.innerHeight) * 2)) + 'px 0 0';
                 }
-                function onEnd() { if (!dragging) return; dragging = false; const s = _getSheet(); if (!s) return; _snapTo(s.getBoundingClientRect().height > window.innerHeight * 0.55, true); }
+                function onEnd() {
+                    if (!dragging) return; dragging = false;
+                    const s = _getSheet(); if (!s) return;
+                    const curH = s.getBoundingClientRect().height;
+                    const ratio = curH / window.innerHeight;
+                    if (ratio < 0.4) _snapTo(false, true);        // 太低弹回默认
+                    else if (ratio > 0.7) _snapTo(true, true);    // 够高吸附全屏
+                    else {
+                        // 中间：停在当前位置，只恢复过渡动画
+                        s.style.transition = 'border-radius 0.22s ease';
+                        s.style.borderRadius = ratio > 0.55 ? '0' : '10px 10px 0 0';
+                    }
+                }
                 handle.addEventListener('touchstart', e => onStart(e.touches[0].clientY), { passive: true });
                 handle.addEventListener('touchmove', e => { onMove(e.touches[0].clientY); e.preventDefault(); }, { passive: false });
                 handle.addEventListener('touchend', onEnd);
@@ -3215,7 +3301,7 @@
                         </div>
                     </div>
                     ${item.forwardFrom ? `<div class="note-quote-mini"><span class="note-quote-mini-author">${item.forwardFrom.name}：</span>${item.forwardFrom.content}</div>` : ''}
-                    ${item.isTodo ? todoHtml : `<div class="note-content">${item.content}</div>`}
+                    ${item.isTodo ? todoHtml : `<div class="note-content">${parseFormat(item.content)}</div>`}
                     ${commentPreviewHtml}
                     ${imagesHtml}
                     <div class="note-card-footer">
@@ -3287,6 +3373,12 @@
                     const inComments = (item.comments||[]).some(c => c.text && c.text.includes(state.searchQuery));
                     if (!inContent && !inRemark && !inComments) return false;
                 }
+                if (state.filterLength) {
+                    const len = (item.content || '').length;
+                    if (state.filterLength === '0-200' && len > 200) return false;
+                    if (state.filterLength === '201-500' && (len < 201 || len > 500)) return false;
+                    if (state.filterLength === '500+' && len < 501) return false;
+                }
                 return true;
             });
 
@@ -3341,7 +3433,7 @@
                     letter-spacing: 0.04em;
                     word-break: break-all;
                     text-indent: 2em;
-                ">${note.content.split('\n').map(p => p.trim() ? `<p style="margin:0 0 0.6em 0; text-indent:2em;">${p}</p>` : '<p style="margin:0 0 0.3em 0;">&nbsp;</p>').join('')}</div>`;
+                ">${note.content.split('\n').map(p => p.trim() ? `<p style="margin:0 0 0.6em 0; text-indent:2em;">${parseFormat(p)}</p>` : '<p style="margin:0 0 0.3em 0;">&nbsp;</p>').join('')}</div>`;
             }
 
             // 时间戳格式化到秒
@@ -4289,6 +4381,38 @@
                 if (area) { area.style.pointerEvents = 'none'; area.style.opacity = '0.4'; }
             }
         }
+        // ── 文本格式解析 ──
+        function parseFormat(text) {
+            if (!text) return '';
+            // 先转义 HTML
+            let s = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            // ~~删除线~~ → <s>
+            s = s.replace(/~~(.+?)~~/g, '<s>$1</s>');
+            // **加粗** → <strong>
+            s = s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+            // *斜体* → <em>（不贪婪，排除已处理的 **）
+            s = s.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, '<em>$1</em>');
+            return s;
+        }
+
+        function wrapFormat(tag) {
+            const ta = document.getElementById('edit-content');
+            if (!ta) return;
+            const start = ta.selectionStart, end = ta.selectionEnd;
+            const sel = ta.value.slice(start, end);
+            const map = { bold: ['**','**'], italic: ['*','*'], strike: ['~~','~~'] };
+            const [open, close] = map[tag] || ['',''];
+            // 如果已有标记则去掉（toggle）
+            if (sel.startsWith(open) && sel.endsWith(close) && sel.length > open.length + close.length) {
+                const inner = sel.slice(open.length, sel.length - close.length);
+                ta.setRangeText(inner, start, end, 'select');
+            } else {
+                ta.setRangeText(open + sel + close, start, end, 'select');
+            }
+            ta.focus();
+            editorAutoResize(ta);
+        }
+
         function rgbToHex(r, g, b) {
             return '#' + [r,g,b].map(v => v.toString(16).padStart(2,'0')).join('');
         }
@@ -4327,19 +4451,116 @@
 
         // ===================== 昵称颜色RGB调色板 =====================
         let _namePickerOpen = false;
+        let _hsvPickerH = 0, _hsvPickerS = 1, _hsvPickerV = 1;
+
+        function _hsvToHex(h, s, v) {
+            let r,g,b;
+            const i=Math.floor(h/60)%6, f=h/60-Math.floor(h/60);
+            const p=v*(1-s), q=v*(1-f*s), t=v*(1-(1-f)*s);
+            if(i===0){r=v;g=t;b=p;}else if(i===1){r=q;g=v;b=p;}else if(i===2){r=p;g=v;b=t;}else if(i===3){r=p;g=q;b=v;}else if(i===4){r=t;g=p;b=v;}else{r=v;g=p;b=q;}
+            return '#'+[r,g,b].map(x=>Math.round(x*255).toString(16).padStart(2,'0')).join('');
+        }
+        function _hexToHsv(hex) {
+            const rgb = parseCssColorToRgb(hex);
+            if (!rgb) return [0,1,1];
+            let [r,g,b]=rgb.map(x=>x/255);
+            const max=Math.max(r,g,b),min=Math.min(r,g,b),d=max-min;
+            let h=0,s=max===0?0:d/max,v=max;
+            if(d!==0){if(max===r)h=((g-b)/d+(g<b?6:0))*60;else if(max===g)h=((b-r)/d+2)*60;else h=((r-g)/d+4)*60;}
+            return [h,s,v];
+        }
+        function _buildHsvPicker() {
+            if (document.getElementById('hsv-picker-popup')) return;
+            const el = document.createElement('div');
+            el.id = 'hsv-picker-popup';
+            el.style.cssText = 'position:fixed;z-index:9999;background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.22);padding:14px;width:260px;display:none;touch-action:none;';
+            el.innerHTML = `
+                <canvas id="hsv-sq" width="232" height="180" style="border-radius:8px;display:block;cursor:crosshair;touch-action:none;width:100%;"></canvas>
+                <div style="margin-top:10px;display:flex;align-items:center;gap:8px;">
+                    <canvas id="hsv-hue" width="196" height="16" style="border-radius:8px;flex:1;cursor:crosshair;touch-action:none;width:100%;"></canvas>
+                    <div id="hsv-result" style="width:32px;height:32px;border-radius:8px;border:1px solid rgba(0,0,0,0.12);flex-shrink:0;"></div>
+                </div>
+                <div style="margin-top:8px;display:flex;gap:6px;align-items:center;">
+                    <input id="hsv-hex-input" type="text" style="flex:1;border:1px solid #ddd;border-radius:8px;padding:5px 8px;font-size:0.82rem;font-family:monospace;" placeholder="#ffffff">
+                    <button onclick="_hsvApply()" style="padding:5px 12px;border-radius:8px;background:var(--accent-color);color:var(--accent-text);border:none;font-size:0.8rem;cursor:pointer;">确定</button>
+                </div>`;
+            document.body.appendChild(el);
+            function sqPointer(e) {
+                const sq=el.querySelector('#hsv-sq'),r=sq.getBoundingClientRect();
+                const cx=e.touches?e.touches[0].clientX:e.clientX,cy=e.touches?e.touches[0].clientY:e.clientY;
+                _hsvPickerS=Math.max(0,Math.min(1,(cx-r.left)/r.width));
+                _hsvPickerV=Math.max(0,Math.min(1,1-(cy-r.top)/r.height));
+                _hsvRedraw(); e.preventDefault();
+            }
+            function huePointer(e) {
+                const hc=el.querySelector('#hsv-hue'),r=hc.getBoundingClientRect();
+                const cx=e.touches?e.touches[0].clientX:e.clientX;
+                _hsvPickerH=Math.max(0,Math.min(360,((cx-r.left)/r.width)*360));
+                _hsvRedraw(); e.preventDefault();
+            }
+            const sq=el.querySelector('#hsv-sq');
+            sq.addEventListener('mousedown',e=>{sqPointer(e);const mm=ev=>sqPointer(ev),mu=()=>{window.removeEventListener('mousemove',mm);window.removeEventListener('mouseup',mu);};window.addEventListener('mousemove',mm);window.addEventListener('mouseup',mu);});
+            sq.addEventListener('touchstart',sqPointer,{passive:false});
+            sq.addEventListener('touchmove',sqPointer,{passive:false});
+            const hc=el.querySelector('#hsv-hue');
+            hc.addEventListener('mousedown',e=>{huePointer(e);const mm=ev=>huePointer(ev),mu=()=>{window.removeEventListener('mousemove',mm);window.removeEventListener('mouseup',mu);};window.addEventListener('mousemove',mm);window.addEventListener('mouseup',mu);});
+            hc.addEventListener('touchstart',huePointer,{passive:false});
+            hc.addEventListener('touchmove',huePointer,{passive:false});
+            el.querySelector('#hsv-hex-input').addEventListener('input',function(){
+                const rgb=parseCssColorToRgb(this.value.trim());
+                if(rgb){[_hsvPickerH,_hsvPickerS,_hsvPickerV]=_hexToHsv(this.value.trim());_hsvRedraw(false);}
+            });
+            document.addEventListener('pointerdown',function(e){
+                const pop=document.getElementById('hsv-picker-popup');
+                if(pop&&pop.style.display!=='none'&&!pop.contains(e.target)&&!e.target.closest('#p-name-color-preview')){pop.style.display='none';_namePickerOpen=false;}
+            });
+        }
+        function _hsvRedraw(updateInput=true) {
+            const el=document.getElementById('hsv-picker-popup');if(!el)return;
+            const sq=el.querySelector('#hsv-sq'),ctx=sq.getContext('2d'),W=sq.width,H=sq.height;
+            const wg=ctx.createLinearGradient(0,0,W,0);
+            wg.addColorStop(0,'#fff');wg.addColorStop(1,`hsl(${_hsvPickerH},100%,50%)`);
+            ctx.fillStyle=wg;ctx.fillRect(0,0,W,H);
+            const bg=ctx.createLinearGradient(0,0,0,H);
+            bg.addColorStop(0,'rgba(0,0,0,0)');bg.addColorStop(1,'#000');
+            ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+            const cx=_hsvPickerS*W,cy=(1-_hsvPickerV)*H;
+            ctx.beginPath();ctx.arc(cx,cy,7,0,Math.PI*2);ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();
+            ctx.beginPath();ctx.arc(cx,cy,8,0,Math.PI*2);ctx.strokeStyle='rgba(0,0,0,0.3)';ctx.lineWidth=1;ctx.stroke();
+            const hc=el.querySelector('#hsv-hue'),hctx=hc.getContext('2d');
+            const hg=hctx.createLinearGradient(0,0,hc.width,0);
+            for(let i=0;i<=360;i+=30)hg.addColorStop(i/360,`hsl(${i},100%,50%)`);
+            hctx.fillStyle=hg;hctx.fillRect(0,0,hc.width,hc.height);
+            const hx=(_hsvPickerH/360)*hc.width;
+            hctx.beginPath();hctx.arc(hx,8,6,0,Math.PI*2);hctx.strokeStyle='#fff';hctx.lineWidth=2;hctx.stroke();
+            hctx.beginPath();hctx.arc(hx,8,7,0,Math.PI*2);hctx.strokeStyle='rgba(0,0,0,0.3)';hctx.lineWidth=1;hctx.stroke();
+            const hex=_hsvToHex(_hsvPickerH,_hsvPickerS,_hsvPickerV);
+            el.querySelector('#hsv-result').style.background=hex;
+            if(updateInput)el.querySelector('#hsv-hex-input').value=hex;
+        }
+        function _hsvApply() {
+            const hex=_hsvToHex(_hsvPickerH,_hsvPickerS,_hsvPickerV);
+            onPortraitProfileNameColor(hex);
+            const pop=document.getElementById('hsv-picker-popup');
+            if(pop)pop.style.display='none';
+            _namePickerOpen=false;
+        }
         function toggleNameColorPicker() {
-            _namePickerOpen = !_namePickerOpen;
-            const picker = document.getElementById('name-color-picker');
-            if (picker) picker.style.display = _namePickerOpen ? 'block' : 'none';
-            if (_namePickerOpen) {
-                // 尝试从当前输入框解析纯色并同步滑条
-                const cur = (document.getElementById('setting-name-color').value || '').trim();
-                const rgb = parseCssColorToRgb(cur);
-                if (rgb) {
-                    document.getElementById('nc-r').value = rgb[0]; document.getElementById('nc-r-val').innerText = rgb[0];
-                    document.getElementById('nc-g').value = rgb[1]; document.getElementById('nc-g-val').innerText = rgb[1];
-                    document.getElementById('nc-b').value = rgb[2]; document.getElementById('nc-b-val').innerText = rgb[2];
-                }
+            _buildHsvPicker();
+            const pop=document.getElementById('hsv-picker-popup');
+            _namePickerOpen=!_namePickerOpen;
+            if(_namePickerOpen){
+                const btn=document.getElementById('p-name-color-preview');
+                const r=btn?btn.getBoundingClientRect():{left:50,bottom:200,top:200};
+                pop.style.display='block';
+                let left=r.left-230;if(left<8)left=8;
+                let top=r.bottom+8;if(top+320>window.innerHeight)top=r.top-320;
+                pop.style.left=left+'px';pop.style.top=top+'px';
+                const cur=(document.getElementById('p-profile-name-color')||{}).value||state.settings.nameColor||'#333333';
+                [_hsvPickerH,_hsvPickerS,_hsvPickerV]=_hexToHsv(cur);
+                requestAnimationFrame(()=>_hsvRedraw());
+            } else {
+                pop.style.display='none';
             }
         }
         function parseCssColorToRgb(str) {
@@ -5264,6 +5485,31 @@
             closeModal('tag-manage-modal');
         }
         function handleSearch(val) { state.searchQuery = val; renderList(); }
+        function toggleLengthFilter() {
+            const pop = document.getElementById('length-filter-popup');
+            if (!pop) return;
+            const open = pop.style.display !== 'none';
+            pop.style.display = open ? 'none' : 'block';
+        }
+        function setLengthFilter(val) {
+            state.filterLength = val;
+            const pop = document.getElementById('length-filter-popup');
+            if (pop) {
+                pop.style.display = 'none';
+                pop.querySelectorAll('.lf-option').forEach(el => el.classList.toggle('active', el.dataset.val === val));
+            }
+            const btn = document.getElementById('length-filter-btn');
+            if (btn) btn.classList.toggle('active', !!val);
+            renderList();
+        }
+        // 点外部关闭
+        document.addEventListener('click', function(e) {
+            const pop = document.getElementById('length-filter-popup');
+            const btn = document.getElementById('length-filter-btn');
+            if (pop && pop.style.display !== 'none' && !pop.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
+                pop.style.display = 'none';
+            }
+        });
 
         // ===================== Special Days =====================
 
@@ -6168,7 +6414,7 @@
                     </div>
                     <div class="portrait-row" style="align-items:flex-start;">
                         <label style="padding-top:6px;">签名</label>
-                        <textarea id="p-profile-signature" class="portrait-input" rows="2" placeholder="留空不显示" style="flex:1;resize:none;overflow:hidden;line-height:1.5;font-family:var(--custom-font);" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';onPortraitProfileSignature(this.value)"></textarea>
+                        <textarea id="p-profile-signature" class="portrait-input" rows="3" placeholder="留空不显示" style="flex:1;resize:none;overflow:hidden;line-height:1.5;font-family:var(--custom-font);" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';onPortraitProfileSignature(this.value)"></textarea>
                     </div>
                     <div class="portrait-row">
                         <label>昵称颜色</label>
@@ -7204,6 +7450,31 @@
                 <div class="pomo-stat-item"><span class="pomo-stat-val">${fmtSec(s.todaySec)}</span><span class="pomo-stat-label">今日专注</span></div>
                 <div class="pomo-stat-item"><span class="pomo-stat-val">${fmtSec(s.monthSec)}</span><span class="pomo-stat-label">本月专注</span></div>
                 <div class="pomo-stat-item"><span class="pomo-stat-val">${fmtSec(s.totalSec)}</span><span class="pomo-stat-label">累计专注</span></div>`;
+            renderPomoLog();
+        }
+        function renderPomoLog() {
+            const el = document.getElementById('pomo-log-wrap'); if(!el) return;
+            const log = _pomoLoadLog().slice().reverse(); // 最新在前
+            if(!log.length){ el.innerHTML=''; return; }
+            const fmt = ts => {
+                const d=new Date(ts), now=new Date();
+                const sameDay=d.toDateString()===now.toDateString();
+                const yesterday=new Date(now-86400000).toDateString()===d.toDateString();
+                const timeStr=d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');
+                if(sameDay) return timeStr;
+                if(yesterday) return '昨天 '+timeStr;
+                return (d.getMonth()+1)+'/'+(d.getDate())+' '+timeStr;
+            };
+            el.innerHTML = `<div class="pomo-log-title">专注记录</div>` +
+                log.map(r=>{
+                    const sec=r.sec!=null?r.sec:(r.min||0)*60;
+                    const reason=r.reason||'';
+                    return `<div class="pomo-log-item">
+                        <span class="pomo-log-reason${reason?'':' empty'}">${reason||'无备注'}</span>
+                        <span class="pomo-log-dur">${fmtSec(sec)}</span>
+                        <span class="pomo-log-time">${fmt(r.ts)}</span>
+                    </div>`;
+                }).join('');
         }
         function showPomoDoneCard(durationSec, reason) {
             const s = _pomoStats();
@@ -7212,6 +7483,7 @@
             document.getElementById('pomo-done-title').textContent = '完成了 '+fmtSec(durationSec)+'的专注'+(reason?' · '+reason:'');
             document.getElementById('pomo-done-sub').innerHTML = '今天第 '+s.todayCount+' 次 &nbsp;·&nbsp; 今日 '+fmtSec(s.todaySec)+'<br>本月累计 '+fmtSec(s.monthSec);
             document.getElementById('pomo-done-card').style.display = 'flex';
+            renderPomoStats();
         }
 
         function pomoTick() {
