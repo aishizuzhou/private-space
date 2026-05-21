@@ -745,21 +745,19 @@
         #editor-modal.open .modal-content { transform: translateY(0); }
         #editor-modal .modal-content.sheet-fullscreen { border-radius: 0; height: 100vh; }
         .editor-handle {
-            width: 36px; height: 4px;
-            background: rgba(0,0,0,0.15);
-            border-radius: 2px;
-            margin: 10px auto 4px;
+            width: 100%;
+            text-align: center;
+            font-size: 1rem;
+            line-height: 1;
+            padding: 8px 0 2px;
             flex-shrink: 0;
             cursor: ns-resize;
+            user-select: none;
+            -webkit-user-select: none;
             position: relative;
+            opacity: 0.45;
         }
-        /* 用伪元素扩大触摸热区，不影响视觉 */
-        .editor-handle::before {
-            content: '';
-            position: absolute;
-            top: -12px; bottom: -12px;
-            left: -40px; right: -40px;
-        }
+        .editor-handle::before { content: ''; position: absolute; top: -8px; bottom: -8px; left: 0; right: 0; }
         .editor-body {
             overflow-y: auto;
             padding: 10px 16px 6px;
@@ -2471,7 +2469,7 @@
 
     <div class="modal" id="editor-modal" onclick="if(event.target===this)_editorDismiss()">
         <div class="modal-content">
-            <div class="editor-handle"></div>
+            <div class="editor-handle">✂</div>
             <div id="todo-editor-area" class="editor-todo-area">
                 <div id="todo-items-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px;"></div>
                 <button onclick="addTodoItem()" style="width:100%;padding:7px;border-radius:8px;border:1px dashed rgba(0,0,0,0.15);background:transparent;color:#aaa;font-size:0.82rem;cursor:pointer;">+ 添加待办项</button>
@@ -2847,15 +2845,10 @@
                 function onEnd() {
                     if (!dragging) return; dragging = false;
                     const s = _getSheet(); if (!s) return;
-                    const curH = s.getBoundingClientRect().height;
-                    const ratio = curH / window.innerHeight;
-                    if (ratio < 0.4) _snapTo(false, true);        // 太低弹回默认
-                    else if (ratio > 0.7) _snapTo(true, true);    // 够高吸附全屏
-                    else {
-                        // 中间：停在当前位置，只恢复过渡动画
-                        s.style.transition = 'border-radius 0.22s ease';
-                        s.style.borderRadius = ratio > 0.55 ? '0' : '10px 10px 0 0';
-                    }
+                    // 放手停在当前位置，不自动回弹
+                    s.style.transition = 'border-radius 0.22s ease';
+                    const ratio = s.getBoundingClientRect().height / window.innerHeight;
+                    s.style.borderRadius = ratio > 0.9 ? '0' : '20px 20px 0 0';
                 }
                 handle.addEventListener('touchstart', e => onStart(e.touches[0].clientY), { passive: true });
                 handle.addEventListener('touchmove', e => { onMove(e.touches[0].clientY); e.preventDefault(); }, { passive: false });
@@ -2868,13 +2861,65 @@
                 });
             }
             const _origOpen = openModal;
-            openModal = function(id) { _origOpen(id); if (id === 'editor-modal') requestAnimationFrame(_initDrag); };
+            openModal = function(id) {
+                _origOpen(id);
+                if (id === 'editor-modal') {
+                    requestAnimationFrame(_initDrag);
+                    // 键盘弹出时锁住editor-body的scrollTop，防止跳顶
+                    if (window.visualViewport) {
+                        function _lockScroll() {
+                            const ta = document.getElementById('edit-content');
+                            const body = ta && ta.closest('.editor-body');
+                            if (!body || document.activeElement !== ta) return;
+                            // 保持光标在可视范围内
+                            const lineH = parseInt(getComputedStyle(ta).lineHeight) || 20;
+                            const lines = ta.value.slice(0, ta.selectionEnd).split('\n').length;
+                            const cursorTop = lines * lineH;
+                            const bodyH = body.clientHeight;
+                            const target = cursorTop - bodyH * 0.6;
+                            body.scrollTop = Math.max(0, target);
+                        }
+                        window.visualViewport.addEventListener('resize', _lockScroll);
+                        window.visualViewport.addEventListener('scroll', _lockScroll);
+                        // editor关闭时移除
+                        const _cleanup = () => {
+                            window.visualViewport.removeEventListener('resize', _lockScroll);
+                            window.visualViewport.removeEventListener('scroll', _lockScroll);
+                        };
+                        document.getElementById('editor-modal').addEventListener('transitionend', function once() {
+                            if (!document.getElementById('editor-modal').classList.contains('open')) {
+                                _cleanup();
+                                document.getElementById('editor-modal').removeEventListener('transitionend', once);
+                            }
+                        });
+                    }
+                }
+            };
         });
 
         // ── editor bottom sheet helpers ──
         function editorAutoResize(ta) {
+            const body = ta.closest('.editor-body');
+            // 记住当前光标的相对位置
+            let cursorTop = null;
+            if (body && document.activeElement === ta) {
+                // 用临时span测量光标Y位置
+                const selEnd = ta.selectionEnd;
+                const before = ta.value.slice(0, selEnd);
+                const lineH = parseInt(getComputedStyle(ta).lineHeight) || 20;
+                const lines = before.split('\n').length;
+                cursorTop = lines * lineH;
+            }
             ta.style.height = 'auto';
             ta.style.height = ta.scrollHeight + 'px';
+            // resize后把光标滚回可视区
+            if (body && cursorTop !== null) {
+                const bodyH = body.clientHeight;
+                const scrollTarget = cursorTop - bodyH * 0.6;
+                if (scrollTarget > body.scrollTop || cursorTop < body.scrollTop) {
+                    body.scrollTop = Math.max(0, scrollTarget);
+                }
+            }
         }
         function editorClosePopover() {
             document.getElementById('ea-popover').style.display = 'none';
