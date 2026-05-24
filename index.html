@@ -26,6 +26,8 @@
             --name-color: #4a3c38;
             --accent-text: #fff;
             --accent-color: #c8848e;
+            --accent-tag-bg: rgba(200,132,142,0.10);
+            --accent-tag-border: rgba(200,132,142,0.20);
             --font-size-base: 14px;
             --preview-lines: 3;
             --custom-font: system-ui, -apple-system, sans-serif;
@@ -246,56 +248,45 @@
         .cal-cell:hover { background: rgba(0,0,0,0.04); }
         .cal-cell.today { font-weight:bold; color: var(--accent-color); }
 
-        /* 单选圆形——用::before避免和has-note::after冲突 */
+        /* ── 日历选区 ── */
         .cal-cell.selected::before {
             content:''; position:absolute;
-            top:50%; left:50%;
-            transform:translate(-50%,-50%);
-            width:88%; padding-top:88%;
+            inset: 8%;
             background: var(--cal-dot-bg);
             border-radius:50%;
             z-index:1;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
             pointer-events:none;
         }
         .cal-cell.selected span { color: var(--cal-text-on-range) !important; position:relative; z-index:3; font-weight:bold; }
 
-        /* 范围：中间条全宽 */
-        .cal-cell.in-range::before {
-            content:''; position:absolute;
-            top:11%; bottom:11%;
-            left:0; right:0;
-            background: var(--cal-range-bg);
-            z-index:0;
-            pointer-events:none;
-        }
-        .cal-cell.range-start::before {
-            content:''; position:absolute;
-            top:11%; bottom:11%;
-            left:89%; right:0;
-            background: var(--cal-range-bg);
-            z-index:0;
-            pointer-events:none;
-        }
+        /* 范围横条 */
+        .cal-cell.in-range::before,
+        .cal-cell.range-start::before,
         .cal-cell.range-end::before {
             content:''; position:absolute;
-            top:11%; bottom:11%;
-            left:0; right:89%;
+            top:28%; bottom:28%;
             background: var(--cal-range-bg);
-            z-index:0;
-            pointer-events:none;
+            z-index:0; pointer-events:none;
         }
-        .cal-cell.range-start, .cal-cell.range-end { isolation: isolate; }
+        .cal-cell.in-range::before    { left:0; right:0; }
+        .cal-cell.range-start::before { left:50%; right:0; }
+        .cal-cell.range-end::before   { left:0; right:50%; }
+
+        .cal-cell.range-start, .cal-cell.range-end { isolation:isolate; }
+
+        /* 端点圆：比横条大，完全盖住横条端头 */
         .cal-cell .range-dot {
             position:absolute;
-            top:50%; left:50%;
-            transform:translate(-50%,-50%);
-            width:78%; padding-top:78%;
+            inset:6%;
             background: var(--cal-dot-bg);
             border-radius:50%;
             z-index:2;
             pointer-events:none;
         }
+        .cal-cell.range-start span,
+        .cal-cell.range-end span,
+        .cal-cell.in-range span { color:var(--cal-text-on-range); position:relative; z-index:3; }
+        .cal-cell.range-start.no-end::before { display:none; }
         .cal-cell.range-start span, .cal-cell.range-end span,
         .cal-cell.in-range span { color: var(--cal-text-on-range); position:relative; z-index:3; }
         .cal-cell.range-start.no-end::before { display:none; }
@@ -475,10 +466,14 @@
         .lf-option.active { color: var(--accent-color); font-weight: 600; }
         #length-filter-btn.active { background: var(--accent-color); color: var(--accent-text); border-color: var(--accent-color); }
         #length-filter-btn.active svg { stroke: var(--accent-text); }
-            width: calc(100% - 24px) !important;
+        .search-bar {
+            width: auto !important;
+            flex: 1 1 0% !important;
+            min-width: 0 !important;
+            max-width: 100% !important;
             height: 40px !important;
             padding: 0 20px !important;
-            margin: 0 12px 15px !important;
+            margin: 0 !important;
             border-radius: 10px !important;
             border: 1px solid var(--glass-border) !important;
             background: var(--glass-bg) !important;
@@ -488,7 +483,7 @@
             font-size: 14px !important;
             outline: none !important;
             box-sizing: border-box !important;
-            display: block !important;
+            display: inline-block !important;
             line-height: 40px !important;
             transition: all 0.3s ease !important;
             position: relative !important;
@@ -730,7 +725,7 @@
         }
         #editor-modal .modal-content {
             width: 100%;
-            height: 92vh;
+            height: 50vh;
             max-height: 100vh;
             border-radius: 20px 20px 0 0;
             padding: 0;
@@ -1010,8 +1005,8 @@
             background: rgba(255,255,255,0.72);
             backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             border-radius: 20px 20px 0 0;
-            height: 78vh;
-            max-height: 88vh;
+            height: 65vh;
+            max-height: 80vh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -1625,8 +1620,8 @@
             border: 1px solid rgba(255,255,255,0.25); min-width: 80px;
         }
         body.dark-mode .pomo-stat-item { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.1); }
-        .pomo-stat-val { font-size: 1.3rem; font-weight: 700; color: var(--accent-color); line-height: 1; }
-        .pomo-stat-label { font-size: 0.7rem; opacity: 0.5; white-space: nowrap; }
+        .pomo-stat-val { font-size: 1.3rem; font-weight: 700; color: var(--text-color); line-height: 1; }
+        .pomo-stat-label { font-size: 0.7rem; color: var(--text-color); opacity: 0.5; white-space: nowrap; }
         .pomo-done-card {
             position: fixed; inset: 0; z-index: 9999;
             background: rgba(0,0,0,0.45); display: flex;
@@ -1868,15 +1863,16 @@
             position: fixed; top: 0; left: 0;
             width: 82vw; max-width: 360px;
             height: 100%; height: 100dvh;
-            background: rgba(240,245,248,0.82);
-            backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+            background: var(--glass-bg);
+            backdrop-filter: blur(32px); -webkit-backdrop-filter: blur(32px);
+            border-right: 1px solid var(--glass-border);
             z-index: 8001;
             transform: translateX(-100%);
             transition: transform 0.32s cubic-bezier(0.4,0,0.2,1);
             display: flex; flex-direction: column; overflow: hidden;
-            box-shadow: 4px 0 24px rgba(0,0,0,0.12);
+            box-shadow: 4px 0 32px rgba(0,0,0,0.10);
         }
-        body.dark-mode #drawer { background: rgba(15,12,20,0.80); }
+        body.dark-mode #drawer { background: rgba(20,15,32,0.85); }
         #drawer.open { transform: translateX(0); }
 
         .drawer-scroll {
@@ -1884,45 +1880,31 @@
             overscroll-behavior: contain;
         }
         .drawer-header {
-            padding: 48px 20px 16px;
+            padding: 52px 20px 18px;
             display: flex; flex-direction: row; align-items: center; gap: 14px;
             background: transparent;
+            border-bottom: 1px solid var(--glass-border);
             flex-shrink: 0;
             cursor: pointer; user-select: none;
             transition: opacity 0.15s;
         }
         .drawer-header:active { opacity: 0.75; }
-        .drawer-avatar-wrap { position: relative; width: 56px; height: 56px; flex-shrink: 0; }
+        .drawer-avatar-wrap { position: relative; width: 52px; height: 52px; flex-shrink: 0; }
         .drawer-avatar-wrap img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; transition: border-radius 0.2s; }
-        .drawer-name { font-size: 1rem; font-weight: 600; color: var(--name-color); }
+        .drawer-name { font-size: 0.95rem; font-weight: 600; color: var(--name-color); }
         .drawer-section-title {
-            padding: 14px 16px 4px;
-            font-size: 0.65rem; font-weight: 700;
-            letter-spacing: 0.12em; color: #c0b0b8; text-transform: uppercase;
-            display: flex; align-items: center; gap: 8px;
+            padding: 16px 18px 5px;
+            font-size: 0.6rem; font-weight: 600;
+            letter-spacing: 0.14em;
+            color: var(--text-color);
+            opacity: 0.3;
+            text-transform: uppercase;
         }
-        .drawer-section-title::before {
-            content: '';
-            display: inline-block;
-            width: 7px; height: 7px;
-            border-radius: 50%;
-            flex-shrink: 0;
-            background: #c0b0b8;
-        }
-        .dst-daily::before      { background: #b8d8f4; }
-        .dst-stats::before      { background: #b8e8c8; }
-        .dst-card::before       { background: #e8d4b8; }
-        .dst-appearance::before { background: #d4b8e8; }
-        .dst-bg::before         { background: #f4d4b8; }
-        .dst-other::before      { background: #c8c8d8; }
-        body.dark-mode .drawer-section-title { color: #484048; }
-
         .drawer-divider {
             height: 1px;
-            background: rgba(0,0,0,0.05);
+            background: var(--glass-border);
             margin: 6px 16px 0;
         }
-        body.dark-mode .drawer-divider { background: rgba(255,255,255,0.06); }
 
         .drawer-tags { padding: 4px 16px 8px; display: flex; flex-wrap: wrap; gap: 6px; }
 
@@ -2080,8 +2062,9 @@
             <div class="drawer-avatar-wrap">
                 <img id="drawer-avatar-img" src="https://via.placeholder.com/150" alt="">
             </div>
-            <div style="flex:1;">
+            <div style="flex:1;min-width:0;">
                 <div class="drawer-name" id="drawer-display-name">宛宛</div>
+                <div id="drawer-display-signature" style="font-size:0.72rem;opacity:0.45;color:var(--text-color);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;"></div>
             </div>
         </div>
 
@@ -2333,12 +2316,12 @@
 
             <!-- ===== 笔记页面 ===== -->
             <div id="page-note" class="mode-page">
-                <div style="display:flex;align-items:center;gap:6px;margin:0 12px 15px;position:relative;">
-                    <input type="text" class="search-bar" placeholder="搜索内容、图片备注..." oninput="handleSearch(this.value)" style="margin:0!important;flex:1;width:auto!important;">
-                    <button id="length-filter-btn" onclick="toggleLengthFilter()" style="height:40px;width:40px;flex-shrink:0;border-radius:10px;border:1px solid var(--glass-border);background:var(--glass-bg);backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);color:var(--text-color);cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative;transition:background 0.15s;">
+                <div style="display:grid;grid-template-columns:1fr 40px;align-items:center;gap:6px;margin:0 12px 15px;position:relative;">
+                    <input type="text" id="search-input" placeholder="搜索内容、图片备注..." oninput="handleSearch(this.value)" style="height:40px;padding:0 16px;border-radius:10px;border:1px solid var(--glass-border);background:var(--glass-bg);backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);color:var(--text-color);font-size:14px;outline:none;box-sizing:border-box;width:100%;">
+                    <button id="length-filter-btn" onclick="toggleLengthFilter()" style="height:40px;width:40px;border-radius:10px;border:1px solid var(--glass-border);background:var(--glass-bg);backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);color:var(--text-color);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.15s;flex-shrink:0;">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
                     </button>
-                    <div id="length-filter-popup" style="display:none;position:absolute;right:12px;top:56px;z-index:200;background:var(--glass-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,0.12);overflow:hidden;min-width:110px;">
+                    <div id="length-filter-popup" style="display:none;position:absolute;right:0;top:48px;z-index:200;background:var(--glass-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,0.12);overflow:hidden;min-width:110px;">
                         <div class="lf-option" data-val="" onclick="setLengthFilter('')">全部</div>
                         <div class="lf-option" data-val="0-200" onclick="setLengthFilter('0-200')">短篇 ≤200</div>
                         <div class="lf-option" data-val="201-500" onclick="setLengthFilter('201-500')">中篇 201–500</div>
@@ -2432,7 +2415,7 @@
                     <span style="font-size:0.88rem;font-weight:600;opacity:0.6;color:var(--text-color);">详情</span>
                     <div style="width:32px;"></div>
                 </div>
-                <div id="full-note-body" style="flex:1; overflow-y:auto; padding:16px 16px 12px; background:var(--page-bg, #f5f5f5);"></div>
+                <div id="full-note-body" style="flex:1; overflow-y:auto; padding:16px 16px 90px; background:var(--page-bg, #f5f5f5);"></div>
                 <div class="full-note-comment-bar" style="display:flex; align-items:flex-start; gap:8px; padding:10px 16px 14px; border-top:1px solid rgba(0,0,0,0.08); background:var(--page-bg, #f5f5f5); flex-shrink:0;">
                     <textarea id="comment-input" rows="1" placeholder="何か言いたいの？" style="flex:1; padding:9px 16px; border-radius:18px; border:1px solid rgba(200,200,200,0.8); background:rgba(245,245,245,0.9); font-size:0.9rem; outline:none; margin:0; resize:none; overflow-y:auto; max-height:100px; line-height:1.5; font-family:var(--custom-font);"
                         oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,100)+'px';"
@@ -2814,7 +2797,7 @@
 
         // ── editor sheet 拖拽扩展（在函数定义完成后执行）──
         window.addEventListener('DOMContentLoaded', function() {
-            const DEFAULT_H = 0.92;
+            const DEFAULT_H = 0.50;
             function _getSheet() { return document.querySelector('#editor-modal .modal-content'); }
             function _snapTo(full, animated) {
                 const sheet = _getSheet(); if (!sheet) return;
@@ -2838,9 +2821,11 @@
                 function onStart(y) { const s = _getSheet(); if (!s) return; dragging = true; startY = y; startH = s.getBoundingClientRect().height; s.style.transition = 'none'; }
                 function onMove(y) {
                     if (!dragging) return; const s = _getSheet(); if (!s) return;
-                    const newH = Math.min(window.innerHeight, Math.max(window.innerHeight * 0.3, startH + (startY - y)));
+                    const newH = Math.min(window.innerHeight, Math.max(window.innerHeight * 0.2, startH + (startY - y)));
                     s.style.height = newH + 'px';
-                    s.style.borderRadius = Math.max(0, 20 * (1 - (newH / window.innerHeight) * 2)) + 'px ' + Math.max(0, 20 * (1 - (newH / window.innerHeight) * 2)) + 'px 0 0';
+                    // 只有接近全屏（>92%）时圆角才消失
+                    const r = newH / window.innerHeight > 0.92 ? 0 : 20;
+                    s.style.borderRadius = r + 'px ' + r + 'px 0 0';
                 }
                 function onEnd() {
                     if (!dragging) return; dragging = false;
@@ -3409,8 +3394,11 @@
                     const toYMD = key => { if(!key) return null; const p=key.trim().split(/\s+/); if(p.length<3) return null; return {y:parseInt(p[0]),m:parseInt(p[1]),d:parseInt(p[2])}; };
                     const cmp = (a,b) => { if(a.y!==b.y) return a.y-b.y; if(a.m!==b.m) return a.m-b.m; return a.d-b.d; };
                     const item_ymd = {y:iy,m:im,d:id2};
-                    if (state.filterDateFrom) { const from=toYMD(state.filterDateFrom); if(from&&cmp(item_ymd,from)<0) return false; }
-                    if (state.filterDateTo)   { const to=toYMD(state.filterDateTo);     if(to&&cmp(item_ymd,to)>0)   return false; }
+                    const from = toYMD(state.filterDateFrom);
+                    // 单日筛选（无终点）：上限也是起点当天
+                    const to = toYMD(state.filterDateTo || state.filterDateFrom);
+                    if (from && cmp(item_ymd, from) < 0) return false;
+                    if (to   && cmp(item_ymd, to)   > 0) return false;
                 }
                 if (state.searchQuery) {
                     const inContent  = item.content.includes(state.searchQuery);
@@ -3454,7 +3442,7 @@
                     `).join('')}
                 </div>`;
             }
-            let tagsHtml = note.tags.map(t => `<span class="tag" style="background:rgba(255,255,255,0.6); border:1px solid #eee;">#${t}</span>`).join('');
+            let tagsHtml = note.tags.map(t => `<span class="tag" style="background:var(--accent-tag-bg,rgba(200,132,142,0.08)); border:1px solid var(--accent-tag-border,rgba(200,132,142,0.15)); color:var(--accent-color);">#${t}</span>`).join('');
 
             // Todo 正文或普通正文
             let bodyContentHtml = '';
@@ -3505,7 +3493,7 @@
                 ${imagesHtml}
                 <div style="margin-top:13px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
                     <span style="font-size:0.72rem; color:var(--text-color); opacity:0.38;">${fullTs}</span>
-                    ${note.tags.length > 0 ? note.tags.map(t => `<span style="font-size:0.65rem;padding:1px 7px;border-radius:10px;background:rgba(200,132,142,0.1);color:var(--accent-color);border:1px solid rgba(200,132,142,0.18);">#${t}</span>`).join('') : ''}
+                    ${note.tags.length > 0 ? note.tags.map(t => `<span style="font-size:0.65rem;padding:1px 7px;border-radius:10px;background:var(--accent-tag-bg,rgba(200,132,142,0.1));color:var(--accent-color);border:1px solid var(--accent-tag-border,rgba(200,132,142,0.18));">#${t}</span>`).join('') : ''}
                 </div>
                 <div style="display:flex; justify-content:flex-end; gap:18px; padding:10px 0; border-bottom:1px solid rgba(74,60,56,0.08); margin-top:4px;">
                     <button onclick="forwardNote(${note.id})" style="display:flex;align-items:center;gap:4px;font-size:0.75rem;opacity:0.4;background:none;border:none;color:var(--text-color);cursor:pointer;font-family:var(--custom-font);">
@@ -3578,7 +3566,7 @@
             }
             container.innerHTML = comments.map((c, i) => `
                 <div class="comment-item" data-note-id="${note.id}" data-idx="${i}" style="position:relative; overflow:hidden; border-radius:8px; margin-bottom:10px;">
-                    <div class="comment-delete-bg" style="position:absolute; top:0; right:0; bottom:0; width:60px; background:transparent; display:flex; align-items:center; justify-content:center; font-size:1.4rem; cursor:pointer; opacity:0; transition:opacity 0.3s;" onclick="deleteComment(${note.id},${i})">🗑️</div>
+                    <div class="comment-delete-bg" style="position:absolute; top:0; right:0; bottom:0; width:60px; background:rgba(255,80,80,0.12); display:flex; align-items:center; justify-content:center; font-size:1.4rem; cursor:pointer; opacity:0; transition:opacity 0.3s; z-index:1;" onclick="deleteComment(${note.id},${i})">🗑️</div>
                     <div class="comment-inner" style="display:flex; align-items:flex-start; gap:9px; padding:6px 4px; background:transparent; position:relative; z-index:2; transition:transform 0.3s ease; will-change:transform;">
                         <img src="${state.settings.currentAvatar}" style="width:28px; height:28px; border-radius:50%; object-fit:cover; flex-shrink:0; margin-top:1px;">
                         <div style="flex:1;">
@@ -3596,33 +3584,52 @@
             container.querySelectorAll('.comment-item').forEach((item, i) => {
                 const inner = item.querySelector('.comment-inner');
                 const delBg = item.querySelector('.comment-delete-bg');
-                let startX = 0, curX = 0, swiping = false, locked = false;
+                let startX = 0, startY = 0, curX = 0, swiping = false, locked = false;
 
-                // 长按复制
+                // 长按复制（只在没有滑动时触发）
                 let longPressTimer = null;
+                let longPressed = false;
                 inner.addEventListener('touchstart', e => {
+                    startX = e.touches[0].clientX;
+                    startY = e.touches[0].clientY;
+                    swiping = false;
+                    longPressed = false;
+                    inner.style.transition = 'none';
                     longPressTimer = setTimeout(() => {
+                        if (swiping) return;
+                        longPressed = true;
                         const text = (note.comments[i] || {}).text || '';
-                        navigator.clipboard.writeText(text).then(() => {
+                        // 先试 clipboard API，失败用 execCommand 降级
+                        const doCopy = () => {
+                            const ta = document.createElement('textarea');
+                            ta.value = text; ta.style.cssText = 'position:fixed;opacity:0;';
+                            document.body.appendChild(ta); ta.select();
+                            document.execCommand('copy'); document.body.removeChild(ta);
+                        };
+                        const showTip = () => {
                             const tip = document.createElement('div');
-                            tip.textContent = '已复制';
+                            tip.textContent = '已复制评论';
                             tip.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.6);color:#fff;padding:8px 18px;border-radius:20px;font-size:0.85rem;z-index:9999;pointer-events:none;';
                             document.body.appendChild(tip);
                             setTimeout(() => tip.remove(), 1200);
-                        });
+                        };
+                        if (navigator.clipboard && navigator.clipboard.writeText) {
+                            navigator.clipboard.writeText(text).then(showTip).catch(() => { doCopy(); showTip(); });
+                        } else { doCopy(); showTip(); }
                     }, 600);
-                    startX = e.touches[0].clientX;
-                    swiping = false;
-                    inner.style.transition = 'none';
                 }, {passive:true});
+
                 inner.addEventListener('touchmove', e => {
-                    clearTimeout(longPressTimer);
                     curX = e.touches[0].clientX;
+                    const dy = Math.abs(e.touches[0].clientY - startY);
+                    const dx = Math.abs(curX - startX);
+                    // 移动超过8px就取消长按
+                    if (dx > 8 || dy > 8) { clearTimeout(longPressTimer); longPressTimer = null; }
                     const diff = curX - startX;
-                    if (Math.abs(diff) > 15) swiping = true;
-                    if (diff < -15) {
-                        inner.style.transform = `translateX(${Math.max(diff, -60)}px)`;
-                        delBg.style.opacity = '0.7';
+                    if (dx > 15 && dx > dy) { swiping = true; }
+                    if (diff < -10) {
+                        inner.style.transform = `translateX(${Math.max(diff, -70)}px)`;
+                        delBg.style.opacity = String(Math.min(1, Math.abs(diff) / 60));
                     }
                 }, {passive:true});
 
@@ -3630,21 +3637,17 @@
                     clearTimeout(longPressTimer);
                     inner.style.transition = 'transform 0.3s ease';
                     const diff = curX - startX;
-                    if (diff < -45) {
-                        // 滑到底：锁定在-60px，等待点垃圾桶
-                        inner.style.transform = 'translateX(-60px)';
-                        delBg.style.opacity = '0.7';
+                    if (!longPressed && diff < -45) {
+                        inner.style.transform = 'translateX(-70px)';
+                        delBg.style.opacity = '1';
                         locked = true;
-                    } else {
-                        // 没滑够：弹回
+                    } else if (!locked) {
                         inner.style.transform = 'translateX(0)';
                         delBg.style.opacity = '0';
-                        locked = false;
                     }
                     startX = 0; curX = 0;
                 });
 
-                // 点内容区域时如果已锁定则收回，不触发打开评论
                 inner.addEventListener('click', () => {
                     if (locked) {
                         inner.style.transition = 'transform 0.3s ease';
@@ -3772,6 +3775,8 @@
             document.documentElement.style.setProperty('--accent-color-40', `rgba(${r},${g},${b},0.4)`);
             document.documentElement.style.setProperty('--accent-color-30', `rgba(${r},${g},${b},0.3)`);
             document.documentElement.style.setProperty('--accent-color-20', `rgba(${r},${g},${b},0.2)`);
+            document.documentElement.style.setProperty('--accent-tag-bg', `rgba(${r},${g},${b},0.10)`);
+            document.documentElement.style.setProperty('--accent-tag-border', `rgba(${r},${g},${b},0.22)`);
 
             // 模式切换按钮三色 —— 基于 accent 混入不同方向的色相偏移，保持柔和
             // note: accent 混白，高亮度浅色
@@ -3844,6 +3849,9 @@
             // 预览框
             const namePreview = document.getElementById('name-color-preview');
             if (namePreview) namePreview.style.background = nameColor;
+            // 抽屉签名
+            const drawerSig = document.getElementById('drawer-display-signature');
+            if (drawerSig) drawerSig.textContent = s.signature || '';
 
             // 全局字体颜色
             const tr = s.textColorR ?? 51, tg = s.textColorG ?? 51, tb = s.textColorB ?? 51;
@@ -6459,7 +6467,7 @@
                     </div>
                     <div class="portrait-row" style="align-items:flex-start;">
                         <label style="padding-top:6px;">签名</label>
-                        <textarea id="p-profile-signature" class="portrait-input" rows="3" placeholder="留空不显示" style="flex:1;resize:none;overflow:hidden;line-height:1.5;font-family:var(--custom-font);" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';onPortraitProfileSignature(this.value)"></textarea>
+                        <textarea id="p-profile-signature" class="portrait-input" rows="4" placeholder="留空不显示" style="flex:1;resize:none;overflow:hidden;line-height:1.5;font-family:var(--custom-font);min-height:80px;" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';onPortraitProfileSignature(this.value)"></textarea>
                     </div>
                     <div class="portrait-row">
                         <label>昵称颜色</label>
