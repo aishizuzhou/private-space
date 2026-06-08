@@ -290,17 +290,17 @@
         .cal-cell.range-start span, .cal-cell.range-end span,
         .cal-cell.in-range span { color: var(--cal-text-on-range); position:relative; z-index:3; }
         .cal-cell.range-start.no-end::before { display:none; }
-        .cal-cell.has-note::after {
-            content:''; display:block; width:3px; height:3px;
-            background: var(--accent-color); border-radius:50%;
-            position:absolute; bottom:3px; left:50%; transform:translateX(-50%);
-            z-index:4;
-            pointer-events:none;
-        }
         .cal-cell.other-month { color:#bbb; }
-        .cal-cell.range-start.has-note::after,
-        .cal-cell.range-end.has-note::after,
-        .cal-cell.in-range.has-note::after { background:#fff; }
+        /* has-note小点用真实DOM span（class=note-dot），避免与range-dot层叠冲突 */
+        .cal-cell .note-dot {
+            position:absolute; bottom:3px; left:50%; transform:translateX(-50%);
+            width:3px; height:3px; border-radius:50%;
+            background: var(--accent-color);
+            z-index:5; pointer-events:none;
+        }
+        .cal-cell.range-start .note-dot,
+        .cal-cell.range-end .note-dot,
+        .cal-cell.in-range .note-dot { background:#fff; }
         .cal-weekday { font-size:0.7rem; color:#aaa; text-align:center; padding-bottom:4px; user-select:none; }
 
         .cal-input-row {
@@ -1009,7 +1009,7 @@
             max-height: 80vh;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            overflow: visible;
             box-shadow: 0 -4px 32px rgba(0,0,0,0.18);
             border-top: 1px solid rgba(255,255,255,0.6);
         }
@@ -2316,8 +2316,8 @@
 
             <!-- ===== 笔记页面 ===== -->
             <div id="page-note" class="mode-page">
-                <div style="display:grid;grid-template-columns:1fr 40px;align-items:center;gap:6px;margin:0 12px 15px;position:relative;">
-                    <input type="text" id="search-input" placeholder="搜索内容、图片备注..." oninput="handleSearch(this.value)" style="height:40px;padding:0 16px;border-radius:10px;border:1px solid var(--glass-border);background:var(--glass-bg);backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);color:var(--text-color);font-size:14px;outline:none;box-sizing:border-box;width:100%;">
+                <div style="display:flex;align-items:center;gap:6px;margin:0 12px 15px;position:relative;">
+                    <input type="text" id="search-input" placeholder="搜索内容、图片备注..." oninput="handleSearch(this.value)" style="flex:1;min-width:0;height:40px;padding:0 16px;border-radius:10px;border:1px solid var(--glass-border);background:var(--glass-bg);backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);color:var(--text-color);font-size:14px;outline:none;box-sizing:border-box;">
                     <button id="length-filter-btn" onclick="toggleLengthFilter()" style="height:40px;width:40px;border-radius:10px;border:1px solid var(--glass-border);background:var(--glass-bg);backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);color:var(--text-color);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.15s;flex-shrink:0;">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
                     </button>
@@ -2415,10 +2415,10 @@
                     <span style="font-size:0.88rem;font-weight:600;opacity:0.6;color:var(--text-color);">详情</span>
                     <div style="width:32px;"></div>
                 </div>
-                <div id="full-note-body" style="flex:1; overflow-y:auto; padding:16px 16px 90px; background:var(--page-bg, #f5f5f5);"></div>
-                <div class="full-note-comment-bar" style="display:flex; align-items:flex-start; gap:8px; padding:10px 16px 14px; border-top:1px solid rgba(0,0,0,0.08); background:var(--page-bg, #f5f5f5); flex-shrink:0;">
+                <div id="full-note-body" style="flex:1; overflow-y:auto; padding:16px; background:var(--page-bg, #f5f5f5);"></div>
+                <div class="full-note-comment-bar" style="position:sticky;bottom:0;display:flex; align-items:flex-start; gap:8px; padding:10px 16px 14px; border-top:1px solid rgba(0,0,0,0.08); background:var(--page-bg, #f5f5f5); flex-shrink:0;z-index:10;">
                     <textarea id="comment-input" rows="1" placeholder="何か言いたいの？" style="flex:1; padding:9px 16px; border-radius:18px; border:1px solid rgba(200,200,200,0.8); background:rgba(245,245,245,0.9); font-size:0.9rem; outline:none; margin:0; resize:none; overflow-y:auto; max-height:100px; line-height:1.5; font-family:var(--custom-font);"
-                        oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,100)+'px';"
+                        oninput="(function(el){var nb=document.getElementById('full-note-body');var st=nb?nb.scrollTop:0;el.style.height='auto';el.style.height=Math.min(el.scrollHeight,100)+'px';if(nb)nb.scrollTop=st;})(this);"
                         onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submitComment();}"></textarea>
                     <button onclick="submitComment()" style="width:36px; height:36px; border-radius:50%; border:none; background:var(--accent-color); color:var(--accent-text); font-size:1rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; cursor:pointer; margin-top:2px;">⋀</button>
                 </div>
@@ -3484,7 +3484,7 @@
                 <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:13px;">
                     <div style="display:flex; align-items:center; gap:10px;">
                         <img src="${state.settings.currentAvatar}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:1px solid rgba(255,255,255,0.5);">
-                        <span style="font-weight:600; font-size:0.95rem; ${(()=>{ const nc = state.settings.nameColor||'#333'; return nc.includes('gradient') ? `background:${nc};-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;` : `color:${nc};`; })()}">${state.settings.name}</span>
+                        <span style="font-weight:600; font-size:0.95rem; ${(()=>{ const nc = state.settings.nameColor||'#333'; if(nc.includes(';')) return nc; return nc.includes('gradient') ? `background:${nc};-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;` : `color:${nc};`; })()}">${state.settings.name}</span>
                     </div>
                     <span class="edit-btn" onclick="closeModal('full-note-modal');openEditor(${note.id})" style="padding:4px 6px;"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAABQCAYAAABxs9dPAAAC80lEQVR42u2YTYhOYRTHf/fOh2nIxxTZSGJFJNmIt5QsLDSapMSGhY2dslJTlmp2ko0okZVSdrOxsPFRr5gMQhZYoXyk0XjvvTbn1On0vrf3vvM+dyY9/3p67sfTPf/nfD3nXIiIiIiIiIiIiIiIWCpIZCwqUmCwzfPBxSA34O7XyPCEayWzEbgEPAO+yGgCF4F1HYgHI3ME+AYUHcYn4EBoTSmZBtASwfNA5sa8vJsDdofSlEbRKPBOBLbcbK//yvwcGAqhJY2m005g3sZcuSM33q2WqrAuZJ6Q60QEJ8BNYIeY5555pwQnjJb7Zi7d4RunoRm3dhj44NY87ZZQ2oPZRpzGmobIkDj0rFsz6u4XTEg/NA/8dLttiMCWjDFglzErwI8QGhoQIbOGYAZsAqaMz1wF1su9buZFiNAfcE7tQ/4gcLzDu/2hcpEepk+MwFzGd+CXuVcy0yGztX50u2ThVkkeysR3NovvBD8+zjqz5G0S4om6DljN2ndLjo4bbm3wEz8BtkgqyJ2Wfkv5kdZVE6kJbpdo6HLd9dDJNmR0ZDIfCk1KS5CVwGcTTZ6QknwlR0qwBkAd9FSJdjypw1W0VNXh9MgYN4LL1lpCSZUdd2uuTHa61SW73JBLjYkSYJs59/pKSLECWOV2nZbUUGNyXZi5bybTneZGMwDvgWPAGTkurDnzOlrmGdNx2PAGuCDP/sj8oMrm0x5yUGEIFSXf1PfNkKe9+txRo6Fc2qK1wD6pKDMT9ntDJkeNnBHgrTNbA5g0DWIBPKxaevSSh1Lxj3PmuRZkc2ZNDpx3tXXfCWFy0X3gjulKEzMPA1eAR7I2Cx1pKniDCfM9RiMfgdVmHSE1pCZKRfB1ozkVPiU1dtpNL9bPH0oJcM1E0YiQvWXaaeoipH7xUjS1TAg15b9R7YRsbpkBlksH21xIl7HQAlz9Yxr4CryW3qyo6jv/PRKXySMiIiIiIiIiIpYAavsFXCv68UdCy9ZJYCfwuJcGUfEPRBMUNTxHaHMAAAAASUVORK5CYII=" class="edit-icon-img"></span>
                 </div>
@@ -3506,22 +3506,39 @@
             document.getElementById('comment-input').value = '';
             document.getElementById('comment-input').style.height = 'auto';
 
-            // 正文长按复制
-            const noteBody = document.getElementById('full-note-body');
-            let bodyLongPressTimer = null;
-            noteBody.addEventListener('touchstart', () => {
-                bodyLongPressTimer = setTimeout(() => {
-                    navigator.clipboard.writeText(note.content).then(() => {
-                        const tip = document.createElement('div');
-                        tip.textContent = '正文已复制';
-                        tip.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.6);color:#fff;padding:8px 18px;border-radius:20px;font-size:0.85rem;z-index:9999;pointer-events:none;';
-                        document.body.appendChild(tip);
-                        setTimeout(() => tip.remove(), 1200);
-                    });
-                }, 600);
-            }, {passive: true});
-            noteBody.addEventListener('touchend', () => clearTimeout(bodyLongPressTimer), {passive: true});
-            noteBody.addEventListener('touchmove', () => clearTimeout(bodyLongPressTimer), {passive: true});
+            // 正文长按复制（绑到正文div，非todo时）
+            if (!note.isTodo) {
+                const noteBody = document.getElementById('full-note-body');
+                // 找正文内容div（bodyContentHtml的第一个子div）
+                const contentDiv = noteBody ? noteBody.querySelector('div[style*="line-height: 1.9"]') || noteBody.querySelector('div[style*="line-height:1.9"]') : null;
+                const bindTarget = contentDiv || noteBody;
+                if (bindTarget) {
+                    let bodyLongPressTimer = null;
+                    bindTarget.addEventListener('touchstart', () => {
+                        bodyLongPressTimer = setTimeout(() => {
+                            const text = note.content;
+                            const doCopy = () => {
+                                const ta = document.createElement('textarea');
+                                ta.value = text; ta.style.cssText = 'position:fixed;opacity:0;';
+                                document.body.appendChild(ta); ta.select();
+                                document.execCommand('copy'); document.body.removeChild(ta);
+                            };
+                            const showTip = () => {
+                                const tip = document.createElement('div');
+                                tip.textContent = '正文已复制';
+                                tip.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.6);color:#fff;padding:8px 18px;border-radius:20px;font-size:0.85rem;z-index:9999;pointer-events:none;';
+                                document.body.appendChild(tip);
+                                setTimeout(() => tip.remove(), 1200);
+                            };
+                            if (navigator.clipboard && navigator.clipboard.writeText) {
+                                navigator.clipboard.writeText(text).then(showTip).catch(() => { doCopy(); showTip(); });
+                            } else { doCopy(); showTip(); }
+                        }, 600);
+                    }, {passive: true});
+                    bindTarget.addEventListener('touchend', () => clearTimeout(bodyLongPressTimer), {passive: true});
+                    bindTarget.addEventListener('touchmove', () => clearTimeout(bodyLongPressTimer), {passive: true});
+                }
+            }
             // 绑定全文查看里的图片长按菜单
             const fnImgs = document.getElementById('full-note-imgs');
             if (fnImgs) {
@@ -3825,27 +3842,35 @@
                 document.documentElement.style.setProperty('--edit-icon-filter', filterVal);
             })(r, g, b);
 
-            // 名字颜色（支持CSS任意值：纯色/渐变）
+            // 名字颜色（支持CSS任意值：纯色/渐变/CSS片段）
             const nameColor = s.nameColor || '#333333';
-            // 渐变需要用 background-clip 实现，纯色直接 color
+            // 渐变需要用 background-clip 实现，纯色直接 color，含分号则视为CSS片段直接注入
             const nameEl = document.getElementById('display-name');
             const drawerNameEl = document.getElementById('drawer-display-name');
             [nameEl, drawerNameEl].filter(Boolean).forEach(el => {
                 const isGradient = nameColor.includes('gradient');
-                if (isGradient) {
+                const isFrag = nameColor.includes(';'); // CSS片段（含分号）
+                // 先清除之前可能残留的样式
+                el.style.backgroundImage = '';
+                el.style.webkitBackgroundClip = '';
+                el.style.webkitTextFillColor = '';
+                el.style.backgroundClip = '';
+                el.style.color = '';
+                el.removeAttribute('data-name-frag');
+                if (isFrag) {
+                    // 片段直接注入：在原有cssText末尾追加
+                    el.style.cssText += ';' + nameColor;
+                    el.dataset.nameFrag = '1';
+                } else if (isGradient) {
                     el.style.backgroundImage = nameColor;
                     el.style.webkitBackgroundClip = 'text';
                     el.style.webkitTextFillColor = 'transparent';
                     el.style.backgroundClip = 'text';
                 } else {
-                    el.style.backgroundImage = '';
-                    el.style.webkitBackgroundClip = '';
-                    el.style.webkitTextFillColor = '';
-                    el.style.backgroundClip = '';
                     el.style.color = nameColor;
                 }
             });
-            document.documentElement.style.setProperty('--name-color', nameColor.includes('gradient') ? 'transparent' : nameColor);
+            document.documentElement.style.setProperty('--name-color', (nameColor.includes('gradient')||nameColor.includes(';')) ? 'transparent' : nameColor);
             // 预览框
             const namePreview = document.getElementById('name-color-preview');
             if (namePreview) namePreview.style.background = nameColor;
@@ -4254,8 +4279,11 @@
         function onPortraitProfileNameColor(val) {
             state.settings.nameColor = val;
             const h = document.getElementById('setting-name-color'); if (h) h.value = val;
-            const p = document.getElementById('p-name-color-preview'); if (p) p.style.background = val;
-            const p2 = document.getElementById('name-color-preview'); if (p2) p2.style.background = val;
+            // 预览框：尝试直接 background，片段时降级
+            const p = document.getElementById('p-name-color-preview');
+            const p2 = document.getElementById('name-color-preview');
+            if (p) { try { p.style.background = val; } catch(e) { p.style.background = 'linear-gradient(135deg,#f90,#f0f)'; } }
+            if (p2) { try { p2.style.background = val; } catch(e) { p2.style.background = 'linear-gradient(135deg,#f90,#f0f)'; } }
             saveData(); applySettings();
         }
 
@@ -4526,7 +4554,7 @@
             if (document.getElementById('hsv-picker-popup')) return;
             const el = document.createElement('div');
             el.id = 'hsv-picker-popup';
-            el.style.cssText = 'position:fixed;z-index:9999;background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.22);padding:14px;width:260px;display:none;touch-action:none;';
+            el.style.cssText = 'position:fixed;z-index:99999;background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.22);padding:14px;width:260px;display:none;touch-action:none;';
             el.innerHTML = `
                 <canvas id="hsv-sq" width="232" height="180" style="border-radius:8px;display:block;cursor:crosshair;touch-action:none;width:100%;"></canvas>
                 <div style="margin-top:10px;display:flex;align-items:center;gap:8px;">
@@ -5774,7 +5802,10 @@
                 el.appendChild(span);
 
                 const noteKey = `${_calYear}-${_calMonth}-${d}`;
-                if (noteDates.has(noteKey)) el.classList.add('has-note');
+                if (noteDates.has(noteKey)) {
+                    el.classList.add('has-note');
+                    const dot = document.createElement('span'); dot.className = 'note-dot'; el.appendChild(dot);
+                }
                 if (specialDateKeys.has(noteKey)) {
                     el.classList.add('has-special');
                     const star = document.createElement('span');
@@ -6471,7 +6502,7 @@
                     </div>
                     <div class="portrait-row">
                         <label>昵称颜色</label>
-                        <input type="text" id="p-profile-name-color" class="portrait-input" placeholder="#333 或 gradient" style="flex:1;" oninput="onPortraitProfileNameColor(this.value)">
+                        <input type="text" id="p-profile-name-color" class="portrait-input" placeholder="#333 / gradient / CSS片段" style="flex:1;" oninput="onPortraitProfileNameColor(this.value)">
                         <div id="p-name-color-preview" style="width:28px;height:28px;border-radius:6px;border:1px solid rgba(0,0,0,0.12);flex-shrink:0;cursor:pointer;margin-left:6px;" onclick="toggleNameColorPicker()"></div>
                     </div>
                 </div>
