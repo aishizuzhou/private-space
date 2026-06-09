@@ -3570,8 +3570,21 @@
                 const vv = window.visualViewport; if (!vv) return;
                 const kbH = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
                 if (commentBar) {
-                    commentBar.style.transform = `translateY(-${kbH}px)`;
-                    commentBar.style.paddingBottom = kbH > 0 ? `${kbH + 14}px` : '14px';
+                    if (kbH > 0) {
+                        commentBar.style.position = 'fixed';
+                        commentBar.style.bottom = kbH + 'px';
+                        commentBar.style.left = '0';
+                        commentBar.style.right = '0';
+                        commentBar.style.zIndex = '200';
+                        commentBar.style.paddingBottom = '14px';
+                    } else {
+                        commentBar.style.position = '';
+                        commentBar.style.bottom = '';
+                        commentBar.style.left = '';
+                        commentBar.style.right = '';
+                        commentBar.style.zIndex = '';
+                        commentBar.style.paddingBottom = '14px';
+                    }
                 }
                 if (modalWrap) { modalWrap.style.height = vv.height + 'px'; modalWrap.style.maxHeight = vv.height + 'px'; }
             }
@@ -3582,7 +3595,14 @@
                 window._fullNoteVVCleanup = () => {
                     window.visualViewport.removeEventListener('resize', _onVVResize);
                     window.visualViewport.removeEventListener('scroll', _onVVResize);
-                    if (commentBar) { commentBar.style.transform = ''; commentBar.style.paddingBottom = '14px'; }
+                    if (commentBar) {
+                        commentBar.style.position = '';
+                        commentBar.style.bottom = '';
+                        commentBar.style.left = '';
+                        commentBar.style.right = '';
+                        commentBar.style.zIndex = '';
+                        commentBar.style.paddingBottom = '14px';
+                    }
                     if (modalWrap) { modalWrap.style.height = ''; modalWrap.style.maxHeight = ''; }
                 };
             }
