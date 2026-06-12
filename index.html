@@ -418,6 +418,7 @@
             position: relative;
             z-index: 3;
             transition: border-radius 0.3s ease;
+            background: #b8c8d8;
         }
 
         .avatar-inner.is-framed {
@@ -2098,7 +2099,7 @@
         <!-- 头部：点击头像展开个人设置 -->
         <div class="drawer-header" id="drawer-header" onclick="openPortrait()">
             <div class="drawer-avatar-wrap">
-                <img id="drawer-avatar-img" src="https://via.placeholder.com/150" alt="">
+                <img id="drawer-avatar-img" src="https://via.placeholder.com/150" alt="" onerror="this.style.opacity='0'" onload="this.style.opacity='1'" style="transition:opacity 0.2s;">
             </div>
             <div style="flex:1;min-width:0;">
                 <div class="drawer-name" id="drawer-display-name">宛宛</div>
@@ -2321,7 +2322,7 @@
         <div class="header-section">
             <div class="avatar-container" id="avatar-box" onclick="openDrawer()" style="position:relative;cursor:pointer;">
                 <div class="avatar-inner" id="avatar-inner-box">
-                    <img id="current-avatar" class="avatar-img" src="https://via.placeholder.com/150" alt="Avatar">
+                    <img id="current-avatar" class="avatar-img" src="https://via.placeholder.com/150" alt="Avatar" onerror="this.style.opacity='0'" onload="this.style.opacity='1'" style="transition:opacity 0.2s;">
                 </div>
             </div>
             <div class="header-info">
