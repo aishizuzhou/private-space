@@ -298,17 +298,17 @@
         .cal-cell.range-start span, .cal-cell.range-end span,
         .cal-cell.in-range span { color: var(--cal-text-on-range); position:relative; z-index:3; }
         .cal-cell.range-start.no-end::before { display:none; }
-        .cal-cell.has-note::after {
-            content:''; display:block; width:3px; height:3px;
-            background: var(--accent-color); border-radius:50%;
+        .cal-cell.has-note::after { display:none; }
+        .cal-cell .note-dot {
             position:absolute; bottom:3px; left:50%; transform:translateX(-50%);
-            z-index:4;
-            pointer-events:none;
+            width:3px; height:3px; border-radius:50%;
+            background: var(--accent-color);
+            z-index:5; pointer-events:none;
         }
         .cal-cell.other-month { color:#bbb; }
-        .cal-cell.range-start.has-note::after,
-        .cal-cell.range-end.has-note::after,
-        .cal-cell.in-range.has-note::after { background:#fff; }
+        .cal-cell.range-start .note-dot,
+        .cal-cell.range-end .note-dot,
+        .cal-cell.in-range .note-dot { background:#fff; }
         .cal-weekday { font-size:0.7rem; color:#aaa; text-align:center; padding-bottom:4px; user-select:none; }
 
         .cal-input-row {
@@ -749,12 +749,11 @@
         }
         #editor-modal .modal-content {
             width: 100%;
-            height: 100vh;
-            height: 100dvh;
+            height: 52vh;
             max-height: 100vh;
-            border-radius: 0;
+            border-radius: 20px 20px 0 0;
             padding: 0;
-            box-shadow: none;
+            box-shadow: 0 -4px 30px rgba(0,0,0,0.18);
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -767,11 +766,13 @@
         }
         body.dark-mode #editor-modal .modal-content { background: rgba(26,18,42,1) !important; }
         #editor-modal.open .modal-content { transform: translateY(0); }
-        #editor-modal .modal-content.sheet-fullscreen { border-radius: 0; height: 100vh; }
+        #editor-modal .modal-content.sheet-fullscreen { border-radius: 0 !important; height: 100vh !important; height: 100dvh !important; }
         .editor-handle {
             flex-shrink: 0;
             user-select: none;
             -webkit-user-select: none;
+            cursor: ns-resize;
+            padding: 8px 16px 4px;
         }
         .editor-body {
             overflow-y: auto;
@@ -1030,7 +1031,7 @@
             max-height: 80vh;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            overflow: visible;
             box-shadow: 0 -4px 32px rgba(0,0,0,0.18);
             border-top: 1px solid rgba(255,255,255,0.6);
         }
@@ -1095,7 +1096,7 @@
         /* 各 tab 内容 */
         .portrait-content {
             flex: 1; overflow-y: auto;
-            padding: 12px 20px 32px;
+            padding: 12px 20px 80px;
         }
         .portrait-tab-panel { display: none; min-height: 260px; }
         .portrait-tab-panel.active { display: block; }
@@ -2494,7 +2495,7 @@
 
     <div class="modal" id="editor-modal" onclick="if(event.target===this)_editorDismiss()">
         <div class="modal-content">
-            <div class="editor-handle" style="display:flex;align-items:center;padding:10px 16px 6px;">
+            <div class="editor-handle">
                 <button onclick="closeModal('editor-modal')" style="background:none;border:none;font-size:1.1rem;color:var(--text-color);opacity:0.4;cursor:pointer;padding:2px 0;line-height:1;">✂</button>
             </div>
             <div id="todo-editor-area" class="editor-todo-area">
@@ -2827,8 +2828,32 @@
             _editorDraft = null;
         }
 
+        function _initSheetDrag(sheet) {
+            if (!sheet || sheet._dragInit) return;
+            sheet._dragInit = true;
+            const handle = sheet.querySelector('.editor-handle');
+            if (!handle) return;
+            let startY = 0, startH = 0, dragging = false;
+            function onStart(y) { dragging = true; startY = y; startH = sheet.getBoundingClientRect().height; sheet.style.transition = 'none'; }
+            function onMove(y) {
+                if (!dragging) return;
+                const newH = Math.min(window.innerHeight, Math.max(window.innerHeight * 0.2, startH + (startY - y)));
+                sheet.style.height = newH + 'px';
+                sheet.style.borderRadius = newH / window.innerHeight > 0.92 ? '0' : '20px 20px 0 0';
+            }
+            function onEnd() {
+                if (!dragging) return; dragging = false;
+                sheet.style.transition = 'border-radius 0.22s ease';
+            }
+            handle.addEventListener('touchstart', e => onStart(e.touches[0].clientY), { passive: true });
+            handle.addEventListener('touchmove', e => { onMove(e.touches[0].clientY); e.preventDefault(); }, { passive: false });
+            handle.addEventListener('touchend', onEnd);
+        }
+
         function _editorDismiss() {
             _editorSaveDraft();
+            const sheet = document.querySelector('#editor-modal .modal-content');
+            if (sheet) { sheet.classList.remove('sheet-fullscreen'); sheet.style.height = '52vh'; }
             closeModal('editor-modal');
             if (_editorDraft) {
                 const tip = document.createElement('div');
@@ -2989,6 +3014,15 @@
 
             renderTempImages();
             openModal('editor-modal');
+            // 有id（详情页编辑）→全屏；无id（新建）→ bottom sheet可拖拽
+            const sheet = document.querySelector('#editor-modal .modal-content');
+            if (id) {
+                sheet.classList.add('sheet-fullscreen');
+            } else {
+                sheet.classList.remove('sheet-fullscreen');
+                sheet.style.height = '52vh';
+                _initSheetDrag(sheet);
+            }
             requestAnimationFrame(() => editorAutoResize(document.getElementById('edit-content')));
         }
 
@@ -3883,6 +3917,12 @@
                     el.style.backgroundClip = '';
                     el.style.color = nameColor;
                 }
+                // 描边
+                if (s.nameStrokeOn) {
+                    el.style.webkitTextStroke = (s.nameStrokeWidth || 1) + 'px ' + (s.nameStrokeColor || '#ffffff');
+                } else {
+                    el.style.webkitTextStroke = '';
+                }
             });
             document.documentElement.style.setProperty('--name-color', nameColor.includes('gradient') ? 'transparent' : nameColor);
             // 预览框
@@ -4154,6 +4194,21 @@
             if (pNC) pNC.value = s.nameColor || '#333333';
             const pNCP = document.getElementById('p-name-color-preview');
             if (pNCP) pNCP.style.background = s.nameColor || '#333333';
+            // 描边同步
+            const pStrokeOn = document.getElementById('p-name-stroke-on');
+            if (pStrokeOn) pStrokeOn.checked = !!s.nameStrokeOn;
+            const pStrokeRow = document.getElementById('p-name-stroke-row');
+            if (pStrokeRow) pStrokeRow.style.display = s.nameStrokeOn ? '' : 'none';
+            const pStrokeWRow = document.getElementById('p-name-stroke-width-row');
+            if (pStrokeWRow) pStrokeWRow.style.display = s.nameStrokeOn ? '' : 'none';
+            const pStrokeColor = document.getElementById('p-name-stroke-color');
+            if (pStrokeColor) pStrokeColor.value = s.nameStrokeColor || '#ffffff';
+            const pStrokePrev = document.getElementById('p-name-stroke-preview');
+            if (pStrokePrev) pStrokePrev.style.background = s.nameStrokeColor || '#ffffff';
+            const pStrokeWidth = document.getElementById('p-name-stroke-width');
+            if (pStrokeWidth) pStrokeWidth.value = s.nameStrokeWidth || 1;
+            const pStrokeWidthVal = document.getElementById('p-name-stroke-width-val');
+            if (pStrokeWidthVal) pStrokeWidthVal.textContent = s.nameStrokeWidth || 1;
             renderPortraitHistoryAvatars();
             renderPortraitFramePresets();
         }
@@ -4582,7 +4637,7 @@
             if (document.getElementById('hsv-picker-popup')) return;
             const el = document.createElement('div');
             el.id = 'hsv-picker-popup';
-            el.style.cssText = 'position:fixed;z-index:9999;background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.22);padding:14px;width:260px;display:none;touch-action:none;';
+            el.style.cssText = 'position:fixed;z-index:999999;background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.22);padding:14px;width:260px;display:none;touch-action:none;';
             el.innerHTML = `
                 <canvas id="hsv-sq" width="232" height="180" style="border-radius:8px;display:block;cursor:crosshair;touch-action:none;width:100%;"></canvas>
                 <div style="margin-top:10px;display:flex;align-items:center;gap:8px;">
@@ -4621,7 +4676,7 @@
             });
             document.addEventListener('pointerdown',function(e){
                 const pop=document.getElementById('hsv-picker-popup');
-                if(pop&&pop.style.display!=='none'&&!pop.contains(e.target)&&!e.target.closest('#p-name-color-preview')){pop.style.display='none';_namePickerOpen=false;}
+                if(pop&&pop.style.display!=='none'&&!pop.contains(e.target)&&!e.target.closest('#p-name-color-preview')&&!e.target.closest('#p-name-stroke-preview')){pop.style.display='none';_namePickerOpen=false;_strokePickerOpen=false;_hsvPickerTarget='name';}
             });
         }
         function _hsvRedraw(updateInput=true) {
@@ -4649,10 +4704,21 @@
         }
         function _hsvApply() {
             const hex=_hsvToHex(_hsvPickerH,_hsvPickerS,_hsvPickerV);
-            onPortraitProfileNameColor(hex);
             const pop=document.getElementById('hsv-picker-popup');
-            if(pop)pop.style.display='none';
-            _namePickerOpen=false;
+            if (_hsvPickerTarget === 'stroke') {
+                const inp = document.getElementById('p-name-stroke-color');
+                if (inp) inp.value = hex;
+                const prev = document.getElementById('p-name-stroke-preview');
+                if (prev) prev.style.background = hex;
+                onPortraitNameStroke();
+                if (pop) pop.style.display = 'none';
+                _strokePickerOpen = false;
+                _hsvPickerTarget = 'name';
+            } else {
+                onPortraitProfileNameColor(hex);
+                if(pop)pop.style.display='none';
+                _namePickerOpen=false;
+            }
         }
         function toggleNameColorPicker() {
             _buildHsvPicker();
@@ -4671,6 +4737,46 @@
             } else {
                 pop.style.display='none';
             }
+        }
+
+        // 描边颜色调色盘（复用HSV picker，target='stroke'时写入描边颜色）
+        let _strokePickerOpen = false;
+        let _hsvPickerTarget = 'name'; // 'name' | 'stroke'
+
+        function toggleStrokeColorPicker() {
+            _buildHsvPicker();
+            const pop = document.getElementById('hsv-picker-popup');
+            _strokePickerOpen = !_strokePickerOpen;
+            if (_namePickerOpen) { _namePickerOpen = false; }
+            if (_strokePickerOpen) {
+                _hsvPickerTarget = 'stroke';
+                const btn = document.getElementById('p-name-stroke-preview');
+                const r = btn ? btn.getBoundingClientRect() : {left:50,bottom:200,top:200};
+                pop.style.display = 'block';
+                let left = r.left - 230; if (left < 8) left = 8;
+                let top = r.bottom + 8; if (top + 320 > window.innerHeight) top = r.top - 320;
+                pop.style.left = left + 'px'; pop.style.top = top + 'px';
+                const cur = (document.getElementById('p-name-stroke-color') || {}).value || state.settings.nameStrokeColor || '#ffffff';
+                [_hsvPickerH, _hsvPickerS, _hsvPickerV] = _hexToHsv(cur);
+                requestAnimationFrame(() => _hsvRedraw());
+            } else {
+                pop.style.display = 'none';
+                _hsvPickerTarget = 'name';
+            }
+        }
+
+        function onPortraitNameStroke() {
+            const on = document.getElementById('p-name-stroke-on').checked;
+            const color = (document.getElementById('p-name-stroke-color') || {}).value || '#ffffff';
+            const width = parseFloat((document.getElementById('p-name-stroke-width') || {}).value || 1);
+            document.getElementById('p-name-stroke-row').style.display = on ? '' : 'none';
+            document.getElementById('p-name-stroke-width-row').style.display = on ? '' : 'none';
+            const prev = document.getElementById('p-name-stroke-preview');
+            if (prev) { try { prev.style.background = color; } catch(e) {} }
+            state.settings.nameStrokeOn = on;
+            state.settings.nameStrokeColor = color;
+            state.settings.nameStrokeWidth = width;
+            saveData(); applySettings();
         }
         function parseCssColorToRgb(str) {
             // 支持 #rgb #rrggbb rgb(r,g,b)
@@ -5830,7 +5936,12 @@
                 el.appendChild(span);
 
                 const noteKey = `${_calYear}-${_calMonth}-${d}`;
-                if (noteDates.has(noteKey)) el.classList.add('has-note');
+                if (noteDates.has(noteKey)) {
+                    el.classList.add('has-note');
+                    const dot = document.createElement('span');
+                    dot.className = 'note-dot';
+                    el.appendChild(dot);
+                }
                 if (specialDateKeys.has(noteKey)) {
                     el.classList.add('has-special');
                     const star = document.createElement('span');
@@ -6527,8 +6638,25 @@
                     </div>
                     <div class="portrait-row">
                         <label>昵称颜色</label>
-                        <input type="text" id="p-profile-name-color" class="portrait-input" placeholder="#333 或 gradient" style="flex:1;" oninput="onPortraitProfileNameColor(this.value)">
+                        <input type="text" id="p-profile-name-color" class="portrait-input" placeholder="#333 / gradient / CSS片段" style="flex:1;" oninput="onPortraitProfileNameColor(this.value)">
                         <div id="p-name-color-preview" style="width:28px;height:28px;border-radius:6px;border:1px solid rgba(0,0,0,0.12);flex-shrink:0;cursor:pointer;margin-left:6px;" onclick="toggleNameColorPicker()"></div>
+                    </div>
+                    <div class="portrait-row">
+                        <label>名字描边</label>
+                        <label style="display:flex;align-items:center;gap:8px;flex:1;">
+                            <input type="checkbox" id="p-name-stroke-on" onchange="onPortraitNameStroke()" style="width:16px;height:16px;cursor:pointer;">
+                            <span style="font-size:0.82rem;opacity:0.5;">开启</span>
+                        </label>
+                    </div>
+                    <div class="portrait-row" id="p-name-stroke-row" style="display:none;">
+                        <label>描边颜色</label>
+                        <input type="text" id="p-name-stroke-color" class="portrait-input" placeholder="#fff" style="flex:1;" oninput="onPortraitNameStroke()">
+                        <div id="p-name-stroke-preview" style="width:28px;height:28px;border-radius:6px;border:1px solid rgba(0,0,0,0.12);flex-shrink:0;cursor:pointer;margin-left:6px;" onclick="toggleStrokeColorPicker()"></div>
+                    </div>
+                    <div class="portrait-row" id="p-name-stroke-width-row" style="display:none;">
+                        <label>描边粗细</label>
+                        <input type="range" id="p-name-stroke-width" min="0.5" max="4" step="0.5" style="flex:1;" oninput="onPortraitNameStroke();document.getElementById('p-name-stroke-width-val').textContent=this.value">
+                        <span class="portrait-val" id="p-name-stroke-width-val">1</span>
                     </div>
                 </div>
 
