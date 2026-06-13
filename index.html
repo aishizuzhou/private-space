@@ -418,7 +418,6 @@
             position: relative;
             z-index: 3;
             transition: border-radius 0.3s ease;
-            background: #b8c8d8;
         }
 
         .avatar-inner.is-framed {
@@ -3353,7 +3352,6 @@
                         <span class="note-header-name">${state.settings.name}</span>
                         <div class="note-header-right">
                             ${timerHtml}
-                            <span class="edit-btn" onclick="event.stopPropagation();openEditor(${item.id})"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAABQCAYAAABxs9dPAAAC80lEQVR42u2YTYhOYRTHf/fOh2nIxxTZSGJFJNmIt5QsLDSapMSGhY2dslJTlmp2ko0okZVSdrOxsPFRr5gMQhZYoXyk0XjvvTbn1On0vrf3vvM+dyY9/3p67sfTPf/nfD3nXIiIiIiIiIiIiIiIWCpIZCwqUmCwzfPBxSA34O7XyPCEayWzEbgEPAO+yGgCF4F1HYgHI3ME+AYUHcYn4EBoTSmZBtASwfNA5sa8vJsDdofSlEbRKPBOBLbcbK//yvwcGAqhJY2m005g3sZcuSM33q2WqrAuZJ6Q60QEJ8BNYIeY5555pwQnjJb7Zi7d4RunoRm3dhj44NY87ZZQ2oPZRpzGmobIkDj0rFsz6u4XTEg/NA/8dLttiMCWjDFglzErwI8QGhoQIbOGYAZsAqaMz1wF1su9buZFiNAfcE7tQ/4gcLzDu/2hcpEepk+MwFzGd+CXuVcy0yGztX50u2ThVkkeysR3NovvBD8+zjqz5G0S4om6DljN2ndLjo4bbm3wEz8BtkgqyJ2Wfkv5kdZVE6kJbpdo6HLd9dDJNmR0ZDIfCk1KS5CVwGcTTZ6QknwlR0qwBkAd9FSJdjypw1W0VNXh9MgYN4LL1lpCSZUdd2uuTHa61SW73JBLjYkSYJs59/pKSLECWOV2nZbUUGNyXZi5bybTneZGMwDvgWPAGTkurDnzOlrmGdNx2PAGuCDP/sj8oMrm0x5yUGEIFSXf1PfNkKe9+txRo6Fc2qK1wD6pKDMT9ntDJkeNnBHgrTNbA5g0DWIBPKxaevSSh1Lxj3PmuRZkc2ZNDpx3tXXfCWFy0X3gjulKEzMPA1eAR7I2Cx1pKniDCfM9RiMfgdVmHSE1pCZKRfB1ozkVPiU1dtpNL9bPH0oJcM1E0YiQvWXaaeoipH7xUjS1TAg15b9R7YRsbpkBlksH21xIl7HQAlz9Yxr4CryW3qyo6jv/PRKXySMiIiIiIiIiIpYAavsFXCv68UdCy9ZJYCfwuJcGUfEPRBMUNTxHaHMAAAAASUVORK5CYII=" class="edit-icon-img"></span>
                         </div>
                     </div>
                     ${item.forwardFrom ? `<div class="note-quote-mini"><span class="note-quote-mini-author">${item.forwardFrom.name}：</span>${item.forwardFrom.content}</div>` : ''}
@@ -6166,7 +6164,8 @@
         function closeModal(id) {
             document.getElementById(id).classList.remove('open');
             if (id === 'full-note-modal') {
-                document.getElementById('main-fab').style.display = '';
+                const fab = document.getElementById('main-fab');
+                if (fab) fab.style.display = '';
                 if (window._fullNoteVVCleanup) { window._fullNoteVVCleanup(); window._fullNoteVVCleanup = null; }
             }
             if (id === 'editor-modal' || id === 'forward-modal') {
