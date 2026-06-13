@@ -3938,7 +3938,6 @@
             const hexVal = rgbToHex(tr, tg, tb);
             if (tcPreview) tcPreview.style.background = hexVal;
             if (tcHexEl) tcHexEl.innerText = hexVal;
-            syncRgbSliders(tr, tg, tb);
 
             // 背景：优先用当前模式专属背景，回退到全局背景
             const modeKey = { note: 'bgNote', todo: 'bgTodo', pomodoro: 'bgPomodoro' };
@@ -4580,39 +4579,6 @@
         function rgbToHex(r, g, b) {
             return '#' + [r,g,b].map(v => v.toString(16).padStart(2,'0')).join('');
         }
-        function syncRgbSliders(r, g, b) {
-            const tr = document.getElementById('tc-r');
-            const tg = document.getElementById('tc-g');
-            const tb = document.getElementById('tc-b');
-            if (tr) { tr.value = r; document.getElementById('tc-r-val').innerText = r; }
-            if (tg) { tg.value = g; document.getElementById('tc-g-val').innerText = g; }
-            if (tb) { tb.value = b; document.getElementById('tc-b-val').innerText = b; }
-            const hex = rgbToHex(r, g, b);
-            const preview = document.getElementById('text-color-preview');
-            const hexEl = document.getElementById('text-color-hex');
-            if (preview) preview.style.background = hex;
-            if (hexEl) hexEl.innerText = hex;
-        }
-
-        function onRgbSliderChange() {
-            const r = parseInt(document.getElementById('tc-r').value);
-            const g = parseInt(document.getElementById('tc-g').value);
-            const b = parseInt(document.getElementById('tc-b').value);
-            document.getElementById('tc-r-val').innerText = r;
-            document.getElementById('tc-g-val').innerText = g;
-            document.getElementById('tc-b-val').innerText = b;
-            const hex = rgbToHex(r, g, b);
-            const preview = document.getElementById('text-color-preview');
-            const hexEl = document.getElementById('text-color-hex');
-            if (preview) preview.style.background = hex;
-            if (hexEl) hexEl.innerText = hex;
-            state.settings.textColorR = r;
-            state.settings.textColorG = g;
-            state.settings.textColorB = b;
-            document.documentElement.style.setProperty('--text-color', `rgb(${r},${g},${b})`);
-            saveData();
-        }
-
         // ===================== 昵称颜色RGB调色板 =====================
         let _namePickerOpen = false;
         let _hsvPickerH = 0, _hsvPickerS = 1, _hsvPickerV = 1;
