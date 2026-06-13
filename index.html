@@ -2856,7 +2856,6 @@
             function onEnd() {
                 if (!dragging) return; dragging = false;
                 sheet.style.transition = 'border-radius 0.22s ease';
-                if (window._editorDragEndHook) window._editorDragEndHook(sheet.getBoundingClientRect().height);
             }
             handle.addEventListener('touchstart', e => onStart(e.touches[0].clientY), { passive: true });
             handle.addEventListener('touchmove', e => { onMove(e.touches[0].clientY); e.preventDefault(); }, { passive: false });
@@ -2880,25 +2879,12 @@
         // ── editor bottom sheet helpers ──
         function editorAutoResize(ta) {
             const body = ta.closest('.editor-body');
-            // 记住当前光标的相对位置
-            let cursorTop = null;
-            if (body && document.activeElement === ta) {
-                // 用临时span测量光标Y位置
-                const selEnd = ta.selectionEnd;
-                const before = ta.value.slice(0, selEnd);
-                const lineH = parseInt(getComputedStyle(ta).lineHeight) || 20;
-                const lines = before.split('\n').length;
-                cursorTop = lines * lineH;
-            }
+            const prevScrollTop = body ? body.scrollTop : 0;
             ta.style.height = 'auto';
             ta.style.height = ta.scrollHeight + 'px';
-            // resize后把光标滚回可视区
-            if (body && cursorTop !== null) {
-                const bodyH = body.clientHeight;
-                const scrollTarget = cursorTop - bodyH * 0.6;
-                if (scrollTarget > body.scrollTop || cursorTop < body.scrollTop) {
-                    body.scrollTop = Math.max(0, scrollTarget);
-                }
+            if (body) {
+                body.scrollTop = prevScrollTop;
+                requestAnimationFrame(() => { body.scrollTop = prevScrollTop; });
             }
         }
         function editorClosePopover() {
@@ -3000,65 +2986,6 @@
                 sheet.classList.remove('sheet-fullscreen');
                 sheet.style.height = '52vh';
                 _initSheetDrag(sheet);
-            }
-            // visualViewport 监听：键盘弹出时缩减 editor-modal 遮罩高度
-            // 让 align-items:flex-end 把 sheet 顶到键盘上方，操作栏始终可见
-            if (window._editorVVCleanup) { window._editorVVCleanup(); window._editorVVCleanup = null; }
-            if (window.visualViewport) {
-                const _editorModal = document.getElementById('editor-modal');
-                let _sheetUserHeight = null; // 记录用户拖动设置的高度
-                let _editorVVTicking = false;
-                function _editorVVResize() {
-                    if (!_editorModal.classList.contains('open')) return;
-                    if (_editorVVTicking) return;
-                    _editorVVTicking = true;
-                    requestAnimationFrame(() => {
-                        _editorVVTicking = false;
-                        const vv = window.visualViewport;
-                        const vvH = vv.height;
-                        const vvTop = vv.offsetTop;
-                        const kbH = Math.max(0, window.innerHeight - vvH - vvTop);
-                        if (kbH <= 0) {
-                            _editorModal.style.top = '';
-                            _editorModal.style.height = '';
-                            _editorModal.style.bottom = '';
-                            if (sheet.classList.contains('sheet-fullscreen')) {
-                                sheet.style.height = '';
-                                sheet.style.maxHeight = '';
-                            } else {
-                                if (_sheetUserHeight !== null) sheet.style.height = _sheetUserHeight + 'px';
-                                sheet.style.maxHeight = '';
-                            }
-                            return;
-                        }
-                        _editorModal.style.top = vvTop + 'px';
-                        _editorModal.style.height = vvH + 'px';
-                        _editorModal.style.bottom = 'auto';
-                        if (sheet.classList.contains('sheet-fullscreen')) {
-                            sheet.style.height = vvH + 'px';
-                            sheet.style.maxHeight = vvH + 'px';
-                        } else {
-                            if (_sheetUserHeight !== null) {
-                                sheet.style.height = Math.min(_sheetUserHeight, vvH) + 'px';
-                            } else {
-                                sheet.style.height = Math.min(parseInt(sheet.style.height) || vvH * 0.52, vvH) + 'px';
-                            }
-                            sheet.style.maxHeight = vvH + 'px';
-                        }
-                    });
-                }
-                // 监听用户拖动结束后的高度
-                const _origDragEnd = window._editorDragEndHook;
-                window._editorDragEndHook = (h) => { _sheetUserHeight = h; if (_origDragEnd) _origDragEnd(h); };
-                window.visualViewport.addEventListener('resize', _editorVVResize);
-                window._editorVVCleanup = () => {
-                    window.visualViewport.removeEventListener('resize', _editorVVResize);
-                    _editorModal.style.top = '';
-                    _editorModal.style.height = '';
-                    _editorModal.style.bottom = '';
-                    sheet.style.maxHeight = '';
-                    window._editorDragEndHook = _origDragEnd;
-                };
             }
             requestAnimationFrame(() => editorAutoResize(document.getElementById('edit-content')));
         }
@@ -6259,54 +6186,8 @@
                 hint.style.display = 'none';
             }
         }
-        // iOS 键盘弹出会强制滚动 body，在 textarea/input focus 时锁住 body
-        // 只针对弹出键盘的输入框，不影响其他 modal
-        let _bodyScrollY = 0;
-        let _bodyLocked = false;
-        function _lockBody() {
-            if (_bodyLocked) return;
-            _bodyLocked = true;
-            _bodyScrollY = window.scrollY || window.pageYOffset || 0;
-            document.body.style.position = 'fixed';
-            document.body.style.top = -_bodyScrollY + 'px';
-            document.body.style.width = '100%';
-        }
-        function _unlockBody() {
-            if (!_bodyLocked) return;
-            _bodyLocked = false;
-            document.body.style.position = '';
-            document.body.style.top = '';
-            document.body.style.width = '';
-            window.scrollTo(0, _bodyScrollY);
-        }
-        // 全局委托：modal/抽屉内任何输入框获焦就锁body，失焦就解锁
-        // 覆盖所有静态和动态渲染的输入框，后续新增也自动生效
-        let _unlockTimer = null;
-        function _isLockableInput(el) {
-            if (!el) return false;
-            const tag = el.tagName;
-            const type = el.type || '';
-            const isInput = (tag === 'TEXTAREA') ||
-                (tag === 'INPUT' && !['button','submit','reset','file','color','checkbox','radio','range','hidden'].includes(type));
-            if (!isInput) return false;
-            return !!(el.closest('.modal') || el.closest('.left-drawer') || el.closest('.portrait-panel') || el.closest('#hsv-picker-popup'));
-        }
-        document.addEventListener('focusin', function(e) {
-            if (!_isLockableInput(e.target)) return;
-            // 取消待执行的解锁（iOS上focusout先于focusin触发，这里拦截）
-            if (_unlockTimer) { clearTimeout(_unlockTimer); _unlockTimer = null; }
-            _lockBody();
-        });
-        document.addEventListener('focusout', function(e) {
-            if (!_isLockableInput(e.target)) return;
-            // 延迟解锁，给focusin一个tick的机会来取消它
-            _unlockTimer = setTimeout(() => { _unlockTimer = null; _unlockBody(); }, 100);
-        });
         function openModal(id) { document.getElementById(id).classList.add('open'); }
         function closeModal(id) {
-            // 关modal时同时解锁body（防止某些情况下blur没触发）
-            if (_unlockTimer) { clearTimeout(_unlockTimer); _unlockTimer = null; }
-            _unlockBody();
             document.getElementById(id).classList.remove('open');
             if (id === 'full-note-modal') {
                 const fab = document.getElementById('main-fab');
@@ -6314,7 +6195,6 @@
                 if (window._fullNoteVVCleanup) { window._fullNoteVVCleanup(); window._fullNoteVVCleanup = null; }
             }
             if (id === 'editor-modal' || id === 'forward-modal') {
-                if (window._editorVVCleanup) { window._editorVVCleanup(); window._editorVVCleanup = null; }
                 _pendingForward = null;
                 _isForwardMode = false;
                 const fp = document.getElementById('forward-preview');
