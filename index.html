@@ -2460,7 +2460,7 @@
                 <div id="full-note-body" style="flex:1; overflow-y:auto; padding:16px 16px 90px; background:var(--page-bg, #f5f5f5);"></div>
                 <div class="full-note-comment-bar" style="display:flex; align-items:flex-start; gap:8px; padding:10px 16px 14px; border-top:1px solid rgba(0,0,0,0.08); background:var(--page-bg, #f5f5f5); flex-shrink:0; min-height:60px;">
                     <textarea id="comment-input" rows="1" placeholder="何か言いたいの？" style="flex:1; padding:9px 16px; border-radius:18px; border:1px solid rgba(200,200,200,0.8); background:rgba(245,245,245,0.9); font-size:0.9rem; outline:none; margin:0; resize:none; overflow-y:auto; max-height:100px; line-height:1.5; font-family:var(--custom-font);"
-                        oninput="(function(el){if(window._restoreNoteScroll)window._restoreNoteScroll();el.style.height='auto';el.style.height=Math.min(el.scrollHeight,100)+'px';if(window._restoreNoteScroll){window._restoreNoteScroll();requestAnimationFrame(window._restoreNoteScroll);}})(this);"
+                        oninput="(function(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,100)+'px';})(this);"
                         onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submitComment();}"></textarea>
                     <button onclick="submitComment()" style="width:36px; height:36px; border-radius:50%; border:none; background:var(--accent-color); color:var(--accent-text); font-size:1rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; cursor:pointer; margin-top:2px;">⋀</button>
                 </div>
@@ -2495,7 +2495,7 @@
     <div class="modal" id="editor-modal" onclick="if(event.target===this)_editorDismiss()">
         <div class="modal-content">
             <div class="editor-handle">
-                <button onclick="closeModal('editor-modal')" style="background:none;border:none;font-size:1.1rem;color:var(--text-color);opacity:0.4;cursor:pointer;padding:2px 0;line-height:1;">ᐢ⩌⌯⩌ᐢ</button>
+                <button id="editor-close-btn" onclick="closeModal('editor-modal')" style="background:none;border:none;font-size:1.1rem;color:var(--text-color);opacity:0.4;cursor:pointer;padding:2px 0;line-height:1;">ᐢ⩌⌯⩌ᐢ</button>
             </div>
             <div id="todo-editor-area" class="editor-todo-area">
                 <div id="todo-items-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px;"></div>
@@ -2836,13 +2836,15 @@
             function onStart(y) { dragging = true; startY = y; startH = sheet.getBoundingClientRect().height; sheet.style.transition = 'none'; }
             function onMove(y) {
                 if (!dragging) return;
-                const newH = Math.min(window.innerHeight, Math.max(window.innerHeight * 0.2, startH + (startY - y)));
+                const modalH = sheet.closest('.modal') ? sheet.closest('.modal').getBoundingClientRect().height : window.innerHeight;
+                const newH = Math.min(modalH, Math.max(modalH * 0.2, startH + (startY - y)));
                 sheet.style.height = newH + 'px';
-                sheet.style.borderRadius = newH / window.innerHeight > 0.92 ? '0' : '20px 20px 0 0';
+                sheet.style.borderRadius = newH / modalH > 0.92 ? '0' : '20px 20px 0 0';
             }
             function onEnd() {
                 if (!dragging) return; dragging = false;
                 sheet.style.transition = 'border-radius 0.22s ease';
+                if (window._editorDragEndHook) window._editorDragEndHook(sheet.getBoundingClientRect().height);
             }
             handle.addEventListener('touchstart', e => onStart(e.touches[0].clientY), { passive: true });
             handle.addEventListener('touchmove', e => { onMove(e.touches[0].clientY); e.preventDefault(); }, { passive: false });
@@ -2862,44 +2864,6 @@
                 setTimeout(() => tip.remove(), 1800);
             }
         }
-
-        // ── editor 键盘处理 ──
-        window.addEventListener('DOMContentLoaded', function() {
-            const _origOpen = openModal;
-            openModal = function(id) {
-                _origOpen(id);
-                if (id === 'editor-modal') {
-                    // 键盘弹出时锁住editor-body的scrollTop，防止跳顶
-                    if (window.visualViewport) {
-                        function _lockScroll() {
-                            const ta = document.getElementById('edit-content');
-                            const body = ta && ta.closest('.editor-body');
-                            if (!body || document.activeElement !== ta) return;
-                            // 保持光标在可视范围内
-                            const lineH = parseInt(getComputedStyle(ta).lineHeight) || 20;
-                            const lines = ta.value.slice(0, ta.selectionEnd).split('\n').length;
-                            const cursorTop = lines * lineH;
-                            const bodyH = body.clientHeight;
-                            const target = cursorTop - bodyH * 0.6;
-                            body.scrollTop = Math.max(0, target);
-                        }
-                        window.visualViewport.addEventListener('resize', _lockScroll);
-                        window.visualViewport.addEventListener('scroll', _lockScroll);
-                        // editor关闭时移除
-                        const _cleanup = () => {
-                            window.visualViewport.removeEventListener('resize', _lockScroll);
-                            window.visualViewport.removeEventListener('scroll', _lockScroll);
-                        };
-                        document.getElementById('editor-modal').addEventListener('transitionend', function once() {
-                            if (!document.getElementById('editor-modal').classList.contains('open')) {
-                                _cleanup();
-                                document.getElementById('editor-modal').removeEventListener('transitionend', once);
-                            }
-                        });
-                    }
-                }
-            };
-        });
 
         // ── editor bottom sheet helpers ──
         function editorAutoResize(ta) {
@@ -3015,12 +2979,74 @@
             openModal('editor-modal');
             // 有id（详情页编辑）→全屏；无id（新建）→ bottom sheet可拖拽
             const sheet = document.querySelector('#editor-modal .modal-content');
+            const _editorCloseBtn = document.getElementById('editor-close-btn');
             if (id) {
+                if (_editorCloseBtn) _editorCloseBtn.textContent = 'ᗜ ˰ ᗜ꧞';
                 sheet.classList.add('sheet-fullscreen');
             } else {
+                if (_editorCloseBtn) _editorCloseBtn.textContent = 'ᐢ⩌⌯⩌ᐢ';
                 sheet.classList.remove('sheet-fullscreen');
                 sheet.style.height = '52vh';
                 _initSheetDrag(sheet);
+            }
+            // visualViewport 监听：键盘弹出时缩减 editor-modal 遮罩高度
+            // 让 align-items:flex-end 把 sheet 顶到键盘上方，操作栏始终可见
+            if (window._editorVVCleanup) { window._editorVVCleanup(); window._editorVVCleanup = null; }
+            if (window.visualViewport) {
+                const _editorModal = document.getElementById('editor-modal');
+                let _sheetUserHeight = null; // 记录用户拖动设置的高度
+                let _editorVVTicking = false;
+                function _editorVVResize() {
+                    if (!_editorModal.classList.contains('open')) return;
+                    if (_editorVVTicking) return;
+                    _editorVVTicking = true;
+                    requestAnimationFrame(() => {
+                        _editorVVTicking = false;
+                        const vv = window.visualViewport;
+                        const vvH = vv.height;
+                        const vvTop = vv.offsetTop;
+                        const kbH = Math.max(0, window.innerHeight - vvH - vvTop);
+                        if (kbH <= 0) {
+                            _editorModal.style.top = '';
+                            _editorModal.style.height = '';
+                            _editorModal.style.bottom = '';
+                            if (sheet.classList.contains('sheet-fullscreen')) {
+                                sheet.style.height = '';
+                                sheet.style.maxHeight = '';
+                            } else {
+                                if (_sheetUserHeight !== null) sheet.style.height = _sheetUserHeight + 'px';
+                                sheet.style.maxHeight = '';
+                            }
+                            return;
+                        }
+                        _editorModal.style.top = vvTop + 'px';
+                        _editorModal.style.height = vvH + 'px';
+                        _editorModal.style.bottom = 'auto';
+                        if (sheet.classList.contains('sheet-fullscreen')) {
+                            sheet.style.height = vvH + 'px';
+                            sheet.style.maxHeight = vvH + 'px';
+                        } else {
+                            if (_sheetUserHeight !== null) {
+                                sheet.style.height = Math.min(_sheetUserHeight, vvH) + 'px';
+                            } else {
+                                sheet.style.height = Math.min(parseInt(sheet.style.height) || vvH * 0.52, vvH) + 'px';
+                            }
+                            sheet.style.maxHeight = vvH + 'px';
+                        }
+                    });
+                }
+                // 监听用户拖动结束后的高度
+                const _origDragEnd = window._editorDragEndHook;
+                window._editorDragEndHook = (h) => { _sheetUserHeight = h; if (_origDragEnd) _origDragEnd(h); };
+                window.visualViewport.addEventListener('resize', _editorVVResize);
+                window._editorVVCleanup = () => {
+                    window.visualViewport.removeEventListener('resize', _editorVVResize);
+                    _editorModal.style.top = '';
+                    _editorModal.style.height = '';
+                    _editorModal.style.bottom = '';
+                    sheet.style.maxHeight = '';
+                    window._editorDragEndHook = _origDragEnd;
+                };
             }
             requestAnimationFrame(() => editorAutoResize(document.getElementById('edit-content')));
         }
@@ -3560,59 +3586,44 @@
             const commentBar = document.querySelector('.full-note-comment-bar');
             const modalWrap = document.querySelector('.full-note-modal-wrap');
 
-            // 持续记录用户滚动位置，所有reflow后还原
-            let _savedScrollTop = 0;
-            const noteBodyEl = document.getElementById('full-note-body');
-            if (noteBodyEl) {
-                noteBodyEl.addEventListener('scroll', () => {
-                    _savedScrollTop = noteBodyEl.scrollTop;
-                }, { passive: true });
-            }
-            function _restoreScroll() {
-                const nb = document.getElementById('full-note-body');
-                if (!nb) return;
-                nb.scrollTop = _savedScrollTop;
-                requestAnimationFrame(() => { nb.scrollTop = _savedScrollTop; });
-            }
-            window._restoreNoteScroll = _restoreScroll;
-
+            let _vvTicking = false;
             function _onVVResize() {
                 if (!document.getElementById('full-note-modal').classList.contains('open')) return;
-                const vv = window.visualViewport; if (!vv) return;
-                const kbH = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
-                const noteBody = document.getElementById('full-note-body');
-                if (commentBar) {
-                    if (kbH > 0) {
-                        commentBar.style.position = 'fixed';
-                        commentBar.style.bottom = kbH + 'px';
-                        commentBar.style.left = '0';
-                        commentBar.style.right = '0';
-                        commentBar.style.zIndex = '200';
-                        commentBar.style.paddingBottom = '14px';
-                    } else {
-                        commentBar.style.position = '';
-                        commentBar.style.bottom = '';
-                        commentBar.style.left = '';
-                        commentBar.style.right = '';
-                        commentBar.style.zIndex = '';
-                        commentBar.style.paddingBottom = '14px';
+                if (_vvTicking) return;
+                _vvTicking = true;
+                requestAnimationFrame(() => {
+                    _vvTicking = false;
+                    const vv = window.visualViewport; if (!vv) return;
+                    const kbH = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+                    const noteBody = document.getElementById('full-note-body');
+                    if (commentBar) {
+                        if (kbH > 0) {
+                            commentBar.style.position = 'fixed';
+                            commentBar.style.bottom = kbH + 'px';
+                            commentBar.style.left = '0';
+                            commentBar.style.right = '0';
+                            commentBar.style.zIndex = '200';
+                            commentBar.style.paddingBottom = '14px';
+                        } else {
+                            commentBar.style.position = '';
+                            commentBar.style.bottom = '';
+                            commentBar.style.left = '';
+                            commentBar.style.right = '';
+                            commentBar.style.zIndex = '';
+                            commentBar.style.paddingBottom = '14px';
+                        }
                     }
-                }
-                if (noteBody) {
-                    const barH = commentBar ? commentBar.offsetHeight : 60;
-                    noteBody.style.paddingBottom = kbH > 0 ? (kbH + barH) + 'px' : '';
-                }
-                // viewport变化（输入法弹出/收起）后还原scrollTop
-                _restoreScroll();
+                    if (noteBody) {
+                        const barH = commentBar ? commentBar.offsetHeight : 60;
+                        noteBody.style.paddingBottom = kbH > 0 ? (kbH + barH) + 'px' : '';
+                    }
+                });
             }
             if (window._fullNoteVVCleanup) window._fullNoteVVCleanup();
             if (window.visualViewport) {
                 window.visualViewport.addEventListener('resize', _onVVResize);
-                window.visualViewport.addEventListener('scroll', _onVVResize);
                 window._fullNoteVVCleanup = () => {
                     window.visualViewport.removeEventListener('resize', _onVVResize);
-                    window.visualViewport.removeEventListener('scroll', _onVVResize);
-                    window._restoreNoteScroll = null;
                     if (commentBar) {
                         commentBar.style.position = '';
                         commentBar.style.bottom = '';
@@ -3915,10 +3926,21 @@
                     el.style.backgroundClip = '';
                     el.style.color = nameColor;
                 }
-                // 描边
+                // 描边：用 text-shadow 模拟，比 -webkit-text-stroke 更自然不蚕食字形
                 if (s.nameStrokeOn) {
-                    el.style.webkitTextStroke = (s.nameStrokeWidth || 1) + 'px ' + (s.nameStrokeColor || '#ffffff');
+                    const sw = parseFloat(s.nameStrokeWidth || 1);
+                    const sc = s.nameStrokeColor || '#ffffff';
+                    const shadows = [];
+                    for (let x = -sw; x <= sw; x += sw > 1 ? sw / 2 : sw) {
+                        for (let y = -sw; y <= sw; y += sw > 1 ? sw / 2 : sw) {
+                            if (x === 0 && y === 0) continue;
+                            shadows.push(`${x}px ${y}px 0 ${sc}`);
+                        }
+                    }
+                    el.style.textShadow = shadows.join(', ');
+                    el.style.webkitTextStroke = '';
                 } else {
+                    el.style.textShadow = '';
                     el.style.webkitTextStroke = '';
                 }
             });
@@ -6203,8 +6225,54 @@
                 hint.style.display = 'none';
             }
         }
+        // iOS 键盘弹出会强制滚动 body，在 textarea/input focus 时锁住 body
+        // 只针对弹出键盘的输入框，不影响其他 modal
+        let _bodyScrollY = 0;
+        let _bodyLocked = false;
+        function _lockBody() {
+            if (_bodyLocked) return;
+            _bodyLocked = true;
+            _bodyScrollY = window.scrollY || window.pageYOffset || 0;
+            document.body.style.position = 'fixed';
+            document.body.style.top = -_bodyScrollY + 'px';
+            document.body.style.width = '100%';
+        }
+        function _unlockBody() {
+            if (!_bodyLocked) return;
+            _bodyLocked = false;
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.width = '';
+            window.scrollTo(0, _bodyScrollY);
+        }
+        // 全局委托：modal/抽屉内任何输入框获焦就锁body，失焦就解锁
+        // 覆盖所有静态和动态渲染的输入框，后续新增也自动生效
+        let _unlockTimer = null;
+        function _isLockableInput(el) {
+            if (!el) return false;
+            const tag = el.tagName;
+            const type = el.type || '';
+            const isInput = (tag === 'TEXTAREA') ||
+                (tag === 'INPUT' && !['button','submit','reset','file','color','checkbox','radio','range','hidden'].includes(type));
+            if (!isInput) return false;
+            return !!(el.closest('.modal') || el.closest('.left-drawer') || el.closest('.portrait-panel') || el.closest('#hsv-picker-popup'));
+        }
+        document.addEventListener('focusin', function(e) {
+            if (!_isLockableInput(e.target)) return;
+            // 取消待执行的解锁（iOS上focusout先于focusin触发，这里拦截）
+            if (_unlockTimer) { clearTimeout(_unlockTimer); _unlockTimer = null; }
+            _lockBody();
+        });
+        document.addEventListener('focusout', function(e) {
+            if (!_isLockableInput(e.target)) return;
+            // 延迟解锁，给focusin一个tick的机会来取消它
+            _unlockTimer = setTimeout(() => { _unlockTimer = null; _unlockBody(); }, 100);
+        });
         function openModal(id) { document.getElementById(id).classList.add('open'); }
         function closeModal(id) {
+            // 关modal时同时解锁body（防止某些情况下blur没触发）
+            if (_unlockTimer) { clearTimeout(_unlockTimer); _unlockTimer = null; }
+            _unlockBody();
             document.getElementById(id).classList.remove('open');
             if (id === 'full-note-modal') {
                 const fab = document.getElementById('main-fab');
@@ -6212,6 +6280,7 @@
                 if (window._fullNoteVVCleanup) { window._fullNoteVVCleanup(); window._fullNoteVVCleanup = null; }
             }
             if (id === 'editor-modal' || id === 'forward-modal') {
+                if (window._editorVVCleanup) { window._editorVVCleanup(); window._editorVVCleanup = null; }
                 _pendingForward = null;
                 _isForwardMode = false;
                 const fp = document.getElementById('forward-preview');
