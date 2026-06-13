@@ -2245,17 +2245,16 @@
             <div class="drawer-settings-area">
                 <div class="drawer-row">
                     <label>主题色</label>
-                    <input type="color" id="setting-color" style="width:60px;height:28px;padding:0;border:none;background:none;cursor:pointer;" onchange="updateSettings()">
+                    <input type="text" id="setting-color" style="display:none">
+                    <div id="accent-color-preview" onclick="toggleAccentColorPicker()" style="width:36px;height:24px;border-radius:6px;border:1px solid rgba(0,0,0,0.12);cursor:pointer;background:#c8848e;flex-shrink:0;"></div>
                 </div>
-                <div class="drawer-row" style="align-items:flex-start;">
-                    <label style="margin-top:2px;">字体颜色</label>
-                    <div id="lockable-textcolor" style="flex:1;min-width:0;">
-                        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;"><span style="font-size:0.72rem;color:#aaa;width:12px;">R</span><input type="range" id="tc-r" min="0" max="255" value="51" style="flex:1;min-width:0;max-width:120px;height:5px;accent-color:#f66;" oninput="onRgbSliderChange()"><span id="tc-r-val" style="font-size:0.72rem;color:#aaa;width:22px;text-align:right;">51</span></div>
-                        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;"><span style="font-size:0.72rem;color:#aaa;width:12px;">G</span><input type="range" id="tc-g" min="0" max="255" value="51" style="flex:1;min-width:0;max-width:120px;height:5px;accent-color:#4c4;" oninput="onRgbSliderChange()"><span id="tc-g-val" style="font-size:0.72rem;color:#aaa;width:22px;text-align:right;">51</span></div>
-                        <div style="display:flex;align-items:center;gap:6px;"><span style="font-size:0.72rem;color:#aaa;width:12px;">B</span><input type="range" id="tc-b" min="0" max="255" value="51" style="flex:1;min-width:0;max-width:120px;height:5px;accent-color:#66f;" oninput="onRgbSliderChange()"><span id="tc-b-val" style="font-size:0.72rem;color:#aaa;width:22px;text-align:right;">51</span></div>
-                        <div style="display:flex;align-items:center;gap:6px;margin-top:4px;"><div id="text-color-preview" style="width:24px;height:18px;border-radius:4px;border:1px solid #ddd;"></div><span id="text-color-hex" style="font-size:0.72rem;color:#aaa;">#333333</span></div>
+                <div class="drawer-row">
+                    <label>字体颜色</label>
+                    <div id="lockable-textcolor" style="display:flex;align-items:center;gap:6px;flex:1;">
+                        <div id="text-color-preview" onclick="toggleTextColorPicker()" style="width:36px;height:24px;border-radius:6px;border:1px solid rgba(0,0,0,0.12);cursor:pointer;background:#333333;flex-shrink:0;"></div>
+                        <span id="text-color-hex" style="font-size:0.72rem;color:#aaa;">#333333</span>
                     </div>
-                    <button class="lock-btn" id="lock-textcolor" onclick="toggleLock('textcolor')" style="margin-top:2px;">🔓</button>
+                    <button class="lock-btn" id="lock-textcolor" onclick="toggleLock('textcolor')">🔓</button>
                 </div>
                 <div class="drawer-row">
                     <label>深色模式</label>
@@ -4004,6 +4003,8 @@
             const ncInput = document.getElementById('setting-name-color');
             if (ncInput) ncInput.value = s.nameColor || '#333333';
             document.getElementById('setting-color').value = s.themeColor;
+            const accentPrev = document.getElementById('accent-color-preview');
+            if (accentPrev) accentPrev.style.background = s.themeColor || '#c8848e';
 
             document.getElementById('setting-charm-size').value = s.charmSize;
             document.getElementById('setting-charm-swing').value = s.charmSwing;
@@ -4675,7 +4676,7 @@
             });
             document.addEventListener('pointerdown',function(e){
                 const pop=document.getElementById('hsv-picker-popup');
-                if(pop&&pop.style.display!=='none'&&!pop.contains(e.target)&&!e.target.closest('#p-name-color-preview')&&!e.target.closest('#p-name-stroke-preview')){pop.style.display='none';_namePickerOpen=false;_strokePickerOpen=false;_hsvPickerTarget='name';}
+                if(pop&&pop.style.display!=='none'&&!pop.contains(e.target)&&!e.target.closest('#p-name-color-preview')&&!e.target.closest('#p-name-stroke-preview')&&!e.target.closest('#accent-color-preview')&&!e.target.closest('#text-color-preview')){pop.style.display='none';_namePickerOpen=false;_strokePickerOpen=false;_accentPickerOpen=false;_textColorPickerOpen=false;_hsvPickerTarget='name';}
             });
         }
         function _hsvRedraw(updateInput=true) {
@@ -4713,6 +4714,34 @@
                 if (pop) pop.style.display = 'none';
                 _strokePickerOpen = false;
                 _hsvPickerTarget = 'name';
+            } else if (_hsvPickerTarget === 'accent') {
+                state.settings.themeColor = hex;
+                const prev = document.getElementById('accent-color-preview');
+                if (prev) prev.style.background = hex;
+                const inp = document.getElementById('setting-color');
+                if (inp) inp.value = hex;
+                applySettings();
+                saveData();
+                if (pop) pop.style.display = 'none';
+                _accentPickerOpen = false;
+                _hsvPickerTarget = 'name';
+            } else if (_hsvPickerTarget === 'textcolor') {
+                const rgb = parseCssColorToRgb(hex);
+                if (rgb) {
+                    const [r, g, b] = rgb;
+                    state.settings.textColorR = r;
+                    state.settings.textColorG = g;
+                    state.settings.textColorB = b;
+                    document.documentElement.style.setProperty('--text-color', `rgb(${r},${g},${b})`);
+                    const prev = document.getElementById('text-color-preview');
+                    if (prev) prev.style.background = hex;
+                    const hexEl = document.getElementById('text-color-hex');
+                    if (hexEl) hexEl.innerText = hex;
+                    saveData();
+                }
+                if (pop) pop.style.display = 'none';
+                _textColorPickerOpen = false;
+                _hsvPickerTarget = 'name';
             } else {
                 onPortraitProfileNameColor(hex);
                 if(pop)pop.style.display='none';
@@ -4740,7 +4769,9 @@
 
         // 描边颜色调色盘（复用HSV picker，target='stroke'时写入描边颜色）
         let _strokePickerOpen = false;
-        let _hsvPickerTarget = 'name'; // 'name' | 'stroke'
+        let _accentPickerOpen = false;
+        let _textColorPickerOpen = false;
+        let _hsvPickerTarget = 'name'; // 'name' | 'stroke' | 'accent' | 'textcolor'
 
         function toggleStrokeColorPicker() {
             _buildHsvPicker();
@@ -4756,6 +4787,55 @@
                 let top = r.bottom + 8; if (top + 320 > window.innerHeight) top = r.top - 320;
                 pop.style.left = left + 'px'; pop.style.top = top + 'px';
                 const cur = (document.getElementById('p-name-stroke-color') || {}).value || state.settings.nameStrokeColor || '#ffffff';
+                [_hsvPickerH, _hsvPickerS, _hsvPickerV] = _hexToHsv(cur);
+                requestAnimationFrame(() => _hsvRedraw());
+            } else {
+                pop.style.display = 'none';
+                _hsvPickerTarget = 'name';
+            }
+        }
+
+        function toggleAccentColorPicker() {
+            _buildHsvPicker();
+            const pop = document.getElementById('hsv-picker-popup');
+            _accentPickerOpen = !_accentPickerOpen;
+            _namePickerOpen = false; _strokePickerOpen = false; _textColorPickerOpen = false;
+            if (_accentPickerOpen) {
+                _hsvPickerTarget = 'accent';
+                const btn = document.getElementById('accent-color-preview');
+                const r = btn ? btn.getBoundingClientRect() : {left:50,bottom:200,top:200};
+                pop.style.display = 'block';
+                let left = r.right + 8; if (left + 260 > window.innerWidth) left = r.left - 268;
+                if (left < 8) left = 8;
+                let top = r.top; if (top + 320 > window.innerHeight) top = window.innerHeight - 328;
+                pop.style.left = left + 'px'; pop.style.top = top + 'px';
+                const cur = state.settings.themeColor || '#c8848e';
+                [_hsvPickerH, _hsvPickerS, _hsvPickerV] = _hexToHsv(cur);
+                requestAnimationFrame(() => _hsvRedraw());
+            } else {
+                pop.style.display = 'none';
+                _hsvPickerTarget = 'name';
+            }
+        }
+
+        function toggleTextColorPicker() {
+            _buildHsvPicker();
+            const pop = document.getElementById('hsv-picker-popup');
+            _textColorPickerOpen = !_textColorPickerOpen;
+            _namePickerOpen = false; _strokePickerOpen = false; _accentPickerOpen = false;
+            if (_textColorPickerOpen) {
+                _hsvPickerTarget = 'textcolor';
+                const btn = document.getElementById('text-color-preview');
+                const r = btn ? btn.getBoundingClientRect() : {left:50,bottom:200,top:200};
+                pop.style.display = 'block';
+                let left = r.right + 8; if (left + 260 > window.innerWidth) left = r.left - 268;
+                if (left < 8) left = 8;
+                let top = r.top; if (top + 320 > window.innerHeight) top = window.innerHeight - 328;
+                pop.style.left = left + 'px'; pop.style.top = top + 'px';
+                const tr = state.settings.textColorR ?? 51;
+                const tg = state.settings.textColorG ?? 51;
+                const tb = state.settings.textColorB ?? 51;
+                const cur = rgbToHex(tr, tg, tb);
                 [_hsvPickerH, _hsvPickerS, _hsvPickerV] = _hexToHsv(cur);
                 requestAnimationFrame(() => _hsvRedraw());
             } else {
