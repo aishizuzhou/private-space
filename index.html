@@ -2372,7 +2372,7 @@
 
             <!-- ===== 笔记页面 ===== -->
             <div id="page-note" class="mode-page">
-                <div style="display:flex;height:40px;gap:6px;margin:0 12px 15px;position:relative;">
+                <div style="display:flex;height:40px;gap:6px;margin:0 12px 15px;position:relative;opacity:0.5;">
                     <input type="text" id="search-input" placeholder="搜索内容、图片备注..." oninput="handleSearch(this.value)" style="flex:1;min-width:0;height:100%;padding:0 16px;border-radius:10px;border:1px solid var(--glass-border);background:var(--glass-bg);backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);color:var(--text-color);font-size:14px;outline:none;box-sizing:border-box;">
                     <button id="length-filter-btn" onclick="toggleLengthFilter()" style="width:40px;height:100%;border-radius:10px;border:1px solid var(--glass-border);background:var(--glass-bg);backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);color:var(--text-color);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.15s;flex-shrink:0;">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
@@ -2714,6 +2714,35 @@
         })();
 
         window.onload = () => {
+            // 申请持久化存储，防止系统清理时丢数据
+            if (navigator.storage && navigator.storage.persist) {
+                navigator.storage.persist().then(granted => {
+                    if (!granted) console.warn('持久化存储未获批，数据可能被系统清除');
+                });
+            }
+            // 切到后台/关屏时立刻保存，防止进程被杀前数据未落盘
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'hidden') {
+                    // localStorage 部分同步写，确保即使 IDB 没来得及写完也有数据
+                    try {
+                        localStorage.setItem('wanwan_notes_v3', JSON.stringify(state.notes));
+                        const s = state.settings;
+                        const slim = Object.assign({}, s);
+                        // 图片字段保持原来的 key，不重新 storeImg
+                        localStorage.setItem('wanwan_settings_v3', JSON.stringify(slim));
+                        localStorage.setItem('wanwan_special_days', JSON.stringify({
+                            days: state.specialDays,
+                            pinnedId: state.specialPinnedId
+                        }));
+                        localStorage.setItem('wanwan_comment_preview', JSON.stringify({
+                            enabled: state.commentPreviewEnabled,
+                            name: state.commentPreviewName,
+                            suffix: state.commentPreviewSuffix,
+                            syncName: state.commentPreviewSyncName
+                        }));
+                    } catch(e) {}
+                }
+            });
             // 内置字体主列表（始终保持最新）
             const BUILTIN_FONTS = [
                 { id: 'system',   name: '手机字体',  value: 'system-ui, -apple-system, sans-serif', isBuiltin: true },
@@ -2785,22 +2814,22 @@
             renderSpecialPin();
             // 异步从 IDB 补全图片（不阻塞首屏）
             _reloadImgsFromIDB().catch(()=>{});
-            // 如果 localStorage 里笔记为空，尝试从 IDB 备份恢复
-            if (state.notes.length === 0) {
-                _idbGet('wanwan_notes_backup').then(backup => {
-                    if (backup) {
-                        try {
-                            const recovered = JSON.parse(backup);
-                            if (recovered && recovered.length > 0) {
-                                state.notes = recovered;
-                                renderList();
-                                renderTags();
-                                console.log('从 IDB 备份恢复了', recovered.length, '条笔记');
-                            }
-                        } catch(e) {}
+            // 启动时对比 IDB 备份和 localStorage，取笔记更多的版本
+            _idbGet('wanwan_notes_backup').then(backup => {
+                if (!backup) return;
+                try {
+                    const recovered = JSON.parse(backup);
+                    if (recovered && recovered.length > state.notes.length) {
+                        const lsCount = state.notes.length;
+                        state.notes = recovered;
+                        // 同步回 localStorage
+                        try { localStorage.setItem('wanwan_notes_v3', backup); } catch(e) {}
+                        renderList();
+                        renderTags();
+                        console.log(`IDB备份(${recovered.length}条) > localStorage(${lsCount}条)，已恢复`);
                     }
-                }).catch(()=>{});
-            }
+                } catch(e) {}
+            }).catch(()=>{});
         };
 
         function openSettings() {
