@@ -2,13 +2,14 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>画脂鏤氷</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#ffffff">
+    <meta name="theme-color" content="#00000000">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="画脂鏤氷">
+    <meta name="mobile-web-app-capable" content="yes">
     <link rel="apple-touch-icon" href="icon-192.png">
     <style>
         * {
@@ -557,15 +558,15 @@
             z-index: 10;
             -webkit-mask-image: linear-gradient(to bottom,
                 transparent 0px,
-                rgba(0,0,0,0.4) 24px,
-                rgba(0,0,0,0.85) 52px,
-                black 72px
+                rgba(0,0,0,0.4) 12px,
+                rgba(0,0,0,0.85) 24px,
+                black 32px
             );
             mask-image: linear-gradient(to bottom,
                 transparent 0px,
-                rgba(0,0,0,0.4) 24px,
-                rgba(0,0,0,0.85) 52px,
-                black 72px
+                rgba(0,0,0,0.4) 12px,
+                rgba(0,0,0,0.85) 24px,
+                black 32px
             );
         }
 
@@ -4833,7 +4834,28 @@
             state.settings.nameStrokeColor = color;
             state.settings.nameStrokeWidth = width;
             state.settings.nameStrokeCardOn = cardOn;
-            saveData(); applySettings();
+            // 直接更新描边，不走完整applySettings
+            const shadows = [];
+            if (on) {
+                const sw = width;
+                for (let x = -sw; x <= sw; x += sw > 1 ? sw / 2 : sw) {
+                    for (let y = -sw; y <= sw; y += sw > 1 ? sw / 2 : sw) {
+                        if (x === 0 && y === 0) continue;
+                        shadows.push(`${x}px ${y}px 0 ${color}`);
+                    }
+                }
+            }
+            const shadowVal = shadows.join(', ');
+            [document.getElementById('display-name'), document.getElementById('drawer-display-name')].filter(Boolean).forEach(el => {
+                el.style.textShadow = shadowVal;
+            });
+            // 卡片描边CSS变量
+            if (on && cardOn) {
+                document.documentElement.style.setProperty('--name-card-text-shadow', shadowVal);
+            } else {
+                document.documentElement.style.setProperty('--name-card-text-shadow', 'none');
+            }
+            saveData();
         }
         function parseCssColorToRgb(str) {
             // 支持 #rgb #rrggbb rgb(r,g,b)
@@ -5084,16 +5106,29 @@
                 if (file.type === 'image/gif') {
                     addToHistoryAvatars(state.settings.currentAvatar);
                     state.settings.currentAvatar = e.target.result;
-                    await saveData(); applySettings(); renderHistoryAvatars(); renderPortraitHistoryAvatars();
+                    // 先立刻更新UI，saveData异步在后台跑
+                    applyAvatarImmediate();
+                    renderHistoryAvatars(); renderPortraitHistoryAvatars();
+                    saveData();
                 } else {
                     openCropModal(e.target.result, async url => {
                         addToHistoryAvatars(state.settings.currentAvatar);
                         state.settings.currentAvatar = url;
-                        await saveData(); applySettings(); renderHistoryAvatars(); renderPortraitHistoryAvatars();
+                        applyAvatarImmediate();
+                        renderHistoryAvatars(); renderPortraitHistoryAvatars();
+                        saveData();
                     });
                 }
             };
             r.readAsDataURL(file);
+        }
+
+        // 只更新头像相关DOM，不走完整applySettings
+        function applyAvatarImmediate() {
+            const s = state.settings;
+            if (s.currentAvatar) document.getElementById('current-avatar').src = s.currentAvatar;
+            const drawerAv = document.getElementById('drawer-avatar-img');
+            if (drawerAv) drawerAv.src = s.currentAvatar || '';
         }
 
         function openCropModal(src, callback) {
@@ -5278,7 +5313,10 @@
                     const url = e.target.result;
                     addToHistoryBgs(state.settings.bgImage);
                     state.settings.bgImage = url;
-                    await saveData(); applySettings(); renderHistoryBgs();
+                    // 立刻更新背景，saveData异步在后台
+                    document.documentElement.style.setProperty('--bg-image', `url(${url})`);
+                    renderHistoryBgs();
+                    saveData();
                 };
                 r.readAsDataURL(input.files[0]);
             }
@@ -5290,12 +5328,31 @@
                 r.onload = async e => {
                     addToHistoryCharms(state.settings.charmImage);
                     state.settings.charmImage = e.target.result;
-                    await saveData(); applySettings(); renderHistoryCharms();
+                    applyCharmImmediate();
+                    renderHistoryCharms();
+                    saveData();
                 };
                 r.readAsDataURL(input.files[0]);
             }
         }
-        function changeCharmUrl(url) { if(url) { state.settings.charmImage = url; saveData(); applySettings(); } }
+        function changeCharmUrl(url) {
+            if(url) {
+                state.settings.charmImage = url;
+                applyCharmImmediate();
+                saveData();
+            }
+        }
+
+        // 只更新挂件相关DOM
+        function applyCharmImmediate() {
+            const s = state.settings;
+            const charmContainer = document.getElementById('charm-display');
+            if (!charmContainer) return;
+            if (s.showCharm && s.charmImage) {
+                charmContainer.classList.remove('hidden');
+                charmContainer.querySelector('img').src = s.charmImage;
+            }
+        }
 
         function renderTags() {
             const container = document.getElementById('drawer-tag-list');
@@ -6281,7 +6338,7 @@
         }
         // 读图：先 IDB，再 localStorage，找不到返回原值
         async function _loadImg(val) {
-            if (!val) return val;
+            if (!val || typeof val !== 'string') return val;
             if (val.startsWith('data:') || val.startsWith('http') || val.startsWith('blob:')) return val;
             try {
                 if (_idbAvailable) {
@@ -6293,7 +6350,7 @@
         }
         // 同步版（兼容旧路径，只查 localStorage）
         function _loadImgSync(val) {
-            if (!val) return val;
+            if (!val || typeof val !== 'string') return val;
             if (val.startsWith('data:') || val.startsWith('http') || val.startsWith('blob:')) return val;
             return localStorage.getItem(val) || val;
         }
@@ -6404,9 +6461,15 @@
                 sExp.bgPomo         = await _loadImg(s.bgPomo);
                 sExp.customFrameImg = await _loadImg(s.customFrameImg);
                 sExp.charmImage     = await _loadImg(s.charmImage);
-                sExp.historyAvatars = await Promise.all((s.historyAvatars||[]).map(_loadImg));
-                sExp.historyBgs     = await Promise.all((s.historyBgs||[]).map(_loadImg));
-                sExp.historyCharms  = await Promise.all((s.historyCharms||[]).map(_loadImg));
+                sExp.historyAvatars = await Promise.all((s.historyAvatars||[]).map(v => typeof v === 'string' ? _loadImg(v) : v));
+                sExp.historyBgs     = await Promise.all((s.historyBgs||[]).map(v => typeof v === 'string' ? _loadImg(v) : v));
+                sExp.historyCharms  = await Promise.all((s.historyCharms||[]).map(async v => {
+                    if (!v) return v;
+                    if (typeof v === 'string') return _loadImg(v);
+                    if (v.url) return Object.assign({}, v, { url: await _loadImg(v.url) });
+                    if (v.dataUrl) return Object.assign({}, v, { dataUrl: await _loadImg(v.dataUrl) });
+                    return v;
+                }));
                 sExp.framePresets   = await Promise.all((s.framePresets||[]).map(async f => {
                     if (!f.dataUrl) return f;
                     return Object.assign({}, f, { dataUrl: await _loadImg(f.dataUrl) });
