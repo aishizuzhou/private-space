@@ -6548,7 +6548,8 @@
                 renderHistoryBgs();
                 renderFontPresets();
                 renderFramePresets();
-                renderSpecialList && renderSpecialList();
+                renderSpecialDays && renderSpecialDays();
+                renderSpecialPin && renderSpecialPin();
                 alert("✅ 导入成功！页面已刷新数据");
             } catch (e) {
                 alert("❌ 导入失败：" + e.message);
