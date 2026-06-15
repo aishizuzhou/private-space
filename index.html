@@ -2694,6 +2694,7 @@
                 return Object.assign({}, f, { dataUrl: await ld(f.dataUrl) });
             }));
             applySettings();
+            renderList();
             renderHistoryAvatars();
             renderHistoryBgs();
             renderHistoryCharms();
@@ -6449,15 +6450,15 @@
             } catch(e) {}
         }
 
-        // 懒加载 JSZip + FileSaver（只在导出/导入时请求）
+        // 懒加载 JSZip + FileSaver（本地文件，离线可用）
         function loadZipLibs() {
             return new Promise((resolve, reject) => {
                 if (window.JSZip && window.saveAs) { resolve(); return; }
                 const s1 = document.createElement('script');
-                s1.src = 'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js';
+                s1.src = 'jszip.min.js';
                 s1.onload = () => {
                     const s2 = document.createElement('script');
-                    s2.src = 'https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js';
+                    s2.src = 'FileSaver.min.js';
                     s2.onload = resolve;
                     s2.onerror = reject;
                     document.head.appendChild(s2);
