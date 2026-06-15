@@ -156,7 +156,7 @@
         }
 
         .header-section {
-            padding: 20px var(--content-padding);
+            padding: max(20px, calc(env(safe-area-inset-top) + 8px)) var(--content-padding) 20px;
             display: flex; align-items: center; z-index: 10;
             position: relative;
         }
@@ -788,6 +788,9 @@
             padding: 8px 16px 4px;
             display: flex;
             justify-content: center;
+        }
+        .sheet-fullscreen .editor-handle {
+            padding-top: max(16px, calc(env(safe-area-inset-top) + 8px));
         }
         .editor-body {
             overflow-y: auto;
@@ -2467,7 +2470,7 @@
 
         <div class="modal" id="full-note-modal" style="align-items:stretch; justify-content:stretch; padding:0;">
             <div class="modal-content glass-modal-content full-note-modal-wrap" style="display:flex; flex-direction:column; padding:0; overflow:hidden; height:100%; max-height:100%; width:100%; max-width:100%; border-radius:0; background:var(--page-bg, #f5f5f5) !important; backdrop-filter:none; -webkit-backdrop-filter:none;">
-                <div style="display:flex; align-items:center; justify-content:center; padding:12px 16px 8px; border-bottom:1px solid var(--glass-border); flex-shrink:0; background:var(--page-bg, #f5f5f5);">
+                <div style="display:flex; align-items:center; justify-content:center; padding:max(12px, calc(env(safe-area-inset-top) + 4px)) 16px 8px; border-bottom:1px solid var(--glass-border); flex-shrink:0; background:var(--page-bg, #f5f5f5);">
                     <button onclick="closeModal('full-note-modal')" style="background:none;border:none;font-size:0.88rem;color:var(--text-color);opacity:0.45;cursor:pointer;padding:2px 6px;letter-spacing:0.02em;">⊹₊ ˚‧︵‿₊୨ ♡ ୧₊‿︵‧ ˚ ₊</button>
                 </div>
                 <div id="full-note-body" style="flex:1; overflow-y:auto; padding:16px 16px 90px; background:var(--page-bg, #f5f5f5);"></div>
@@ -2658,16 +2661,30 @@
         async function _reloadImgsFromIDB() {
             const s = state.settings;
             const ld = _loadImg;
+            // 先读关键视觉图片，读完立刻刷新
             s.currentAvatar  = await ld(s.currentAvatar);
             s.bgImage        = await ld(s.bgImage);
             s.bgNote         = await ld(s.bgNote);
             s.bgTodo         = await ld(s.bgTodo);
             s.bgPomo         = await ld(s.bgPomo);
-            s.customFrameImg = await ld(s.customFrameImg);
             s.charmImage     = await ld(s.charmImage);
-            s.historyAvatars = await Promise.all((s.historyAvatars||[]).map(ld));
-            s.historyBgs     = await Promise.all((s.historyBgs||[]).map(ld));
-            s.historyCharms  = await Promise.all((s.historyCharms||[]).map(ld));
+            // 立刻应用头像、背景、挂件，不等历史记录
+            applyAvatarImmediate();
+            applyCharmImmediate();
+            const modeKey = { note: 'bgNote', todo: 'bgTodo', pomodoro: 'bgPomo' };
+            const activeBg = s[modeKey[_currentMode]] || s.bgImage || '';
+            if (activeBg) document.documentElement.style.setProperty('--bg-image', `url(${activeBg})`);
+            // 再读其余的
+            s.customFrameImg = await ld(s.customFrameImg);
+            s.historyAvatars = await Promise.all((s.historyAvatars||[]).map(v => typeof v === 'string' ? ld(v) : v));
+            s.historyBgs     = await Promise.all((s.historyBgs||[]).map(v => typeof v === 'string' ? ld(v) : v));
+            s.historyCharms  = await Promise.all((s.historyCharms||[]).map(async v => {
+                if (!v) return v;
+                if (typeof v === 'string') return ld(v);
+                if (v.url) return Object.assign({}, v, { url: await ld(v.url) });
+                if (v.dataUrl) return Object.assign({}, v, { dataUrl: await ld(v.dataUrl) });
+                return v;
+            }));
             s.framePresets   = await Promise.all((s.framePresets||[]).map(async f => {
                 if (!f.dataUrl) return f;
                 return Object.assign({}, f, { dataUrl: await ld(f.dataUrl) });
@@ -3342,7 +3359,7 @@
                 card.innerHTML = `
                     <div class="pin-bar">∅</div>
                     <div class="note-header">
-                        <img src="${state.settings.currentAvatar}" class="note-header-avatar">
+                        <img src="${state.settings.currentAvatar}" class="note-header-avatar" onerror="this.style.display='none'" onload="this.style.display=''"  style="display:${state.settings.currentAvatar ? '' : 'none'}">
                         <span class="note-header-name">${state.settings.name}</span>
                         <div class="note-header-right">
                             ${timerHtml}
@@ -5106,7 +5123,7 @@
                 if (file.type === 'image/gif') {
                     addToHistoryAvatars(state.settings.currentAvatar);
                     state.settings.currentAvatar = e.target.result;
-                    // 先立刻更新UI，saveData异步在后台跑
+                    try { localStorage.setItem('__img_fallback_ww_av', e.target.result); } catch(ex) {}
                     applyAvatarImmediate();
                     renderHistoryAvatars(); renderPortraitHistoryAvatars();
                     saveData();
@@ -5114,6 +5131,7 @@
                     openCropModal(e.target.result, async url => {
                         addToHistoryAvatars(state.settings.currentAvatar);
                         state.settings.currentAvatar = url;
+                        try { localStorage.setItem('__img_fallback_ww_av', url); } catch(ex) {}
                         applyAvatarImmediate();
                         renderHistoryAvatars(); renderPortraitHistoryAvatars();
                         saveData();
@@ -5313,7 +5331,7 @@
                     const url = e.target.result;
                     addToHistoryBgs(state.settings.bgImage);
                     state.settings.bgImage = url;
-                    // 立刻更新背景，saveData异步在后台
+                    try { localStorage.setItem('__img_fallback_ww_bg', url); } catch(ex) {}
                     document.documentElement.style.setProperty('--bg-image', `url(${url})`);
                     renderHistoryBgs();
                     saveData();
@@ -5328,6 +5346,7 @@
                 r.onload = async e => {
                     addToHistoryCharms(state.settings.charmImage);
                     state.settings.charmImage = e.target.result;
+                    try { localStorage.setItem('__img_fallback_ww_charm', e.target.result); } catch(ex) {}
                     applyCharmImmediate();
                     renderHistoryCharms();
                     saveData();
@@ -6326,8 +6345,11 @@
         }
         // 存图：优先 IDB，兜底 localStorage，全部失败静默
         async function _storeImg(prefix, data) {
-            if (!data || !data.startsWith('data:') || data.length < 100) return data;
+            if (!data || typeof data !== 'string' || !data.startsWith('data:') || data.length < 100) return data;
             const key = _imgKey(prefix, data);
+            // 同步备份到 localStorage（固定 key），IDB 未写完时也能读到
+            const lsFallbackKey = '__img_fallback_' + prefix;
+            try { localStorage.setItem(lsFallbackKey, data); } catch(e) {}
             try {
                 if (_idbAvailable) await _idbSet(key, data);
                 else throw 'no idb';
@@ -6336,7 +6358,7 @@
             }
             return key;
         }
-        // 读图：先 IDB，再 localStorage，找不到返回原值
+        // 读图：先 IDB，再 localStorage key，再 localStorage fallback
         async function _loadImg(val) {
             if (!val || typeof val !== 'string') return val;
             if (val.startsWith('data:') || val.startsWith('http') || val.startsWith('blob:')) return val;
@@ -6346,7 +6368,19 @@
                     if (v) return v;
                 }
             } catch(e) {}
-            return localStorage.getItem(val) || val;
+            // 查 localStorage hash key
+            const lsVal = localStorage.getItem(val);
+            if (lsVal) return lsVal;
+            // 查 fallback：从 key 找对应的 prefix fallback
+            const PREFIXES = ['ww_av','ww_bg','ww_bgnote','ww_bgtodo','ww_bgpomo','ww_frame','ww_charm','ww_fp','ww_font'];
+            for (const p of PREFIXES) {
+                if (val.startsWith(p + '_')) {
+                    const fb = localStorage.getItem('__img_fallback_' + p);
+                    if (fb) return fb;
+                    break;
+                }
+            }
+            return val;
         }
         // 同步版（兼容旧路径，只查 localStorage）
         function _loadImgSync(val) {
