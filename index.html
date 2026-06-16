@@ -1224,6 +1224,8 @@
         .cal-weekday, .cal-cell, .cal-month-label, .cal-nav,
         .stats-label, .stats-sub, .stats-total, .stats-val,
         .edit-btn, .fab, .fab span, .note-actions,
+
+
         #full-note-body, .comment-inner .stats-cell .stats-label,
         .note-wrapper, .note-header {
             user-select: none;
@@ -1857,8 +1859,18 @@
         }
 
         @media (orientation: landscape) {
-            .sb-portrait { display: none !important; }
-            .sb-landscape { display: flex !important; }
+            .sb-landscape { display: none !important; }
+            .sb-portrait {
+                display: flex !important;
+                transform: rotate(90deg);
+                transform-origin: center center;
+                width: 100vh;
+                height: 100vw;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                translate: -50% -50%;
+            }
         }
         @media (orientation: portrait) {
             .sb-portrait { display: flex !important; }
@@ -2470,11 +2482,11 @@
 
         <div class="modal" id="full-note-modal" style="align-items:stretch; justify-content:stretch; padding:0;">
             <div class="modal-content glass-modal-content full-note-modal-wrap" style="display:flex; flex-direction:column; padding:0; overflow:hidden; height:100%; max-height:100%; width:100%; max-width:100%; border-radius:0; background:var(--page-bg, #f5f5f5) !important; backdrop-filter:none; -webkit-backdrop-filter:none;">
-                <div style="display:flex; align-items:center; justify-content:center; padding:max(12px, calc(env(safe-area-inset-top) + 4px)) 16px 8px; border-bottom:1px solid var(--glass-border); flex-shrink:0; background:var(--page-bg, #f5f5f5);">
+                <div class="full-note-top-bar" style="display:flex; align-items:center; justify-content:center; padding:max(12px, calc(env(safe-area-inset-top) + 4px)) 16px 8px; flex-shrink:0; background:transparent;">
                     <button onclick="closeModal('full-note-modal')" style="background:none;border:none;font-size:0.88rem;color:var(--text-color);opacity:0.45;cursor:pointer;padding:2px 6px;letter-spacing:0.02em;">⊹₊ ˚‧︵‿₊୨ ♡ ୧₊‿︵‧ ˚ ₊</button>
                 </div>
                 <div id="full-note-body" style="flex:1; overflow-y:auto; padding:16px 16px 90px; background:var(--page-bg, #f5f5f5);"></div>
-                <div class="full-note-comment-bar" style="display:flex; align-items:flex-start; gap:8px; padding:10px 16px 14px; border-top:1px solid rgba(0,0,0,0.08); background:var(--page-bg, #f5f5f5); flex-shrink:0; min-height:60px;">
+                <div class="full-note-comment-bar" style="display:flex; align-items:flex-start; gap:8px; padding:10px 16px 14px; background:var(--page-bg, #f5f5f5); flex-shrink:0; min-height:60px;">
                     <textarea id="comment-input" rows="1" placeholder="何か言いたいの？" style="flex:1; padding:9px 16px; border-radius:18px; border:1px solid rgba(200,200,200,0.8); background:rgba(245,245,245,0.9); font-size:0.9rem; outline:none; margin:0; resize:none; overflow-y:auto; max-height:100px; line-height:1.5; font-family:var(--custom-font);"
                         oninput="(function(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,100)+'px';})(this);"
                         onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submitComment();}"></textarea>
@@ -2524,18 +2536,6 @@
             <div class="editor-more-panel" id="editor-more-panel" style="display:none;padding:8px 16px 4px;border-top:1px solid rgba(0,0,0,0.07);">
                 <input type="number" id="edit-timer" value="0" min="0" placeholder="一忘皆空（分钟，0永久）" style="margin-bottom:6px;font-size:0.85rem;">
             </div>
-            <div class="editor-actions">
-                <input type="file" id="file-input" style="display:none" multiple accept="image/*" onchange="handleImageUpload(this)">
-                <input type="file" id="file-input-camera" style="display:none" accept="image/*" capture="environment" onchange="handleImageUpload(this)">
-                <button class="ea-btn" id="ea-tag-btn" onclick="editorPopover('tag')">#</button>
-                <button class="ea-btn" onclick="document.getElementById('file-input-camera').click()" title="拍照"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="18" height="18" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><path d="M38 36 Q38 28 46 28 L54 28 Q62 28 62 36"/><path d="M18 36 L18 72 Q18 80 26 80 L74 80 Q82 80 82 72 L82 36 Q82 28 74 28 L26 28 Q18 28 18 36Z"/><circle cx="50" cy="56" r="12" stroke-dasharray="60 16"/></svg></button>
-                <button class="ea-btn" onclick="document.getElementById('file-input').click()" title="从相册选择"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="18" height="18"><g stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M 55 15 L 25 15 A 10 10 0 0 0 15 25 L 15 75 A 10 10 0 0 0 25 85 L 75 85 A 10 10 0 0 0 85 75 L 85 45"/><path d="M 15 65 L 35 40 L 55 55 L 70 42 L 85 58"/><path d="M 75 40 L 75 10 M 62 22 L 75 10 L 88 22"/></g></svg></button>
-                <button class="ea-btn" id="ea-timer-btn" onclick="editorPopover('timer')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="14" height="14"><defs><mask id="ribbon-gap"><rect width="200" height="200" fill="white"/><path d="M 145 25 C 145 95, 55 105, 55 175" fill="none" stroke="black" stroke-width="44" stroke-linecap="butt"/></mask></defs><g fill="currentColor"><polygon points="25,12 175,12 162,38 38,38"/><polygon points="25,188 175,188 162,162 38,162"/></g><path d="M 55 25 C 55 95, 145 105, 145 175" fill="none" stroke="currentColor" stroke-width="26" stroke-linecap="butt" mask="url(#ribbon-gap)"/><path d="M 145 25 C 145 95, 55 105, 55 175" fill="none" stroke="currentColor" stroke-width="26" stroke-linecap="butt"/></svg></button>
-                <button class="ea-btn" onclick="wrapFormat('bold')" title="加粗" style="font-weight:700;font-size:0.95rem;">B</button>
-                <button class="ea-btn" onclick="wrapFormat('italic')" title="斜体" style="font-style:italic;font-size:0.95rem;">I</button>
-                <button class="ea-btn" onclick="wrapFormat('strike')" title="删除线" style="text-decoration:line-through;font-size:0.85rem;">S</button>
-                <button class="ea-save-btn" onclick="saveItem()">↑</button>
-            </div>
             <div class="ea-popover" id="ea-popover" style="display:none;">
                 <div id="eapop-tag" style="display:none;">
                     <div id="eapop-tag-list"></div>
@@ -2552,6 +2552,19 @@
                     </div>
                 </div>
             </div>
+            <div class="editor-actions">
+                <input type="file" id="file-input" style="display:none" multiple accept="image/*" onchange="handleImageUpload(this)">
+                <input type="file" id="file-input-camera" style="display:none" accept="image/*" capture="environment" onchange="handleImageUpload(this)">
+                <button class="ea-btn" id="ea-tag-btn" onclick="editorPopover('tag')">#</button>
+                <button class="ea-btn" onclick="document.getElementById('file-input-camera').click()" title="拍照"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="18" height="18" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><path d="M38 36 Q38 28 46 28 L54 28 Q62 28 62 36"/><path d="M18 36 L18 72 Q18 80 26 80 L74 80 Q82 80 82 72 L82 36 Q82 28 74 28 L26 28 Q18 28 18 36Z"/><circle cx="50" cy="56" r="12" stroke-dasharray="60 16"/></svg></button>
+                <button class="ea-btn" onclick="document.getElementById('file-input').click()" title="从相册选择"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="18" height="18"><g stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M 55 15 L 25 15 A 10 10 0 0 0 15 25 L 15 75 A 10 10 0 0 0 25 85 L 75 85 A 10 10 0 0 0 85 75 L 85 45"/><path d="M 15 65 L 35 40 L 55 55 L 70 42 L 85 58"/><path d="M 75 40 L 75 10 M 62 22 L 75 10 L 88 22"/></g></svg></button>
+                <button class="ea-btn" id="ea-timer-btn" onclick="editorPopover('timer')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="14" height="14"><defs><mask id="ribbon-gap"><rect width="200" height="200" fill="white"/><path d="M 145 25 C 145 95, 55 105, 55 175" fill="none" stroke="black" stroke-width="44" stroke-linecap="butt"/></mask></defs><g fill="currentColor"><polygon points="25,12 175,12 162,38 38,38"/><polygon points="25,188 175,188 162,162 38,162"/></g><path d="M 55 25 C 55 95, 145 105, 145 175" fill="none" stroke="currentColor" stroke-width="26" stroke-linecap="butt" mask="url(#ribbon-gap)"/><path d="M 145 25 C 145 95, 55 105, 55 175" fill="none" stroke="currentColor" stroke-width="26" stroke-linecap="butt"/></svg></button>
+                <button class="ea-btn" onclick="wrapFormat('bold')" title="加粗" style="font-weight:700;font-size:0.95rem;">B</button>
+                <button class="ea-btn" onclick="wrapFormat('italic')" title="斜体" style="font-style:italic;font-size:0.95rem;">I</button>
+                <button class="ea-btn" onclick="wrapFormat('strike')" title="删除线" style="text-decoration:line-through;font-size:0.85rem;">S</button>
+                <button class="ea-save-btn" onclick="saveItem()">↑</button>
+            </div>
+
         </div>
     </div>
 
@@ -2939,6 +2952,14 @@
             document.getElementById('ea-popover').style.display = 'none';
             document.querySelectorAll('.ea-btn').forEach(b => b.classList.remove('active'));
         }
+        // 点弹窗外自动关闭
+        document.addEventListener('pointerdown', function(e) {
+            const pop = document.getElementById('ea-popover');
+            if (pop.style.display === 'none') return;
+            if (!pop.contains(e.target) && !e.target.closest('.ea-btn')) {
+                editorClosePopover();
+            }
+        }, true);
         function editorPopover(type) {
             const pop = document.getElementById('ea-popover');
             const btnMap = { tag: 'ea-tag-btn', timer: 'ea-timer-btn' };
@@ -2951,13 +2972,10 @@
             document.getElementById(panelMap[type]).style.display = '';
             btn.classList.add('active');
             pop.style.display = '';
-            // 定位：固定在 editor-actions 上方
-            const actions = document.querySelector('.editor-actions');
-            if (actions) {
-                const rect = actions.getBoundingClientRect();
-                pop.style.bottom = (window.innerHeight - rect.top + 8) + 'px';
-                pop.style.left = '8px';
-            }
+            // 定位：固定在屏幕上方安全区
+            pop.style.top = '60px';
+            pop.style.bottom = 'auto';
+            pop.style.left = '8px';
             if (type === 'tag') renderEditorTagPopover();
         }
         function renderEditorTagPopover() {
@@ -3462,6 +3480,33 @@
 
         let _currentNoteId = null;
 
+        // 详情页左右滑退出手势
+        (function() {
+            let touchStartX = 0, touchStartY = 0, keyboardDismissed = false;
+            document.addEventListener('touchstart', function(e) {
+                const modal = document.getElementById('full-note-modal');
+                if (!modal || modal.style.display === 'none') return;
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+            }, { passive: true });
+            document.addEventListener('touchend', function(e) {
+                const modal = document.getElementById('full-note-modal');
+                if (!modal || modal.style.display === 'none') return;
+                const dx = e.changedTouches[0].clientX - touchStartX;
+                const dy = e.changedTouches[0].clientY - touchStartY;
+                if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx)) return; // 不够水平
+                // 先收键盘
+                const active = document.activeElement;
+                if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) {
+                    active.blur();
+                    keyboardDismissed = true;
+                    return;
+                }
+                closeModal('full-note-modal');
+                keyboardDismissed = false;
+            }, { passive: true });
+        })();
+
         function openFullNote(id) {
             const note = state.notes.find(n => n.id === id);
             if(!note) return;
@@ -3529,7 +3574,7 @@
                 ${imagesHtml}
                 <div style="margin-top:13px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
                     <span style="font-size:0.72rem; color:var(--text-color); opacity:0.38;">${fullTs}</span>
-                    ${note.tags.length > 0 ? note.tags.map(t => `<span style="font-size:0.65rem;padding:1px 7px;border-radius:10px;background:var(--accent-tag-bg,rgba(200,132,142,0.1));color:var(--accent-color);border:1px solid var(--accent-tag-border,rgba(200,132,142,0.18));">#${t}</span>`).join('') : ''}
+                    ${note.tags.length > 0 ? note.tags.map(t => `<span style="font-size:0.65rem;padding:1px 7px;border-radius:10px;background:var(--accent-tag-bg,rgba(200,132,142,0.1));color:var(--text-color);border:1px solid var(--accent-tag-border,rgba(200,132,142,0.18));opacity:0.7;">#${t}</span>`).join('') : ''}
                 </div>
                 <div style="display:flex; justify-content:flex-end; gap:18px; padding:10px 0; border-bottom:1px solid rgba(74,60,56,0.08); margin-top:4px;">
                     <button onclick="forwardNote(${note.id})" style="display:flex;align-items:center;gap:4px;font-size:0.75rem;opacity:0.4;background:none;border:none;color:var(--text-color);cursor:pointer;font-family:var(--custom-font);">
@@ -6845,17 +6890,17 @@
                     </div>
                     <div class="portrait-row">
                         <label>X 坐标</label>
-                        <button class="portrait-snap-btn" onclick="state.settings.charmX=Math.max(0,(+state.settings.charmX||0)-2);saveData();applySettings();syncPortraitFromState()">−</button>
-                        <input type="number" id="p-charm-x" placeholder="距右侧px" oninput="onPortraitCharmX(this.value)" style="flex:1;">
                         <button class="portrait-snap-btn" onclick="state.settings.charmX=(+state.settings.charmX||0)+2;saveData();applySettings();syncPortraitFromState()">＋</button>
+                        <input type="number" id="p-charm-x" placeholder="距右侧px" oninput="onPortraitCharmX(this.value)" style="flex:1;">
+                        <button class="portrait-snap-btn" onclick="state.settings.charmX=Math.max(0,(+state.settings.charmX||0)-2);saveData();applySettings();syncPortraitFromState()">−</button>
                         <button class="portrait-snap-btn" onclick="setCharmX(20);syncPortraitFromState()">贴右</button>
                         <button class="portrait-snap-btn" onclick="setCharmX(-(parseInt(getComputedStyle(document.documentElement).getPropertyValue('--charm-size'))||50)-4);syncPortraitFromState()">贴左</button>
                     </div>
                     <div class="portrait-row">
                         <label>Y 坐标</label>
-                        <button class="portrait-snap-btn" onclick="state.settings.charmY=Math.max(0,(+state.settings.charmY||0)-2);saveData();applySettings();syncPortraitFromState()">−</button>
-                        <input type="number" id="p-charm-y" placeholder="距顶部px" oninput="onPortraitCharmY(this.value)" style="flex:1;">
                         <button class="portrait-snap-btn" onclick="state.settings.charmY=(+state.settings.charmY||0)+2;saveData();applySettings();syncPortraitFromState()">＋</button>
+                        <input type="number" id="p-charm-y" placeholder="距顶部px" oninput="onPortraitCharmY(this.value)" style="flex:1;">
+                        <button class="portrait-snap-btn" onclick="state.settings.charmY=Math.max(0,(+state.settings.charmY||0)-2);saveData();applySettings();syncPortraitFromState()">−</button>
                         <button class="portrait-snap-btn" onclick="setCharmY(0);syncPortraitFromState()">顶</button>
                         <button class="portrait-snap-btn" onclick="snapCharmY30();syncPortraitFromState()">30%</button>
                     </div>
