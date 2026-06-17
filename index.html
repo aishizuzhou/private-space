@@ -2391,7 +2391,7 @@
                     <button id="length-filter-btn" onclick="toggleLengthFilter()" style="width:40px;height:100%;border-radius:10px;border:1px solid var(--glass-border);background:var(--glass-bg);backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);color:var(--text-color);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.15s;flex-shrink:0;">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
                     </button>
-                    <div id="length-filter-popup" style="display:none;position:absolute;right:0;top:48px;z-index:200;background:var(--glass-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,0.12);overflow:hidden;min-width:110px;">
+                    <div id="length-filter-popup" style="display:none;position:absolute;right:0;top:48px;z-index:9500;background:var(--card-bg,#fff);border:1px solid var(--glass-border);border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,0.12);overflow:hidden;min-width:110px;">
                         <div class="lf-option" data-val="" onclick="setLengthFilter('')">全部</div>
                         <div class="lf-option" data-val="0-200" onclick="setLengthFilter('0-200')">短篇 ≤200</div>
                         <div class="lf-option" data-val="201-500" onclick="setLengthFilter('201-500')">中篇 201–500</div>
@@ -3510,6 +3510,39 @@
             }, { passive: true });
         })();
 
+        // 详情页边缘滑动退出
+        (function() {
+            let _tx = 0, _ty = 0, _edgeSwipe = false;
+            const EDGE = 30; // 边缘触发区域px
+            document.addEventListener('touchstart', function(e) {
+                const m = document.getElementById('full-note-modal');
+                if (!m || m.style.display === 'none') return;
+                _tx = e.touches[0].clientX;
+                _ty = e.touches[0].clientY;
+                // 只有从左边缘或右边缘开始才触发
+                _edgeSwipe = _tx <= EDGE || _tx >= window.innerWidth - EDGE;
+            }, { passive: true });
+            document.addEventListener('touchend', function(e) {
+                const m = document.getElementById('full-note-modal');
+                if (!m || m.style.display === 'none' || !_edgeSwipe) return;
+                const dx = e.changedTouches[0].clientX - _tx;
+                const dy = e.changedTouches[0].clientY - _ty;
+                if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx) * 0.8) return;
+                const active = document.activeElement;
+                if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) {
+                    active.blur();
+                    _edgeSwipe = false;
+                    return;
+                }
+                closeModal('full-note-modal');
+                _edgeSwipe = false;
+            }, { passive: true });
+        })();
+
+        function fullNoteBackPressed() {
+            closeModal('full-note-modal');
+        }
+
         function openFullNote(id) {
             const note = state.notes.find(n => n.id === id);
             if(!note) return;
@@ -3598,7 +3631,9 @@
             // 正文长按复制
             const noteBody = document.getElementById('full-note-body');
             let bodyLongPressTimer = null;
-            noteBody.addEventListener('touchstart', () => {
+            noteBody.addEventListener('touchstart', (e) => {
+                // 如果touch在评论区内则不触发正文复制
+                if (e.target.closest('.comment-item, .comment-inner, .comment-delete-bg')) return;
                 bodyLongPressTimer = setTimeout(() => {
                     navigator.clipboard.writeText(note.content).then(() => {
                         const tip = document.createElement('div');
@@ -7134,6 +7169,42 @@
         }
         // ===== 自定义弹窗 END =====
         // ===================== 待机模式 =====================
+        // 陀螺仪检测物理横竖屏（竖屏锁定时也能用）
+        (function() {
+            let _sbRotated = false;
+            function _applySbOrientation(landscape) {
+                const overlay = document.getElementById('standby-overlay');
+                if (!overlay) return;
+                if (landscape === _sbRotated) return;
+                _sbRotated = landscape;
+                const portrait = overlay.querySelector('.sb-portrait');
+                const land = overlay.querySelector('.sb-landscape');
+                if (landscape) {
+                    if (portrait) portrait.style.display = 'none';
+                    if (land) { land.style.display = 'flex'; }
+                } else {
+                    if (portrait) portrait.style.display = 'flex';
+                    if (land) land.style.display = 'none';
+                }
+            }
+            function _handleOrientation(e) {
+                const overlay = document.getElementById('standby-overlay');
+                if (!overlay || !overlay.classList.contains('active')) return;
+                // gamma是左右倾斜角，绝对值>45说明横着放
+                const gamma = e.gamma || 0;
+                _applySbOrientation(Math.abs(gamma) > 45);
+            }
+            window.addEventListener('deviceorientation', _handleOrientation, true);
+            // 也监听系统旋转事件作为backup
+            window.addEventListener('orientationchange', () => {
+                setTimeout(() => {
+                    const overlay = document.getElementById('standby-overlay');
+                    if (!overlay || !overlay.classList.contains('active')) return;
+                    const isLandscape = window.innerWidth > window.innerHeight;
+                    _applySbOrientation(isLandscape);
+                }, 100);
+            });
+        })();
         let _sbWakeLock = null;
         let _sbTimer = null;
         let _sbActive = false;
@@ -7319,7 +7390,16 @@
 
         function sbFitDigits() {
             const canvas = document.getElementById('sb-canvas');
-            const _sbFont = getComputedStyle(document.documentElement).getPropertyValue('--custom-font').trim() || 'Arial, sans-serif';
+            // 直接从state取字体名，避免CSS变量格式问题
+            let _sbFont = 'Arial, sans-serif';
+            const _activeFont = (state.settings.fontPresets||[]).find(f => f.id === state.settings.currentFont);
+            if (_activeFont) {
+                if (_activeFont.dataUrl) {
+                    _sbFont = 'custom_font_' + _activeFont.id;
+                } else if (_activeFont.value) {
+                    _sbFont = _activeFont.value.replace(/['"]/g, '').split(',')[0].trim();
+                }
+            }
             if (!canvas) return;
             const overlay = document.getElementById('standby-overlay');
             const W = overlay.clientWidth  || window.innerWidth;
