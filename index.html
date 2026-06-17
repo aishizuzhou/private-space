@@ -1816,61 +1816,59 @@
 
         .sb-landscape {
             display: none;
-            flex-direction: row;
-            align-items: stretch;
+            position: relative;
             width: 100%; height: 100%;
-            padding: 4vh 5vw;
         }
-        .sb-landscape .sb-land-time {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            flex: 1;
-        }
+        /* 大时间，绝对居中 */
         .sb-landscape .sb-big-time {
-            font-size: 34vh;
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 38vw;
             font-weight: 700;
             letter-spacing: -0.03em;
-            line-height: 0.88;
-            display: block;
+            line-height: 1;
+            white-space: nowrap;
+            font-family: var(--custom-font);
         }
-        .sb-landscape .sb-land-sec-row {
-            display: flex;
-            align-items: baseline;
-            gap: 0.4em;
-        }
-        .sb-landscape .sb-land-sec {
-            font-size: 5vh;
-            font-weight: 400;
-            opacity: 0.45;
-        }
-        .sb-landscape .sb-right-col {
+        /* 左上：时间+星期 */
+        .sb-landscape .sb-land-time {
+            position: absolute;
+            top: 4vh; left: 4vw;
             display: flex;
             flex-direction: column;
-            justify-content: flex-end;
+            gap: 0.8vh;
+            font-size: 4vh;
+            opacity: 0.6;
+            font-family: var(--custom-font);
+        }
+        /* 右上：纪念日 */
+        .sb-landscape .sb-right-col {
+            position: absolute;
+            top: 4vh; right: 4vw;
+            display: flex;
+            flex-direction: column;
             align-items: flex-end;
-            gap: 1.2vh;
-            font-size: 2.4vh;
-            font-weight: 300;
-            opacity: 0.7;
+            gap: 0.8vh;
+            font-size: 4vh;
+            opacity: 0.6;
             text-align: right;
-            min-width: 0;
-            padding-left: 3vw;
+            font-family: var(--custom-font);
+        }
+        /* 右下：秒数 */
+        .sb-landscape .sb-land-sec-row {
+            position: absolute;
+            bottom: 4vh; right: 4vw;
+        }
+        .sb-landscape .sb-land-sec {
+            font-size: 6vh;
+            opacity: 0.4;
+            font-family: var(--custom-font);
         }
 
         @media (orientation: landscape) {
-            .sb-landscape { display: none !important; }
-            .sb-portrait {
-                display: flex !important;
-                transform: rotate(90deg);
-                transform-origin: center center;
-                width: 100vh;
-                height: 100vw;
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                translate: -50% -50%;
-            }
+            .sb-portrait { display: none !important; }
+            .sb-landscape { display: flex !important; }
         }
         @media (orientation: portrait) {
             .sb-portrait { display: flex !important; }
@@ -2197,7 +2195,7 @@
                         </div>
                         <div class="drawer-special-form-row">
                             <button onclick="toggleDrawerSpecialForm()" style="background:rgba(0,0,0,0.06);color:#666;">取消</button>
-                            <button id="dsf-delete-btn" onclick="if(_editingSpecialIdx>=0&&confirm('确认删除？')){deleteSpecialDay(_editingSpecialIdx);_editingSpecialIdx=-1;_drawerSpecialFormOpen=false;document.getElementById('drawer-special-form').classList.remove('open');renderDrawerSpecialDays();}" style="display:none;background:rgba(220,80,80,0.12);color:#c04040;border:none;">删除</button>
+                            <button id="dsf-delete-btn" onclick="_deleteCurrentSpecialDay()" style="display:none;background:rgba(220,80,80,0.12);color:#c04040;border:none;">删除</button>
                             <button onclick="saveDrawerSpecialDay()" style="background:var(--accent-color);color:var(--accent-text);">保存</button>
                         </div>
                     </div>
@@ -2464,7 +2462,7 @@
                     <div class="pomo-stats" id="pomo-stats"></div>
                     <div class="pomo-controls">
                         <button class="pomo-ctrl-btn pomo-start" id="pomo-btn" onclick="pomoToggle()">开始</button>
-                        <button class="pomo-ctrl-btn pomo-reset" onclick="pomoReset()">重置</button>
+                        <button class="pomo-ctrl-btn pomo-reset" id="pomo-reset-btn" onclick="pomoResetOrCancel()">重置</button>
                     </div>
                     <div class="pomo-status" id="pomo-label"></div>
                     <div class="pomo-log-wrap" id="pomo-log-wrap"></div>
@@ -2666,7 +2664,12 @@
             s.charmImage     = _loadImgSync(s.charmImage);
             s.historyAvatars = (s.historyAvatars||[]).map(_loadImgSync);
             s.historyBgs     = (s.historyBgs||[]).map(_loadImgSync);
-            s.historyCharms  = (s.historyCharms||[]).map(_loadImgSync);
+            s.historyCharms  = (s.historyCharms||[]).map(v => {
+                if (!v) return v;
+                if (typeof v === 'string') return _loadImgSync(v);
+                if (v.url) return Object.assign({}, v, { url: _loadImgSync(v.url) });
+                return v;
+            });
             s.framePresets   = (s.framePresets||[]).map(f => f.dataUrl ? Object.assign({}, f, { dataUrl: _loadImgSync(f.dataUrl) }) : f);
             s.fontPresets    = (s.fontPresets||[]).map(f => f.dataUrl ? Object.assign({}, f, { dataUrl: _loadImgSync(f.dataUrl) }) : f);
         } catch(e) {}
@@ -3572,9 +3575,14 @@
                 ${note.forwardFrom ? `<div style="border-left:2.5px solid var(--accent-color);border-radius:0 8px 8px 0;padding:9px 11px;margin-bottom:13px;font-size:0.82rem;line-height:1.6;opacity:0.68;background:rgba(0,0,0,0.03);"><div style="font-weight:600;color:var(--name-color);font-size:0.75rem;margin-bottom:4px;">${note.forwardFrom.name}：</div>${note.forwardFrom.content}</div>` : ''}
                 ${bodyContentHtml}
                 ${imagesHtml}
-                <div style="margin-top:13px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                    <span style="font-size:0.72rem; color:var(--text-color); opacity:0.38;">${fullTs}</span>
-                    ${note.tags.length > 0 ? note.tags.map(t => `<span style="font-size:0.65rem;padding:1px 7px;border-radius:10px;background:var(--accent-tag-bg,rgba(200,132,142,0.1));color:var(--text-color);border:1px solid var(--accent-tag-border,rgba(200,132,142,0.18));opacity:0.7;">#${t}</span>`).join('') : ''}
+                <div style="margin-top:13px; display:flex; flex-direction:column; gap:4px;">
+                    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                        <span style="font-size:0.72rem; color:var(--text-color); opacity:0.38;">${fullTs}</span>
+                        <span style="font-size:0.72rem; color:var(--text-color); opacity:0.28;">字数：${note.content.replace(/<[^>]*>/g,'').length}</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                        ${note.tags.length > 0 ? note.tags.map(t => `<span style="font-size:0.65rem;padding:1px 7px;border-radius:10px;background:var(--accent-tag-bg,rgba(200,132,142,0.1));color:var(--text-color);border:1px solid var(--accent-tag-border,rgba(200,132,142,0.18));opacity:0.7;">#${t}</span>`).join('') : ''}
+                    </div>
                 </div>
                 <div style="display:flex; justify-content:flex-end; gap:18px; padding:10px 0; border-bottom:1px solid rgba(74,60,56,0.08); margin-top:4px;">
                     <button onclick="forwardNote(${note.id})" style="display:flex;align-items:center;gap:4px;font-size:0.75rem;opacity:0.4;background:none;border:none;color:var(--text-color);cursor:pointer;font-family:var(--custom-font);">
@@ -3737,13 +3745,16 @@
                     curX = e.touches[0].clientX;
                     const dy = Math.abs(e.touches[0].clientY - startY);
                     const dx = Math.abs(curX - startX);
-                    // 移动超过8px就取消长按
                     if (dx > 8 || dy > 8) { clearTimeout(longPressTimer); longPressTimer = null; }
                     const diff = curX - startX;
                     if (dx > 15 && dx > dy) { swiping = true; }
-                    if (diff < -10) {
+                    if (locked && diff > 0) {
+                        // 已展开状态，右滑收回
+                        inner.style.transform = `translateX(${Math.min(diff - 70, 0)}px)`;
+                        delBg.style.opacity = String(Math.min(1, (70 - diff) / 70));
+                    } else if (!locked && diff < -10) {
                         inner.style.transform = `translateX(${Math.max(diff, -70)}px)`;
-                        delBg.style.opacity = String(Math.min(1, Math.abs(diff) / 60));
+                        delBg.style.opacity = String(Math.min(1, Math.abs(diff) / 80));
                     }
                 }, {passive:true});
 
@@ -3751,7 +3762,13 @@
                     clearTimeout(longPressTimer);
                     inner.style.transition = 'transform 0.3s ease';
                     const diff = curX - startX;
-                    if (!longPressed && diff < -45) {
+                    if (locked && diff > 30) {
+                        // 左滑收回
+                        inner.style.transform = 'translateX(0)';
+                        delBg.style.opacity = '0';
+                        locked = false;
+                    } else if (!locked && !longPressed && diff < -80) {
+                        // 右滑超过80px才展开（加大阈值）
                         inner.style.transform = 'translateX(-70px)';
                         delBg.style.opacity = '1';
                         locked = true;
@@ -3760,15 +3777,6 @@
                         delBg.style.opacity = '0';
                     }
                     startX = 0; curX = 0;
-                });
-
-                inner.addEventListener('click', () => {
-                    if (locked) {
-                        inner.style.transition = 'transform 0.3s ease';
-                        inner.style.transform = 'translateX(0)';
-                        delBg.style.opacity = '0';
-                        locked = false;
-                    }
                 });
             });
         }
@@ -4299,10 +4307,7 @@
                 img.style.cssText = `width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;border:2px solid ${src===state.settings.currentAvatar?'var(--accent-color)':'transparent'};flex-shrink:0;`;
                 img.onclick = () => selectHistoryAvatar(src);
                 setupLongPress(img, () => {
-                    if (confirm('删除这张历史头像？')) {
-                        state.settings.historyAvatars = (state.settings.historyAvatars||[]).filter(u => u !== src);
-                        saveData(); renderPortraitHistoryAvatars();
-                    }
+                    _dlgConfirm('删除这张历史头像？','删除','🗑️').then(r=>{ if(r){ state.settings.historyAvatars=(state.settings.historyAvatars||[]).filter(u=>u!==src); saveData(); renderPortraitHistoryAvatars(); } });
                 });
                 container.appendChild(img);
             });
@@ -4332,11 +4337,12 @@
                 el.addEventListener('click', () => selectFrameFromPortrait(p.id));
                 if (!p.isBuiltin) {
                     setupLongPress(el, () => {
-                        if (confirm(`删除头像框「${p.name || p.id}」？`)) {
+                        _dlgConfirm(`删除头像框「${p.name || p.id}」？`, '删除', '🗑️').then(r => {
+                            if (!r) return;
                             state.settings.framePresets = state.settings.framePresets.filter(f => f.id !== p.id);
                             if (state.settings.currentFrame === p.id) state.settings.currentFrame = 'none';
                             saveData(); applySettings(); renderPortraitFramePresets(); renderFramePresets();
-                        }
+                        });
                     });
                 }
                 container.appendChild(el);
@@ -4575,7 +4581,7 @@
             const name   = document.getElementById('dsf-name').value.trim();
             const date   = document.getElementById('dsf-date').value;
             const annual = document.getElementById('dsf-annual').checked;
-            if (!name || !date) { alert('请填写名称和日期'); return; }
+            if (!name || !date) { _dlgAlert('请填写名称和日期'); return; }
             if (!state.specialDays) state.specialDays = [];
             if (_editingSpecialIdx >= 0 && state.specialDays[_editingSpecialIdx]) {
                 // 编辑模式：更新已有条目
@@ -5020,10 +5026,7 @@
                     saveData(); applySettings(); renderHistoryAvatars();
                 };
                 setupLongPress(img, () => {
-                    if (confirm('删除这张历史头像？')) {
-                        state.settings.historyAvatars = (state.settings.historyAvatars||[]).filter(u => u !== url);
-                        saveData(); renderHistoryAvatars();
-                    }
+                    _dlgConfirm('删除这张历史头像？','删除','🗑️').then(r=>{ if(r){ state.settings.historyAvatars=(state.settings.historyAvatars||[]).filter(u=>u!==url); saveData(); renderHistoryAvatars(); } });
                 });
                 container.appendChild(img);
             });
@@ -5054,10 +5057,11 @@
                     saveData(); applySettings(); renderHistoryBgs();
                 };
                 setupLongPress(img, () => {
-                    if (confirm('删除这张历史背景？')) {
+                    _dlgConfirm('删除这张历史背景？', '删除', '🗑️').then(r => {
+                        if (!r) return;
                         state.settings.historyBgs = (state.settings.historyBgs||[]).filter((_,idx)=>idx!==i);
                         saveData(); renderHistoryBgs();
-                    }
+                    });
                 });
                 container.appendChild(img);
             });
@@ -5117,12 +5121,13 @@
                     saveData(); applySettings(); syncPortraitFromState(); renderHistoryCharms();
                 };
                 setupLongPress(img, () => {
-                    if (confirm('删除这个历史挂件？')) {
+                    _dlgConfirm('删除这个历史挂件？', '删除', '🗑️').then(r => {
+                        if (!r) return;
                         state.settings.historyCharms = (state.settings.historyCharms||[])
                             .map(it => typeof it === 'string' ? { url: it } : it)
                             .filter(it => it.url !== entry.url);
                         saveData(); renderHistoryCharms();
-                    }
+                    });
                 });
                 wrap.appendChild(img);
                 container.appendChild(wrap);
@@ -5665,18 +5670,38 @@
         }
 
         function renameTag(oldName) {
-            const newName = prompt('标签新名称：', oldName);
-            if (!newName || newName.trim() === oldName) return;
-            const n = newName.trim();
-            state.notes.forEach(note => {
-                note.tags = note.tags.map(t => {
-                    if (t === oldName) return n;
-                    if (t.startsWith(oldName + '/')) return n + t.slice(oldName.length);
-                    return t;
+            // 自定义弹窗，Android WebView的prompt不支持预填值
+            const overlay = document.createElement('div');
+            overlay.style.cssText = 'position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;';
+            overlay.innerHTML = `
+                <div style="background:var(--card-bg,#fff);border-radius:16px;padding:24px 20px 16px;width:80vw;max-width:320px;box-shadow:0 8px 32px rgba(0,0,0,0.18);">
+                    <div style="font-size:0.95rem;color:var(--text-color);margin-bottom:12px;">标签新名称：</div>
+                    <input id="_rename_input" value="${oldName}" style="width:100%;box-sizing:border-box;border:none;border-bottom:1.5px solid var(--accent-color);background:transparent;font-size:1rem;color:var(--text-color);padding:4px 0;outline:none;caret-color:var(--accent-color);">
+                    <div style="display:flex;justify-content:flex-end;gap:16px;margin-top:20px;">
+                        <button onclick="this.closest('div[style]').parentElement.remove()" style="background:none;border:none;color:#aaa;font-size:0.9rem;cursor:pointer;">取消</button>
+                        <button id="_rename_ok" style="background:none;border:none;color:var(--accent-color);font-size:0.9rem;font-weight:600;cursor:pointer;">确定</button>
+                    </div>
+                </div>`;
+            document.body.appendChild(overlay);
+            const inp = overlay.querySelector('#_rename_input');
+            inp.focus();
+            inp.select();
+            const doRename = () => {
+                const n = inp.value.trim();
+                overlay.remove();
+                if (!n || n === oldName) return;
+                state.notes.forEach(note => {
+                    note.tags = note.tags.map(t => {
+                        if (t === oldName) return n;
+                        if (t.startsWith(oldName + '/')) return n + t.slice(oldName.length);
+                        return t;
+                    });
                 });
-            });
-            if (state.filterTag === oldName) state.filterTag = n;
-            saveData(); renderList(); renderTags();
+                if (state.filterTag === oldName) state.filterTag = n;
+                saveData(); renderList(); renderTags();
+            };
+            overlay.querySelector('#_rename_ok').onclick = doRename;
+            inp.onkeydown = e => { if (e.key === 'Enter') doRename(); };
         }
 
         function removeTagFromNotes(tag) {
@@ -5688,12 +5713,14 @@
         }
 
         function deleteTagAndNotes(tag) {
-            if (!confirm(`删除标签「${tag}」及所有相关笔记？`)) return;
-            state.notes = state.notes.filter(note =>
-                !note.tags.includes(tag) && !note.tags.some(t => t.startsWith(tag + '/'))
-            );
-            if (state.filterTag === tag) { state.filterTag = null; state.filterTagIsParent = false; }
-            saveData(); renderList(); renderTags();
+            _dlgConfirm(`删除标签「${tag}」及所有相关笔记？`, '删除', '🗑️').then(r => {
+                if (!r) return;
+                state.notes = state.notes.filter(note =>
+                    !note.tags.includes(tag) && !note.tags.some(t => t.startsWith(tag + '/'))
+                );
+                if (state.filterTag === tag) { state.filterTag = null; state.filterTagIsParent = false; }
+                saveData(); renderList(); renderTags();
+            });
         }
 
         // ===================== Todo 模式 =====================
@@ -6007,13 +6034,26 @@
             const name = document.getElementById('sf-name').value.trim();
             const date = document.getElementById('sf-date').value;
             const annual = document.getElementById('sf-annual').checked;
-            if (!name || !date) { alert('请填写名称和日期'); return; }
+            if (!name || !date) { _dlgAlert('请填写名称和日期'); return; }
             if (!state.specialDays) state.specialDays = [];
             state.specialDays.push({ id: Date.now(), emoji, name, date, annual });
             saveData();
             toggleSpecialForm();
             renderSpecialDays();
             renderSpecialPin();
+        }
+
+        function _deleteCurrentSpecialDay() {
+            if (_editingSpecialIdx < 0) return;
+            _dlgConfirm('确认删除？', '删除', '🗑️').then(r => {
+                if (r) {
+                    deleteSpecialDay(_editingSpecialIdx);
+                    _editingSpecialIdx = -1;
+                    _drawerSpecialFormOpen = false;
+                    document.getElementById('drawer-special-form').classList.remove('open');
+                    renderDrawerSpecialDays();
+                }
+            });
         }
 
         function deleteSpecialDay(idx) {
@@ -6393,9 +6433,8 @@
         async function _storeImg(prefix, data) {
             if (!data || typeof data !== 'string' || !data.startsWith('data:') || data.length < 100) return data;
             const key = _imgKey(prefix, data);
-            // 同步备份到 localStorage（固定 key），IDB 未写完时也能读到
-            const lsFallbackKey = '__img_fallback_' + prefix;
-            try { localStorage.setItem(lsFallbackKey, data); } catch(e) {}
+            // 用hash key做fallback，每张图独立存储不互相覆盖
+            try { localStorage.setItem('__img_fallback_' + key, data); } catch(e) {}
             try {
                 if (_idbAvailable) await _idbSet(key, data);
                 else throw 'no idb';
@@ -6414,6 +6453,9 @@
                     if (v) return v;
                 }
             } catch(e) {}
+            // 查独立fallback key
+            const fbVal = localStorage.getItem('__img_fallback_' + val);
+            if (fbVal) return fbVal;
             // 查 localStorage hash key
             const lsVal = localStorage.getItem(val);
             if (lsVal) return lsVal;
@@ -6432,7 +6474,7 @@
         function _loadImgSync(val) {
             if (!val || typeof val !== 'string') return val;
             if (val.startsWith('data:') || val.startsWith('http') || val.startsWith('blob:')) return val;
-            return localStorage.getItem(val) || val;
+            return localStorage.getItem('__img_fallback_' + val) || localStorage.getItem(val) || val;
         }
         async function saveData() {
             const s = state.settings;
@@ -6446,7 +6488,15 @@
             slim.charmImage     = await _storeImg('ww_charm',  s.charmImage);
             slim.historyAvatars = await Promise.all((s.historyAvatars||[]).map(u => _storeImg('ww_av', u)));
             slim.historyBgs     = await Promise.all((s.historyBgs||[]).map(u => _storeImg('ww_bg', u)));
-            slim.historyCharms  = await Promise.all((s.historyCharms||[]).map(u => _storeImg('ww_charm', u)));
+            slim.historyCharms  = await Promise.all((s.historyCharms||[]).map(async entry => {
+                if (!entry) return entry;
+                if (typeof entry === 'string') {
+                    const key = await _storeImg('ww_charm', entry);
+                    return key;
+                }
+                const key = await _storeImg('ww_charm', entry.url);
+                return Object.assign({}, entry, { url: key });
+            }));
             // framePresets / fontPresets 的自定义 dataUrl 也走 IDB，避免撑爆 localStorage
             slim.framePresets = await Promise.all((s.framePresets||[]).map(async f => {
                 if (!f.dataUrl) return f;
@@ -6585,10 +6635,10 @@
                     a.download = fileName;
                     a.click();
                     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-                    alert("✅ 导出成功！");
+                    _dlgAlert("导出成功！文件已保存到下载目录。", "✅");
                 }
             } catch (e) {
-                alert("❌ 导出失败：" + e.message);
+                _dlgAlert("导出失败：" + e.message, "❌");
             }
         }
 
@@ -6640,9 +6690,9 @@
                 renderFramePresets();
                 renderSpecialDays && renderSpecialDays();
                 renderSpecialPin && renderSpecialPin();
-                alert("✅ 导入成功！页面已刷新数据");
+                _dlgAlert("导入成功！数据已刷新。", "✅");
             } catch (e) {
-                alert("❌ 导入失败：" + e.message);
+                _dlgAlert("导入失败：" + e.message, "❌");
             }
             input.value = '';
         }
@@ -6700,11 +6750,12 @@
                 // 长按删除（仅自定义）
                 if (!font.isBuiltin) {
                     setupLongPress(el, () => {
-                        if (confirm(`删除字体「${font.name}」？`)) {
+                        _dlgConfirm(`删除字体「${font.name}」？`, '删除', '🗑️').then(r => {
+                            if (!r) return;
                             state.settings.fontPresets = state.settings.fontPresets.filter(f => f.id !== font.id);
                             if (state.settings.currentFont === font.id) state.settings.currentFont = 'system';
                             saveData(); applySettings(); renderFontPresets();
-                        }
+                        });
                     });
                 }
                 container.appendChild(el);
@@ -6715,15 +6766,17 @@
             if (!input.files[0]) return;
             const file = input.files[0];
             const nameRaw = file.name.replace(/\.[^/.]+$/, '');
-            const label = prompt('给这个字体起个名字：', nameRaw) || nameRaw;
-            const reader = new FileReader();
-            reader.onload = e => {
-                const id = 'custom_font_' + Date.now();
-                state.settings.fontPresets.push({ id, name: label, value: id, dataUrl: e.target.result, isBuiltin: false });
-                state.settings.currentFont = id;
-                saveData(); applySettings(); renderFontPresets();
-            };
-            reader.readAsDataURL(file);
+            _dlgPrompt('给这个字体起个名字', nameRaw).then(label => {
+                label = label || nameRaw;
+                const reader = new FileReader();
+                reader.onload = e => {
+                    const id = 'custom_font_' + Date.now();
+                    state.settings.fontPresets.push({ id, name: label, value: id, dataUrl: e.target.result, isBuiltin: false });
+                    state.settings.currentFont = id;
+                    saveData(); applySettings(); renderFontPresets();
+                };
+                reader.readAsDataURL(file);
+            });
             input.value = '';
         }
 
@@ -6766,11 +6819,12 @@
                 // 长按删除（仅自定义）
                 if (!frame.isBuiltin) {
                     setupLongPress(wrapper, () => {
-                        if (confirm(`删除头像框「${frame.name}」？`)) {
+                        _dlgConfirm(`删除头像框「${frame.name}」？`, '删除', '🗑️').then(r => {
+                            if (!r) return;
                             state.settings.framePresets = state.settings.framePresets.filter(f => f.id !== frame.id);
                             if (state.settings.currentFrame === frame.id) state.settings.currentFrame = 'none';
                             saveData(); applySettings(); renderFramePresets();
-                        }
+                        });
                     });
                 }
 
@@ -6783,38 +6837,61 @@
         function addFramePresetFromFile(input) {
             if (!input.files[0]) return;
             const file = input.files[0];
-            const label = prompt('给这个头像框起个名字：', file.name.replace(/\.[^/.]+$/, '')) || '自定义框';
-            const reader = new FileReader();
-            reader.onload = e => {
-                const id = 'frame_' + Date.now();
-                state.settings.framePresets.push({ id, name: label, value: 'custom', dataUrl: e.target.result, isBuiltin: false });
-                state.settings.currentFrame = id;
-                saveData(); applySettings(); renderFramePresets();
-            };
-            reader.readAsDataURL(file);
+            _dlgPrompt('给这个头像框起个名字', file.name.replace(/\.[^/.]+$/, '')).then(label => {
+                label = label || '自定义框';
+                const reader = new FileReader();
+                reader.onload = e => {
+                    const id = 'frame_' + Date.now();
+                    state.settings.framePresets.push({ id, name: label, value: 'custom', dataUrl: e.target.result, isBuiltin: false });
+                    state.settings.currentFrame = id;
+                    saveData(); applySettings(); renderFramePresets();
+                };
+                reader.readAsDataURL(file);
+            });
             input.value = '';
         }
 
         function addFramePresetFromUrl(url) {
             if (!url) return;
-            const label = prompt('给这个头像框起个名字：', '自定义框') || '自定义框';
-            const id = 'frame_' + Date.now();
-            state.settings.framePresets.push({ id, name: label, value: 'custom', url: url, isBuiltin: false });
-            state.settings.currentFrame = id;
-            document.getElementById('frame-preset-url-input').value = '';
-            saveData(); applySettings(); renderFramePresets();
+            _dlgPrompt('给这个头像框起个名字', '自定义框').then(label => {
+                label = label || '自定义框';
+                const id = 'frame_' + Date.now();
+                state.settings.framePresets.push({ id, name: label, value: 'custom', url: url, isBuiltin: false });
+                state.settings.currentFrame = id;
+                document.getElementById('frame-preset-url-input').value = '';
+                saveData(); applySettings(); renderFramePresets();
+            });
         }
 
         // ===================== 长按工具函数 =====================
         function setupLongPress(el, callback) {
             let timer = null;
-            const start = () => {
-                timer = setTimeout(() => { el.classList.add('long-pressing'); callback(); el.classList.remove('long-pressing'); }, 700);
+            let fired = false;
+            const start = (e) => {
+                fired = false;
+                timer = setTimeout(() => {
+                    fired = true;
+                    el.classList.add('long-pressing');
+                    el.classList.remove('long-pressing');
+                    // 延迟一帧再弹窗，让touchend先结束冒泡
+                    requestAnimationFrame(() => setTimeout(() => callback(), 50));
+                }, 700);
             };
-            const cancel = () => { clearTimeout(timer); el.classList.remove('long-pressing'); };
+            const cancel = (e) => {
+                clearTimeout(timer);
+                el.classList.remove('long-pressing');
+            };
+            const touchEnd = (e) => {
+                clearTimeout(timer);
+                el.classList.remove('long-pressing');
+                if (fired) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            };
             el.addEventListener('touchstart', start, { passive: true });
-            el.addEventListener('touchend', cancel);
-            el.addEventListener('touchmove', cancel);
+            el.addEventListener('touchend', touchEnd, { passive: false });
+            el.addEventListener('touchmove', cancel, { passive: true });
             el.addEventListener('mousedown', start);
             el.addEventListener('mouseup', cancel);
             el.addEventListener('mouseleave', cancel);
@@ -6969,24 +7046,93 @@
         </div>
         <!-- 横屏 -->
         <div class="sb-landscape">
+            <!-- 大时间居中 -->
+            <span class="sb-big-time" id="sb-l-time">--:--</span>
+            <!-- 左上：日期+星期 -->
             <div class="sb-land-time">
-                <span class="sb-big-time" id="sb-l-time">--:--</span>
-                <div class="sb-land-sec-row">
-                    <span class="sb-land-sec" id="sb-l-sec">00</span>
-                </div>
-            </div>
-            <div class="sb-right-col">
                 <span id="sb-l-date">--年--月--日</span>
                 <span id="sb-l-weekday">星期-</span>
+            </div>
+            <!-- 右上：纪念日+电量 -->
+            <div class="sb-right-col">
                 <span id="sb-l-battery"></span>
                 <span id="sb-l-special" style="display:none;"></span>
                 <span id="sb-l-todo" style="display:none; font-size:2.2vh; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:28vw;"></span>
+            </div>
+            <!-- 右下：秒 -->
+            <div class="sb-land-sec-row">
+                <span class="sb-land-sec" id="sb-l-sec">00</span>
             </div>
         </div>
         <div class="sb-exit-hint">点击退出</div>
     </div>
 
     <script>
+
+        // ===== 自定义弹窗 =====
+        function _dlgAlert(msg, icon) {
+            return new Promise(resolve => {
+                const o = document.createElement('div');
+                o.style.cssText = 'position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,0.3);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;animation:_fadeIn 0.15s ease;pointer-events:all;';
+                o.addEventListener('touchstart', e => e.stopPropagation(), true);
+                o.addEventListener('pointerdown', e => e.stopPropagation(), true);
+                o.addEventListener('click', e => e.stopPropagation(), true);
+                o.addEventListener('click', e => e.stopPropagation(), true);
+                o.addEventListener('click', e => e.stopPropagation(), true);
+                o.innerHTML = `<div style="background:rgba(255,255,255,0.95);backdrop-filter:blur(20px);border-radius:20px;width:78vw;max-width:300px;padding:24px 20px 16px;box-shadow:0 12px 40px rgba(0,0,0,0.15);animation:_slideUp 0.18s cubic-bezier(0.32,0.72,0,1);">
+                    ${icon ? `<div style="font-size:1.6rem;margin-bottom:10px;">${icon}</div>` : ''}
+                    <div style="font-size:0.97rem;color:var(--text-color,#3a3050);line-height:1.5;">${msg}</div>
+                    <div style="display:flex;justify-content:center;margin-top:20px;">
+                        <button id="_dlg_ok" style="background:rgba(184,160,200,0.15);color:var(--accent-color,#b8a0c8);font-weight:600;padding:8px 32px;border-radius:10px;border:none;font-size:0.9rem;cursor:pointer;">好的</button>
+                    </div>
+                </div>`;
+                document.documentElement.appendChild(o);
+                o.querySelector('#_dlg_ok').onclick = () => { o.remove(); resolve(); };
+            });
+        }
+        function _dlgConfirm(msg, dangerLabel, icon) {
+            return new Promise(resolve => {
+                const o = document.createElement('div');
+                o.style.cssText = 'position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,0.3);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;pointer-events:all;';
+                o.addEventListener('touchstart', e => e.stopPropagation(), true);
+                o.addEventListener('pointerdown', e => e.stopPropagation(), true);
+                const isDanger = !!dangerLabel;
+                o.innerHTML = `<div style="background:rgba(255,255,255,0.95);backdrop-filter:blur(20px);border-radius:20px;width:78vw;max-width:300px;padding:24px 20px 16px;box-shadow:0 12px 40px rgba(0,0,0,0.15);">
+                    ${icon ? `<div style="font-size:1.6rem;margin-bottom:10px;">${icon}</div>` : ''}
+                    <div style="font-size:0.97rem;color:var(--text-color,#3a3050);line-height:1.5;">${msg}</div>
+                    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px;">
+                        <button id="_dlg_cancel" style="background:none;border:none;font-size:0.9rem;cursor:pointer;padding:6px 10px;border-radius:8px;color:#aaa;">取消</button>
+                        <button id="_dlg_ok" style="background:none;border:none;font-size:0.9rem;cursor:pointer;padding:6px 10px;border-radius:8px;font-weight:600;color:${isDanger ? '#d05060' : 'var(--accent-color,#b8a0c8)'};">${dangerLabel || '确定'}</button>
+                    </div>
+                </div>`;
+                document.documentElement.appendChild(o);
+                o.querySelector('#_dlg_cancel').onclick = () => { o.remove(); resolve(false); };
+                o.querySelector('#_dlg_ok').onclick = () => { o.remove(); resolve(true); };
+            });
+        }
+        function _dlgPrompt(title, defaultVal) {
+            return new Promise(resolve => {
+                const o = document.createElement('div');
+                o.style.cssText = 'position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,0.3);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;pointer-events:all;';
+                o.addEventListener('touchstart', e => e.stopPropagation(), true);
+                o.addEventListener('pointerdown', e => e.stopPropagation(), true);
+                o.innerHTML = `<div style="background:rgba(255,255,255,0.95);backdrop-filter:blur(20px);border-radius:20px;width:78vw;max-width:300px;padding:24px 20px 16px;box-shadow:0 12px 40px rgba(0,0,0,0.15);">
+                    <div style="font-size:0.88rem;color:#8a7a9a;margin-bottom:8px;font-weight:500;">${title}</div>
+                    <input id="_dlg_inp" value="${defaultVal || ''}" style="width:100%;box-sizing:border-box;border:none;border-bottom:1.5px solid var(--accent-color,#b8a0c8);background:transparent;font-size:1rem;color:var(--text-color,#3a3050);padding:6px 0;outline:none;caret-color:var(--accent-color,#b8a0c8);">
+                    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px;">
+                        <button id="_dlg_cancel" style="background:none;border:none;font-size:0.9rem;cursor:pointer;padding:6px 10px;color:#aaa;">取消</button>
+                        <button id="_dlg_ok" style="background:none;border:none;font-size:0.9rem;cursor:pointer;padding:6px 10px;font-weight:600;color:var(--accent-color,#b8a0c8);">确定</button>
+                    </div>
+                </div>`;
+                document.documentElement.appendChild(o);
+                const inp = o.querySelector('#_dlg_inp');
+                inp.focus(); inp.select();
+                o.querySelector('#_dlg_cancel').onclick = () => { o.remove(); resolve(null); };
+                o.querySelector('#_dlg_ok').onclick = () => { const v = inp.value.trim(); o.remove(); resolve(v || null); };
+                inp.onkeydown = e => { if (e.key === 'Enter') { const v = inp.value.trim(); o.remove(); resolve(v || null); } };
+            });
+        }
+        // ===== 自定义弹窗 END =====
         // ===================== 待机模式 =====================
         let _sbWakeLock = null;
         let _sbTimer = null;
@@ -7173,6 +7319,7 @@
 
         function sbFitDigits() {
             const canvas = document.getElementById('sb-canvas');
+            const _sbFont = getComputedStyle(document.documentElement).getPropertyValue('--custom-font').trim() || 'Arial, sans-serif';
             if (!canvas) return;
             const overlay = document.getElementById('standby-overlay');
             const W = overlay.clientWidth  || window.innerWidth;
@@ -7217,12 +7364,12 @@
             ctx.textBaseline = 'alphabetic';
 
             // 第一行：日期
-            ctx.font = `300 ${line1Size}px "Arial",sans-serif`;
+            ctx.font = `300 ${line1Size}px _sbFont`;
             ctx.globalAlpha = 0.85;
             ctx.fillText(dateStr, pad, line1Y);
 
             // 第二行：星期（左）+ 电量（右）
-            ctx.font = `300 ${line2Size}px "Arial",sans-serif`;
+            ctx.font = `300 ${line2Size}px _sbFont`;
             ctx.globalAlpha = 0.6;
             ctx.fillText(wdStr, pad, line2Y);
             if (batStr) {
@@ -7239,10 +7386,10 @@
             // 二分查找合适字体大小，让数字恰好填满格子
             function fitDigit(digit, x, y, cw, ch) {
                 let lo = 10, hi = ch * 2, fs = hi;
-                ctx.font = `900 ${hi}px "Arial Black",Arial,sans-serif`;
+                ctx.font = `900 ${hi}px _sbFont`;
                 for (let i = 0; i < 14; i++) {
                     const mid = (lo + hi) / 2;
-                    ctx.font = `900 ${mid}px "Arial Black",Arial,sans-serif`;
+                    ctx.font = `900 ${mid}px _sbFont`;
                     const m = ctx.measureText(digit);
                     const tw = m.width;
                     const th = (m.actualBoundingBoxAscent || mid * 0.78) +
@@ -7251,7 +7398,7 @@
                     else hi = mid;
                     fs = lo;
                 }
-                ctx.font = `900 ${fs}px "Arial Black",Arial,sans-serif`;
+                ctx.font = `900 ${fs}px _sbFont`;
                 const m = ctx.measureText(digit);
                 const th = (m.actualBoundingBoxAscent || fs * 0.78);
                 // 居中绘制
@@ -7270,7 +7417,7 @@
             fitDigit(mm[1], cellW,  topH + dCellH,     cellW, dCellH);
 
             // 秒数右下角
-            ctx.font = `300 ${W * 0.08}px "Arial",sans-serif`;
+            ctx.font = `300 ${W * 0.08}px _sbFont`;
             ctx.globalAlpha = 0.45;
             ctx.fillText(ss, W - W*0.06 - ctx.measureText(ss).width, H - H*0.04);
             ctx.globalAlpha = 1;
@@ -7308,10 +7455,10 @@
             const wdEl   = document.getElementById('sb-p-weekday');
             const batEl  = document.getElementById('sb-p-battery');
             const line1Size = H * 0.08;
-            ctx.font = `300 ${line1Size}px "Arial",sans-serif`;
+            ctx.font = `300 ${line1Size}px _sbFont`;
             ctx.globalAlpha = 0.75;
             ctx.fillText(dateEl ? dateEl.textContent : '', pad, topH * 0.55);
-            ctx.font = `300 ${H * 0.065}px "Arial",sans-serif`;
+            ctx.font = `300 ${H * 0.065}px _sbFont`;
             ctx.globalAlpha = 0.55;
             const wdStr = wdEl ? wdEl.textContent : '';
             ctx.fillText(wdStr, pad, topH * 0.55 + line1Size * 1.3);
@@ -7325,12 +7472,12 @@
                 let lo = 10, hi = ch * 2;
                 for (let i = 0; i < 14; i++) {
                     const mid = (lo + hi) / 2;
-                    ctx.font = `900 ${mid}px "Arial Black",Arial,sans-serif`;
+                    ctx.font = `900 ${mid}px _sbFont`;
                     const m = ctx.measureText(digit);
                     const th = (m.actualBoundingBoxAscent || mid * 0.78) + (m.actualBoundingBoxDescent || mid * 0.1);
                     if (m.width < cw * 0.88 && th < ch * 0.88) lo = mid; else hi = mid;
                 }
-                ctx.font = `900 ${lo}px "Arial Black",Arial,sans-serif`;
+                ctx.font = `900 ${lo}px _sbFont`;
                 const m = ctx.measureText(digit);
                 const th = m.actualBoundingBoxAscent || lo * 0.78;
                 ctx.fillStyle = '#fff';
@@ -7343,14 +7490,14 @@
             fitDigitH(mm[1], cellW*3,     topH, cellW, cellH);
 
             // 冒号
-            ctx.font = `300 ${cellH * 0.25}px "Arial",sans-serif`;
+            ctx.font = `300 ${cellH * 0.25}px _sbFont`;
             ctx.globalAlpha = 0.5;
             ctx.fillStyle = '#fff';
             ctx.fillText(':', W/2 - ctx.measureText(':').width/2, topH + cellH * 0.6);
             ctx.globalAlpha = 1;
 
             // 秒数
-            ctx.font = `300 ${H * 0.07}px "Arial",sans-serif`;
+            ctx.font = `300 ${H * 0.07}px _sbFont`;
             ctx.globalAlpha = 0.4;
             ctx.fillText(ss, W - pad - ctx.measureText(ss).width, H - H * 0.05);
             ctx.globalAlpha = 1;
@@ -7545,6 +7692,11 @@
         function switchModeDot(mode) {
             _closeModeDots();
             if (mode === _currentMode) return;
+            // 番茄钟计时中拦截
+            if (_currentMode === 'pomodoro' && (_pomoRunning || _pomoSeconds < _pomoDuration)) {
+                _dlgConfirm('确定不继续吗？', '放弃').then(r => { if (r) { pomoReset(); switchModeDot(mode); } });
+                return;
+            }
             const btn = document.getElementById('special-days-btn');
             const r   = btn.getBoundingClientRect();
             btn.dataset.mode = mode;
@@ -7713,7 +7865,7 @@
 
         function _confirmDelete(msg, onConfirm) {
             // 复用现有 modal 或创建简单 confirm
-            if (confirm(msg)) onConfirm();
+            _dlgConfirm(msg, '确定').then(r => { if (r) onConfirm(); });
         }
 
         function renderTodoPage() {
@@ -7733,18 +7885,16 @@
                 setupLongPress(btn, () => {
                     const actions = [
                         { label: '改名', fn: () => {
-                            const newName = prompt('分区名称：', sec.name);
-                            if (newName && newName.trim()) {
-                                sec.name = newName.trim();
-                                saveTodoSections(); renderTodoTabs();
-                            }
+                            _dlgPrompt('分区名称', sec.name).then(newName => { if (newName && newName.trim()) { sec.name = newName.trim(); saveTodoSections(); renderTodoTabs(); } });
                         }},
                         { label: '删除', fn: () => {
-                            if (state.todoSections.length <= 1) { alert('至少保留一个分区'); return; }
-                            if (!confirm(`删除「${sec.name}」及其所有待办？`)) return;
-                            state.todoSections = state.todoSections.filter(s => s.id !== sec.id);
-                            if (_currentSectionId === sec.id) _currentSectionId = state.todoSections[0]?.id;
-                            saveTodoSections(); renderTodoPage();
+                            if (state.todoSections.length <= 1) { _dlgAlert('至少保留一个分区'); return; }
+                            _dlgConfirm(`删除「${sec.name}」及其所有待办？`, '删除', '🗑️').then(r => {
+                                if (!r) return;
+                                state.todoSections = state.todoSections.filter(s => s.id !== sec.id);
+                                if (_currentSectionId === sec.id) _currentSectionId = state.todoSections[0]?.id;
+                                saveTodoSections(); renderTodoPage();
+                            });
                         }}
                     ];
                     showActionSheet(actions);
@@ -7756,13 +7906,14 @@
             addBtn.textContent = '＋';
             addBtn.title = '新增分区';
             addBtn.onclick = () => {
-                const name = prompt('新分区名称：', `分区 ${state.todoSections.length + 1}`);
-                if (!name) return;
-                const sec = { id: 'sec_' + Date.now(), name: name.trim(), items: [] };
-                state.todoSections.push(sec);
-                _currentSectionId = sec.id;
-                saveTodoSections();
-                renderTodoPage();
+                _dlgPrompt('新分区名称', `分区 ${state.todoSections.length + 1}`).then(name => {
+                    if (!name) return;
+                    const sec = { id: 'sec_' + Date.now(), name: name.trim(), items: [] };
+                    state.todoSections.push(sec);
+                    _currentSectionId = sec.id;
+                    saveTodoSections();
+                    renderTodoPage();
+                });
             };
             container.appendChild(addBtn);
         }
@@ -8037,6 +8188,8 @@
                 _pomoRunning = false;
                 if (btn) btn.textContent = '继续';
                 if (label) label.textContent = '已暂停';
+                const resetBtn = document.getElementById('pomo-reset-btn');
+                if (resetBtn) resetBtn.textContent = '取消';
                 const avatarBox = document.getElementById('avatar-box');
                 if (avatarBox) avatarBox.style.pointerEvents = '';
             } else {
@@ -8054,9 +8207,35 @@
                 if (avatarBox) avatarBox.style.pointerEvents = 'none';
                 _pomoRunning = true;
                 _pomoInterval = setInterval(pomoTick, 1000);
+                _pomoLock();
                 if (btn) btn.textContent = '暂停';
                 if (label) label.textContent = '专注中';
+                const resetBtn = document.getElementById('pomo-reset-btn');
+                if (resetBtn) resetBtn.textContent = '取消';
             }
+        }
+
+        function pomoResetOrCancel() {
+            if (_pomoRunning || _pomoSeconds < _pomoDuration) {
+                _dlgConfirm('确定不继续吗？', '放弃').then(r => { if (r) { _pomoUnlock(); pomoReset(); } });
+            } else {
+                pomoReset();
+            }
+        }
+
+        function pomoBackPressed() {
+            _dlgConfirm('确定不继续吗？', '放弃').then(r => { if (r) { _pomoUnlock(); pomoReset(); } });
+        }
+
+        function _pomoLock() {
+            if (window.AndroidSave) {
+                AndroidSave.requestAdminIfNeeded();
+                AndroidSave.setPomoLock(true);
+            }
+        }
+
+        function _pomoUnlock() {
+            if (window.AndroidSave) AndroidSave.setPomoLock(false);
         }
 
         function pomoReset() {
@@ -8079,6 +8258,9 @@
             if (btn) btn.textContent = '开始';
             if (label) label.textContent = '';
             if (reason) { reason.readOnly = false; reason.classList.remove('running'); }
+            const resetBtn = document.getElementById('pomo-reset-btn');
+            if (resetBtn) resetBtn.textContent = '重置';
+            _pomoUnlock();
         }
 
         // 初始化：从 state 恢复模式
