@@ -2005,13 +2005,15 @@
             font-size: 0.72rem;
             border-radius: 8px;
             cursor: pointer;
-            color: #aaa;
-            transition: background 0.18s, color 0.18s;
+            color: var(--accent-color);
+            opacity: 0.5;
+            transition: background 0.18s, color 0.18s, opacity 0.18s;
             user-select: none;
         }
         .drawer-cal-tab.active {
             background: #fff;
             color: var(--text-color);
+            opacity: 1;
             box-shadow: 0 1px 4px rgba(0,0,0,0.08);
         }
         body.dark-mode .drawer-cal-tab.active { background: rgba(255,255,255,0.12); color: #e0d8e8; }
@@ -2128,10 +2130,11 @@
             <div class="drawer-avatar-wrap">
                 <img id="drawer-avatar-img" src="https://via.placeholder.com/150" alt="" onerror="this.style.opacity='0'" onload="this.style.opacity='1'" style="transition:opacity 0.2s;">
             </div>
-            <div style="flex:1;min-width:0;">
+            <div style="flex:1;min-width:0;padding-right:6px;">
                 <div class="drawer-name" id="drawer-display-name">宛宛</div>
                 <div id="drawer-display-signature" style="font-size:0.72rem;opacity:0.45;color:var(--text-color);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;"></div>
             </div>
+            <button onclick="event.stopPropagation();" style="flex-shrink:0;width:30px;height:30px;border-radius:50%;background:rgba(180,160,200,0.15);border:1px solid rgba(180,160,200,0.3);display:flex;align-items:center;justify-content:center;font-size:0.85rem;cursor:pointer;color:var(--text-color);opacity:0.6;" title="设置">⚙</button>
         </div>
 
         <div class="drawer-scroll">
@@ -2165,7 +2168,7 @@
             <div class="drawer-section-title dst-daily">✧𝓓𝓪𝓲𝓵𝔂</div>
             <!-- tab 切换 -->
             <div class="drawer-cal-tabs">
-                <div class="drawer-cal-tab active" id="dct-cal" onclick="switchDrawerCalTab('cal')">𝓓𝓪𝓲𝓵𝔂</div>
+                <div class="drawer-cal-tab active" id="dct-cal" onclick="switchDrawerCalTab('cal')">✧𝓓𝓪𝓲𝓵𝔂</div>
                 <div class="drawer-cal-tab" id="dct-special" onclick="switchDrawerCalTab('special')">✦𝓼𝓹𝓮𝓬𝓲𝓪𝓵</div>
             </div>
             <!-- 日历面板 -->
@@ -2217,23 +2220,12 @@
             </div>
             <div style="height:1px;background:rgba(0,0,0,0.04);margin:6px 16px;"></div>
             <div class="drawer-tag-list" id="drawer-tag-list"></div>
-            <div class="drawer-row" style="padding:8px 16px 12px;">
-                <label>启动默认标签</label>
-                <input type="text" id="setting-default-tag" placeholder="留空则无" style="width:110px;font-size:0.82rem;text-align:right;border:none;border-bottom:1px solid rgba(0,0,0,0.1);background:transparent;outline:none;padding:2px 0;" oninput="updateSettings()">
-            </div>
 
             <div class="drawer-divider"></div>
 
             <!-- ── 卡片 ── -->
             <div class="drawer-section-title dst-card">卡片</div>
             <div class="drawer-settings-area">
-                <div class="drawer-row">
-                    <label>预览行数</label>
-                    <div id="lockable-previewlines" style="display:flex;flex:1;gap:6px;align-items:center;">
-                        <input type="range" id="setting-preview-lines" min="1" max="10" style="flex:1;height:5px;" onchange="updateSettings()">
-                    </div>
-                    <button class="lock-btn" id="lock-previewlines" onclick="toggleLock('previewlines')">🔓</button>
-                </div>
                 <div class="drawer-row">
                     <label>背景模糊</label>
                     <input type="range" id="setting-bg-blur" min="0" max="100" step="1" style="flex:1;height:5px;" oninput="updateBgBlur(this.value)">
@@ -2288,13 +2280,6 @@
                     <label>深色模式</label>
                     <input type="checkbox" id="setting-dark-mode" style="width:auto;margin:0;" onchange="toggleDarkMode(this.checked)">
                 </div>
-<div class="drawer-row">
-                    <label>字体大小</label>
-                    <div id="lockable-fontsize" style="display:flex;flex:1;gap:6px;align-items:center;">
-                        <input type="range" id="setting-fontsize" min="12" max="20" style="flex:1;height:5px;" onchange="updateSettings()">
-                    </div>
-                    <button class="lock-btn" id="lock-fontsize" onclick="toggleLock('fontsize')">🔓</button>
-                </div>
                 <div class="drawer-row" style="padding-bottom:4px;">
                     <label>字体</label>
                 </div>
@@ -2307,25 +2292,6 @@
 
             <div class="drawer-divider"></div>
 
-            <!-- ── 背景 ── -->
-            <div class="drawer-section-title dst-bg">背景</div>
-            <div class="drawer-settings-area">
-                <button onclick="document.getElementById('bg-input').click()" style="width:100%;padding:7px;border-radius:8px;border:1px dashed rgba(0,0,0,0.15);background:transparent;color:#aaa;font-size:0.82rem;cursor:pointer;margin-bottom:8px;">全局背景</button>
-                <input type="file" id="bg-input" accept="image/*" style="display:none" onchange="changeBg(this)">
-                <div style="display:flex;gap:6px;margin-bottom:6px;">
-                    <button onclick="document.getElementById('bg-note-input').click()" style="flex:1;padding:6px 4px;border-radius:8px;border:1px solid rgba(187,224,226,0.7);background:rgba(187,224,226,0.2);font-size:0.78rem;cursor:pointer;color:var(--text-color);">笔记背景</button>
-                    <button onclick="document.getElementById('bg-todo-input').click()" style="flex:1;padding:6px 4px;border-radius:8px;border:1px solid rgba(200,235,190,0.7);background:rgba(238,251,224,0.3);font-size:0.78rem;cursor:pointer;color:var(--text-color);">待办背景</button>
-                    <button onclick="document.getElementById('bg-pomo-input').click()" style="flex:1;padding:6px 4px;border-radius:8px;border:1px solid rgba(210,180,210,0.7);background:rgba(230,208,227,0.25);font-size:0.78rem;cursor:pointer;color:var(--text-color);">番茄背景</button>
-                </div>
-                <input type="file" id="bg-note-input" accept="image/*" onchange="changeModeBg(this,'bgNote')" style="display:none;">
-                <input type="file" id="bg-todo-input" accept="image/*" onchange="changeModeBg(this,'bgTodo')" style="display:none;">
-                <input type="file" id="bg-pomo-input" accept="image/*" onchange="changeModeBg(this,'bgPomodoro')" style="display:none;">
-                <button onclick="clearModeBg()" style="width:100%;padding:6px;border-radius:8px;background:rgba(0,0,0,0.04);border:none;color:#aaa;font-size:0.78rem;cursor:pointer;margin-top:2px;">清除当前模式背景</button>
-                <div id="history-bgs" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;"></div>
-            </div>
-
-            <div class="drawer-divider"></div>
-
             <!-- ── 其他 ── -->
             <div class="drawer-section-title dst-other">其他</div>
             <div class="drawer-settings-area" style="padding-bottom:16px;">
@@ -2334,8 +2300,11 @@
                     <button onclick="document.getElementById('import-zip-input').click()" style="flex:1;padding:8px;border-radius:8px;background:rgba(210,185,80,0.15);color:#6b5500;border:1px solid rgba(210,185,80,0.4);font-weight:bold;font-size:0.82rem;cursor:pointer;">⬇ 导入</button>
                     <input type="file" id="import-zip-input" style="display:none" accept=".zip" onchange="importDataFromZip(this)">
                 </div>
+                <div id="auto-backup-status" style="margin-top:6px;font-size:0.72rem;color:#999;text-align:center;">本地自动备份：检测中…</div>
+                <button onclick="openBackupList()" style="width:100%;margin-top:6px;padding:7px;border-radius:8px;background:rgba(160,180,220,0.13);color:#3a5080;border:1px solid rgba(160,180,220,0.35);font-size:0.8rem;cursor:pointer;">🕓 查看 / 恢复本地快照</button>
             </div>
         </div>
+
     </div>
 
         <button class="fab" onclick="openEditor()" id="main-fab"><span>⍚</span></button>
@@ -2386,7 +2355,7 @@
 
             <!-- ===== 笔记页面 ===== -->
             <div id="page-note" class="mode-page">
-                <div style="display:flex;height:40px;gap:6px;margin:0 12px 15px;position:relative;opacity:0.5;">
+                <div style="display:flex;height:40px;gap:6px;margin:0 12px 15px;position:relative;">
                     <input type="text" id="search-input" placeholder="搜索内容、图片备注..." oninput="handleSearch(this.value)" style="flex:1;min-width:0;height:100%;padding:0 16px;border-radius:10px;border:1px solid var(--glass-border);background:var(--glass-bg);backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);color:var(--text-color);font-size:14px;outline:none;box-sizing:border-box;">
                     <button id="length-filter-btn" onclick="toggleLengthFilter()" style="width:40px;height:100%;border-radius:10px;border:1px solid var(--glass-border);background:var(--glass-bg);backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);color:var(--text-color);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.15s;flex-shrink:0;">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
@@ -2463,6 +2432,10 @@
                     <div class="pomo-controls">
                         <button class="pomo-ctrl-btn pomo-start" id="pomo-btn" onclick="pomoToggle()">开始</button>
                         <button class="pomo-ctrl-btn pomo-reset" id="pomo-reset-btn" onclick="pomoResetOrCancel()">重置</button>
+                    </div>
+                    <div id="pomo-admin-row" style="text-align:center;margin-top:6px;font-size:0.75rem;display:none;">
+                        <span id="pomo-admin-label" style="opacity:0.45;"></span>
+                        <button id="pomo-admin-btn" onclick="pomoRequestAdmin()" style="display:none;margin-left:6px;background:none;border:1px solid rgba(160,120,180,0.4);border-radius:10px;font-size:0.72rem;padding:2px 10px;cursor:pointer;color:var(--text-color);opacity:0.6;">授予专注权限</button>
                     </div>
                     <div class="pomo-status" id="pomo-label"></div>
                     <div class="pomo-log-wrap" id="pomo-log-wrap"></div>
@@ -2646,7 +2619,7 @@
             },
             tempImages: [], filterTag: null, blockedTags: [], searchQuery: '',
             editingId: null, filterDateFrom: null, filterDateTo: null, filterLength: '',
-            specialDays: [], specialPinnedId: null,
+            specialDays: [], specialPinnedId: null, specialPinHidden: false,
             commentPreviewName: '宛宛',
             commentPreviewSuffix: '说：',
             commentPreviewEnabled: true,
@@ -2732,9 +2705,18 @@
             if (sd) {
                 if (sd.days) state.specialDays = sd.days;
                 if (sd.pinnedId !== undefined) state.specialPinnedId = sd.pinnedId;
+                if (sd.pinHidden !== undefined) state.specialPinHidden = sd.pinHidden;
             }
         } catch(e) {}
 
+        try {
+            const uiRaw = localStorage.getItem('wanwan_ui_state');
+            if (uiRaw) {
+                const ui = JSON.parse(uiRaw);
+                if (ui.blockedTags) state.blockedTags = ui.blockedTags;
+                if (ui.filterLength) state.filterLength = ui.filterLength;
+            }
+        } catch(e) {}
         // 清理 localStorage 里残留的图片 key，释放配额
         (function _cleanupLsImgKeys() {
             try {
@@ -2776,6 +2758,8 @@
                             syncName: state.commentPreviewSyncName
                         }));
                     } catch(e) {}
+                    // 切到后台是数据最容易丢的时刻（进程随时可能被系统杀掉），顺手做一次落盘备份（5分钟内已备份过则跳过）
+                    _autoFileBackup().catch(()=>{});
                 }
             });
             // 内置字体主列表（始终保持最新）
@@ -2847,6 +2831,11 @@
             setInterval(updateClock, 1000);
             initBattery();
             renderSpecialPin();
+            if (typeof _pomoUpdateSetUI === 'function') _pomoUpdateSetUI();
+            // 启动后延迟5秒做一次落盘备份（不卡首屏），之后每30分钟自动一次
+            _renderBackupStatus();
+            setTimeout(() => _autoFileBackup(true), 5000);
+            setInterval(() => _autoFileBackup(), _FILE_BACKUP_INTERVAL);
             // 异步从 IDB 补全图片（不阻塞首屏）
             _reloadImgsFromIDB().catch(()=>{});
             // 启动时对比 IDB 备份和 localStorage，取笔记更多的版本
@@ -4247,9 +4236,11 @@
             }
         }
         function switchPortraitTab(tab) {
-            ['avatar','frame','charm','profile'].forEach(t => {
-                document.getElementById('pt-' + t).classList.toggle('active', t === tab);
-                document.getElementById('pp-' + t).classList.toggle('active', t === tab);
+            ['avatar','frame','charm','profile','bg'].forEach(t => {
+                const btn = document.getElementById('pt-' + t);
+                const panel = document.getElementById('pp-' + t);
+                if (btn) btn.classList.toggle('active', t === tab);
+                if (panel) panel.classList.toggle('active', t === tab);
             });
             if (tab === 'frame') renderPortraitFramePresets();
             if (tab === 'avatar') renderPortraitHistoryAvatars();
@@ -5509,6 +5500,15 @@
                 name.className = 'drawer-tag-name' + (isActive ? ' active-filter' : '');
                 name.textContent = label;
 
+                // 统计这个标签下有多少条非trash笔记（父标签同时统计子标签的笔记，让数字更有参考价值）
+                const countNotes = hasChildren
+                    ? state.notes.filter(n => !n.isTrash && n.tags.some(t => t === tag || t.startsWith(tag + '/'))).length
+                    : state.notes.filter(n => !n.isTrash && n.tags.includes(tag)).length;
+
+                const countBadge = document.createElement('span');
+                countBadge.textContent = countNotes;
+                countBadge.style.cssText = 'font-size:0.7rem;opacity:0.35;flex-shrink:0;min-width:16px;text-align:right;margin-right:2px;';
+
                 const more = document.createElement('button');
                 more.className = 'drawer-tag-more';
                 more.textContent = '···';
@@ -5524,6 +5524,7 @@
                     row.appendChild(arrow);
                 }
 
+                row.appendChild(countBadge);
                 row.appendChild(more);
 
                 row.onclick = () => {
@@ -6016,9 +6017,11 @@
         function toggleSpecialPin(idx) {
             const d = state.specialDays[idx];
             if (state.specialPinnedId === d.id) {
-                state.specialPinnedId = null; // 取消置顶
+                state.specialPinnedId = null;
+                state.specialPinHidden = true;
             } else {
-                state.specialPinnedId = d.id; // 设为置顶
+                state.specialPinnedId = d.id;
+                state.specialPinHidden = false;
             }
             saveData();
             renderSpecialDays();
@@ -6029,7 +6032,7 @@
             const pin = document.getElementById('special-pin');
             if (!pin) return;
             const days = state.specialDays || [];
-            if (days.length === 0) { pin.classList.remove('visible'); return; }
+            if (days.length === 0 || state.specialPinHidden) { pin.classList.remove('visible'); return; }
 
             let target = null;
             if (state.specialPinnedId) {
@@ -6412,8 +6415,19 @@
                 hint.style.display = 'none';
             }
         }
-        function openModal(id) { document.getElementById(id).classList.add('open'); }
+        // 笔记编辑器跟手机系统返回手势/返回键联动：打开时压一条历史记录，
+        // 返回手势触发的 popstate 来关闭；从UI按钮关闭时反过来消费掉这条历史记录，
+        // 这样无论从哪条路径关闭，历史栈都不会错位（不会出现"返回键被吃掉一次"的问题）
+        let _editorModalHistoryOwned = false;
+        function openModal(id) {
+            document.getElementById(id).classList.add('open');
+            if (id === 'editor-modal' && !_editorModalHistoryOwned) {
+                history.pushState({ editorModal: true }, '');
+                _editorModalHistoryOwned = true;
+            }
+        }
         function closeModal(id) {
+            const wasOpen = document.getElementById(id).classList.contains('open');
             document.getElementById(id).classList.remove('open');
             if (id === 'full-note-modal') {
                 const fab = document.getElementById('main-fab');
@@ -6423,8 +6437,14 @@
             if (id === 'editor-modal' || id === 'forward-modal') {
                 _pendingForward = null;
                 _isForwardMode = false;
+                const fab = document.getElementById('main-fab');
+                if (fab && _currentMode === 'note') fab.style.display = '';
                 const fp = document.getElementById('forward-preview');
                 if (fp) fp.remove();
+            }
+            if (id === 'editor-modal' && _editorModalHistoryOwned && wasOpen) {
+                _editorModalHistoryOwned = false;
+                history.back(); // 消费掉打开时压入的那条历史记录，避免下次返回手势空响应一次
             }
         }
         // ── IndexedDB 图片存储（IDB不可用时自动降级到localStorage）──
@@ -6575,9 +6595,149 @@
             try {
                 localStorage.setItem('wanwan_special_days', JSON.stringify({
                     days: state.specialDays,
-                    pinnedId: state.specialPinnedId
+                    pinnedId: state.specialPinnedId,
+                    pinHidden: state.specialPinHidden
                 }));
             } catch(e) {}
+            try { localStorage.setItem('wanwan_ui_state', JSON.stringify({
+                blockedTags: state.blockedTags,
+                filterLength: state.filterLength
+            })); } catch(e) {}
+        }
+
+        // ── 自动快照备份：存进 IDB（app 内部，不依赖 Filesystem 插件，肯定可读可写）
+        // 保留最近 12 份，每份带时间戳；在 app 内提供列表 + 一键恢复入口。
+        const _SNAP_STORE = 'wanwan_snapshots';
+        const _SNAP_KEEP = 12;
+        const _FILE_BACKUP_INTERVAL = 30 * 60 * 1000;
+        let _lastFileBackupTs = 0;
+        let _lastFileBackupOk = null;
+        let _lastFileBackupErrMsg = '';
+
+        function _snapOpenDB() {
+            return new Promise((res, rej) => {
+                const req = indexedDB.open('wanwan_snap_db', 1);
+                req.onupgradeneeded = e => e.target.result.createObjectStore(_SNAP_STORE, { keyPath: 'ts' });
+                req.onsuccess = e => res(e.target.result);
+                req.onerror = () => rej(req.error);
+            });
+        }
+
+        function _collectBackupPayload() {
+            const data = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const k = localStorage.key(i);
+                if (k && k.indexOf('wanwan_') === 0) data[k] = localStorage.getItem(k);
+            }
+            return { ts: Date.now(), data };
+        }
+
+        async function _autoFileBackup(force) {
+            try {
+                if (!force && Date.now() - _lastFileBackupTs < 5 * 60 * 1000) return;
+                const db = await _snapOpenDB();
+                const payload = _collectBackupPayload();
+                await new Promise((res, rej) => {
+                    const tx = db.transaction(_SNAP_STORE, 'readwrite');
+                    tx.objectStore(_SNAP_STORE).put(payload);
+                    tx.oncomplete = res; tx.onerror = () => rej(tx.error);
+                });
+                // 超出保留数量就删最旧的
+                await new Promise((res, rej) => {
+                    const tx = db.transaction(_SNAP_STORE, 'readwrite');
+                    const store = tx.objectStore(_SNAP_STORE);
+                    const req = store.getAll();
+                    req.onsuccess = () => {
+                        const all = req.result.sort((a, b) => a.ts - b.ts);
+                        if (all.length > _SNAP_KEEP) {
+                            all.slice(0, all.length - _SNAP_KEEP).forEach(r => store.delete(r.ts));
+                        }
+                        res();
+                    };
+                    req.onerror = () => rej(req.error);
+                });
+                db.close();
+                _lastFileBackupTs = Date.now();
+                _lastFileBackupOk = true;
+                _lastFileBackupErrMsg = '';
+                _renderBackupStatus();
+            } catch(e) {
+                _lastFileBackupOk = false;
+                _lastFileBackupErrMsg = (e && (e.message || e.toString())) || '未知错误';
+                _renderBackupStatus();
+            }
+        }
+
+        function _renderBackupStatus() {
+            const el = document.getElementById('auto-backup-status');
+            if (!el) return;
+            if (_lastFileBackupOk === null) {
+                el.textContent = '本地自动备份：等待首次执行…'; el.style.color = '#999';
+            } else if (_lastFileBackupOk) {
+                const d = new Date(_lastFileBackupTs);
+                el.textContent = '本地自动备份：正常（上次 ' + String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0') + '）';
+                el.style.color = '#7a9a7a';
+            } else {
+                el.textContent = '本地自动备份：失败 — ' + _lastFileBackupErrMsg;
+                el.style.color = '#c06060';
+            }
+        }
+
+        async function openBackupList() {
+            let db, snaps;
+            try {
+                db = await _snapOpenDB();
+                snaps = await new Promise((res, rej) => {
+                    const tx = db.transaction(_SNAP_STORE, 'readonly');
+                    const req = tx.objectStore(_SNAP_STORE).getAll();
+                    req.onsuccess = () => res(req.result); req.onerror = () => rej(req.error);
+                });
+                db.close();
+            } catch(e) { _dlgAlert('暂无快照，等待首次备份执行（约5秒后）'); return; }
+
+            snaps = snaps.sort((a, b) => b.ts - a.ts);
+            if (!snaps.length) { _dlgAlert('还没有自动备份记录，等待首次备份执行（约5秒后）'); return; }
+
+            const ov = document.createElement('div');
+            ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.45);display:flex;align-items:flex-end;';
+            const box = document.createElement('div');
+            box.style.cssText = 'width:100%;max-height:70vh;overflow-y:auto;background:var(--card-bg,#fff);border-radius:18px 18px 0 0;padding:18px 16px 32px;';
+            box.innerHTML = '<div style="font-weight:700;font-size:1rem;margin-bottom:12px;">本地快照记录</div>';
+
+            snaps.forEach((s, i) => {
+                const d = new Date(s.ts);
+                const label = d.getFullYear() + '/' + String(d.getMonth()+1).padStart(2,'0') + '/' + String(d.getDate()).padStart(2,'0')
+                    + ' ' + String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+                let noteCount = 0;
+                try { noteCount = JSON.parse(s.data['wanwan_notes_v3'] || '[]').length; } catch(e) {}
+                const row = document.createElement('div');
+                row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.06);';
+                row.innerHTML = `<div><div style="font-size:0.88rem;">${label}${i===0?' <span style="font-size:0.7rem;opacity:0.5;">最新</span>':''}</div><div style="font-size:0.72rem;opacity:0.45;margin-top:2px;">${noteCount} 条笔记</div></div>`;
+                const btn = document.createElement('button');
+                btn.textContent = '恢复';
+                btn.style.cssText = 'padding:5px 14px;border-radius:10px;border:1px solid rgba(160,120,180,0.4);background:rgba(160,120,180,0.1);font-size:0.8rem;cursor:pointer;color:var(--text-color);flex-shrink:0;';
+                btn.onclick = () => {
+                    document.body.removeChild(ov);
+                    _dlgConfirm('将用「' + label + '」的快照覆盖当前所有数据，此操作不可撤销。', '确认恢复').then(ok => {
+                        if (!ok) return;
+                        try {
+                            Object.keys(s.data).forEach(k => localStorage.setItem(k, s.data[k]));
+                            _dlgAlert('恢复成功，即将重新加载…').then(() => location.reload());
+                        } catch(e) { _dlgAlert('恢复失败：' + e.message); }
+                    });
+                };
+                row.appendChild(btn);
+                box.appendChild(row);
+            });
+
+            const closeBtn = document.createElement('button');
+            closeBtn.textContent = '关闭';
+            closeBtn.style.cssText = 'width:100%;margin-top:14px;padding:10px;border-radius:10px;border:none;background:rgba(0,0,0,0.07);font-size:0.9rem;cursor:pointer;';
+            closeBtn.onclick = () => document.body.removeChild(ov);
+            box.appendChild(closeBtn);
+            ov.appendChild(box);
+            ov.onclick = e => { if (e.target === ov) document.body.removeChild(ov); };
+            document.body.appendChild(ov);
         }
 
         // 懒加载 JSZip + FileSaver（本地文件，离线可用）
@@ -6948,6 +7108,7 @@
                 <div class="portrait-tab active" id="pt-avatar" onclick="switchPortraitTab('avatar')">头像</div>
                 <div class="portrait-tab" id="pt-frame" onclick="switchPortraitTab('frame')">头像框</div>
                 <div class="portrait-tab" id="pt-charm" onclick="switchPortraitTab('charm')">挂件</div>
+                <div class="portrait-tab" id="pt-bg" onclick="switchPortraitTab('bg')">背景</div>
                 <div class="portrait-tab" id="pt-profile" onclick="switchPortraitTab('profile')">资料</div>
             </div>
             <div class="portrait-content">
@@ -7059,6 +7220,22 @@
                     </div>
                 </div>
 
+                <!-- 背景 tab -->
+                <div class="portrait-tab-panel" id="pp-bg">
+                    <button onclick="document.getElementById('bg-input').click()" style="width:100%;padding:8px;border-radius:8px;border:1px dashed rgba(0,0,0,0.15);background:transparent;color:#aaa;font-size:0.82rem;cursor:pointer;margin-bottom:10px;">全局背景</button>
+                    <input type="file" id="bg-input" accept="image/*" style="display:none" onchange="changeBg(this)">
+                    <div style="display:flex;gap:6px;margin-bottom:8px;">
+                        <button onclick="document.getElementById('bg-note-input').click()" style="flex:1;padding:7px 4px;border-radius:8px;border:1px solid rgba(187,224,226,0.7);background:rgba(187,224,226,0.2);font-size:0.78rem;cursor:pointer;color:var(--text-color);">笔记</button>
+                        <button onclick="document.getElementById('bg-todo-input').click()" style="flex:1;padding:7px 4px;border-radius:8px;border:1px solid rgba(200,235,190,0.7);background:rgba(238,251,224,0.3);font-size:0.78rem;cursor:pointer;color:var(--text-color);">待办</button>
+                        <button onclick="document.getElementById('bg-pomo-input').click()" style="flex:1;padding:7px 4px;border-radius:8px;border:1px solid rgba(210,180,210,0.7);background:rgba(230,208,227,0.25);font-size:0.78rem;cursor:pointer;color:var(--text-color);">番茄</button>
+                    </div>
+                    <input type="file" id="bg-note-input" accept="image/*" onchange="changeModeBg(this,'bgNote')" style="display:none;">
+                    <input type="file" id="bg-todo-input" accept="image/*" onchange="changeModeBg(this,'bgTodo')" style="display:none;">
+                    <input type="file" id="bg-pomo-input" accept="image/*" onchange="changeModeBg(this,'bgPomodoro')" style="display:none;">
+                    <button onclick="clearModeBg()" style="width:100%;padding:7px;border-radius:8px;background:rgba(0,0,0,0.04);border:none;color:#aaa;font-size:0.78rem;cursor:pointer;margin-top:2px;">清除当前模式背景</button>
+                    <div id="history-bgs" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;"></div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -7109,11 +7286,9 @@
             return new Promise(resolve => {
                 const o = document.createElement('div');
                 o.style.cssText = 'position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,0.3);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;animation:_fadeIn 0.15s ease;pointer-events:all;';
-                o.addEventListener('touchstart', e => e.stopPropagation(), true);
-                o.addEventListener('pointerdown', e => e.stopPropagation(), true);
-                o.addEventListener('click', e => e.stopPropagation(), true);
-                o.addEventListener('click', e => e.stopPropagation(), true);
-                o.addEventListener('click', e => e.stopPropagation(), true);
+                o.addEventListener('touchstart', e => e.stopPropagation());
+                o.addEventListener('pointerdown', e => e.stopPropagation());
+                o.addEventListener('click', e => e.stopPropagation());
                 o.innerHTML = `<div style="background:rgba(255,255,255,0.95);backdrop-filter:blur(20px);border-radius:20px;width:78vw;max-width:300px;padding:24px 20px 16px;box-shadow:0 12px 40px rgba(0,0,0,0.15);animation:_slideUp 0.18s cubic-bezier(0.32,0.72,0,1);">
                     ${icon ? `<div style="font-size:1.6rem;margin-bottom:10px;">${icon}</div>` : ''}
                     <div style="font-size:0.97rem;color:var(--text-color,#3a3050);line-height:1.5;">${msg}</div>
@@ -7297,9 +7472,39 @@
             }
         }
 
-        // 处理浏览器返回键
+        // 处理系统返回手势 / 物理返回键
+        // Capacitor 的 backButton 事件同时覆盖手势导航和物理键，比 popstate 更可靠
+        function _handleBackAction() {
+            if (_sbActive) { exitStandby(); return true; }
+            const editorModal = document.getElementById('editor-modal');
+            if (editorModal && editorModal.classList.contains('open')) {
+                if (typeof _editorDismiss === 'function') _editorDismiss();
+                else closeModal('editor-modal');
+                return true;
+            }
+            return false;
+        }
+
+        // Capacitor App 插件路径（手势导航 + 物理键，是主路径）
+        try {
+            const CapApp = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App;
+            if (CapApp) {
+                CapApp.addListener('backButton', ({ canGoBack }) => {
+                    const handled = _handleBackAction();
+                    if (!handled && !canGoBack) {
+                        // 没有任何弹层要关，且没有 web 历史可退，让系统正常退出 app
+                        CapApp.exitApp();
+                    }
+                });
+            }
+        } catch(e) {}
+
+        // popstate 作为备用（非 Capacitor 环境 / 浏览器调试时仍然生效）
         window.addEventListener('popstate', (e) => {
-            if (_sbActive) exitStandby();
+            _handleBackAction();
+            // _editorModalHistoryOwned 那条 history.pushState 用来让 canGoBack 返回 true，
+            // popstate 触发后对应的记录已被消费，把 flag 同步清掉
+            if (typeof _editorModalHistoryOwned !== 'undefined') _editorModalHistoryOwned = false;
         });
 
         // WakeLock 在页面重新可见时重新请求
@@ -8103,11 +8308,24 @@
         let _pomoDuration = 25 * 60;
         let _pomoAdjusting = false;
         let _pomoSetH = 0, _pomoSetM = 25, _pomoSetS = 0;
+        // 启动时恢复上次设置的时长，没存过才用默认 25 分钟
+        try {
+            const savedDur = JSON.parse(localStorage.getItem('wanwan_pomo_duration'));
+            if (savedDur) {
+                _pomoSetH = savedDur.h || 0;
+                _pomoSetM = savedDur.m != null ? savedDur.m : 25;
+                _pomoSetS = savedDur.s || 0;
+            }
+        } catch(e) {}
+        _pomoDuration = _pomoSetH * 3600 + _pomoSetM * 60 + _pomoSetS;
+        _pomoSeconds = _pomoDuration;
 
         function _pomoApplySet() {
             _pomoDuration = _pomoSetH * 3600 + _pomoSetM * 60 + _pomoSetS;
             if (_pomoDuration < 1) { _pomoSetS = 5; _pomoDuration = 5; }
             _pomoSeconds = _pomoDuration;
+            // 每次手动调整时长都顺手存一下，下次打开app沿用这个设置
+            try { localStorage.setItem('wanwan_pomo_duration', JSON.stringify({ h: _pomoSetH, m: _pomoSetM, s: _pomoSetS })); } catch(e) {}
         }
         function _pomoUpdateSetUI() {
             const vh = document.getElementById('pomo-val-h');
@@ -8206,6 +8424,7 @@
                 <div class="pomo-stat-item"><span class="pomo-stat-val">${fmtSec(s.monthSec)}</span><span class="pomo-stat-label">本月专注</span></div>
                 <div class="pomo-stat-item"><span class="pomo-stat-val">${fmtSec(s.totalSec)}</span><span class="pomo-stat-label">累计专注</span></div>`;
             renderPomoLog();
+            renderPomoAdminStatus();
         }
         function renderPomoLog() {
             const el = document.getElementById('pomo-log-wrap'); if(!el) return;
@@ -8307,9 +8526,31 @@
             _dlgConfirm('确定不继续吗？', '放弃').then(r => { if (r) { _pomoUnlock(); pomoReset(); } });
         }
 
+        function pomoRequestAdmin() {
+            if (window.AndroidSave) AndroidSave.requestAdminIfNeeded();
+            // 给用户返回后刷新状态的时机：延迟1.5秒再刷一次（系统授权页面回来的时间）
+            setTimeout(renderPomoAdminStatus, 1500);
+        }
+
+        function renderPomoAdminStatus() {
+            const row = document.getElementById('pomo-admin-row');
+            const lbl = document.getElementById('pomo-admin-label');
+            const btn = document.getElementById('pomo-admin-btn');
+            if (!row) return;
+            if (!window.AndroidSave) { row.style.display = 'none'; return; } // 非APK环境不显示
+            row.style.display = '';
+            const active = AndroidSave.isAdminActive();
+            if (active) {
+                lbl.textContent = '专注权限已授权 ✓';
+                btn.style.display = 'none';
+            } else {
+                lbl.textContent = '未授权（状态栏屏蔽不可用）';
+                btn.style.display = '';
+            }
+        }
+
         function _pomoLock() {
             if (window.AndroidSave) {
-                AndroidSave.requestAdminIfNeeded();
                 AndroidSave.setPomoLock(true);
             }
         }
@@ -8343,14 +8584,27 @@
             _pomoUnlock();
         }
 
-        // 初始化：从 state 恢复模式
+        // 初始化：从 state 恢复模式（只还原视觉状态，不重复渲染/写盘）
         window.addEventListener('load', () => {
             const savedMode = (typeof state !== 'undefined' && state.settings && state.settings.lastMode) || 'note';
             _currentMode = savedMode;
             const btn = document.getElementById('special-days-btn');
             if (btn) btn.dataset.mode = _currentMode;
-            // 确保图标filter在load后也生效
-            // 图标颜色由applySettings统一处理
+            if (savedMode === 'note') return; // 默认就是笔记页，不需要额外处理
+            // 只切换页面显示和图标着色，不调 saveData() 也不重复 renderList()
+            const pageNote = document.getElementById('page-note');
+            const pageTodo = document.getElementById('page-todo');
+            const pagePomo = document.getElementById('page-pomodoro');
+            if (pageNote) pageNote.style.display = 'none';
+            if (pageTodo) pageTodo.style.display = savedMode === 'todo' ? 'flex' : 'none';
+            if (pagePomo) pagePomo.style.display = savedMode === 'pomodoro' ? 'flex' : 'none';
+            const fab = document.getElementById('main-fab');
+            if (fab) fab.style.display = 'none';
+            const todoModeBtn = document.getElementById('todo-mode-btn');
+            if (todoModeBtn) todoModeBtn.style.display = '';
+            if (typeof applySettings === 'function') applySettings(); // 同步图标配色
+            if (savedMode === 'todo' && typeof renderTodoPage === 'function') renderTodoPage();
+            else if (savedMode === 'pomodoro' && typeof renderPomoStats === 'function') renderPomoStats();
         });
 
         // ===================== 抽屉 & 模式切换 END =====================
